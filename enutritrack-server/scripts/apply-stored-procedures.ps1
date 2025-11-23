@@ -10,8 +10,8 @@ Write-Host ''
 $DB_HOST = 'localhost'
 $DB_PORT = '5433'
 $DB_NAME = 'enutritrack'
-$DB_USER = 'postgres'
-$DB_PASSWORD = 'juanjose10'
+$DB_USER = 'enutritrack'
+$DB_PASSWORD = 'enutritrack2024'
 
 Write-Host 'Conectando a PostgreSQL...' -ForegroundColor Yellow
 Write-Host "Host: $DB_HOST" -ForegroundColor Gray

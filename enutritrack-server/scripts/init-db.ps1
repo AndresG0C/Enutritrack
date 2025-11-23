@@ -10,8 +10,8 @@ Write-Host ''
 $DB_HOST = 'localhost'
 $DB_PORT = '5433'
 $DB_NAME = 'enutritrack'
-$DB_USER = 'postgres'
-$DB_PASSWORD = '1234'
+$DB_USER = 'enutritrack'
+$DB_PASSWORD = 'enutritrack2024'
 
 Write-Host 'Conectando a PostgreSQL...' -ForegroundColor Yellow
 Write-Host "Host: $DB_HOST" -ForegroundColor Gray
@@ -58,12 +58,12 @@ if (-not $psqlPath) {
     Write-Host ''
     Write-Host 'O puedes ejecutar manualmente desde pgAdmin:' -ForegroundColor Cyan
     Write-Host "  1. Abre pgAdmin" -ForegroundColor Gray
-    Write-Host "  2. Conectate a localhost:5433" -ForegroundColor Gray
+    Write-Host "  2. Conectate a localhost:5433 (user: $DB_USER, password: $DB_PASSWORD)" -ForegroundColor Gray
     Write-Host "  3. Abre la base de datos $DB_NAME" -ForegroundColor Gray
     Write-Host "  4. Ejecuta el archivo: $scriptPath" -ForegroundColor Gray
     Write-Host ''
     Write-Host 'O usando Docker:' -ForegroundColor Cyan
-    Write-Host "  docker exec -i enutritrack_postgres psql -U postgres -d enutritrack < $scriptPath" -ForegroundColor Gray
+    Write-Host "  docker exec -i enutritrack_postgres psql -U $DB_USER -d enutritrack < $scriptPath" -ForegroundColor Gray
     Write-Host ''
     exit 1
 }

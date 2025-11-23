@@ -37,12 +37,12 @@ object ApiConfig {
      * Reemplaza [TU_IP_GCP] con la IP externa de tu VM de GCP
      * Ejemplo: "34.123.45.67"
      */
-    private const val PROD_IP = "[TU_IP_GCP]"  // <-- Cambiar aquí con la IP de GCP
+    private const val PROD_IP = "35.239.67.227"  // <-- Cambiar aquí con la IP de GCP
     
     /**
      * Modo de operación:
      * - false = Desarrollo local (usa DEV_IP con puertos directos)
-     * - true = Producción GCP (usa PROD_IP con rutas de Nginx)
+     * - true = Producción GCP (usa PROD_IP con puertos directos)
      */
     private const val USE_PRODUCTION = false  // <-- Cambiar a true para usar GCP
     
@@ -54,6 +54,12 @@ object ApiConfig {
     /**
      * URLs para desarrollo local (puertos directos)
      * Usadas cuando USE_PRODUCTION = false
+     * 
+     * Puertos utilizados:
+     * - 3004: Microservicio de Autenticación (Auth)
+     * - 3001: Microservicio de Usuarios (Users)
+     * - 3002: Microservicio de Historial Médico (Medical History)
+     * - 4000: Servidor principal (Backend/CMS) - contiene: health, nutrition, appointments, alerts, activity, etc.
      */
     val BASE_URL_AUTH_DEV = "http://$DEV_IP:3004/"
     val BASE_URL_USERS_DEV = "http://$DEV_IP:3001/"
@@ -61,13 +67,19 @@ object ApiConfig {
     val BASE_URL_SERVER_DEV = "http://$DEV_IP:4000/"
     
     /**
-     * URLs para producción GCP (rutas a través de Nginx)
+     * URLs para producción GCP (puertos directos, sin Nginx)
      * Usadas cuando USE_PRODUCTION = true
+     * 
+     * IMPORTANTE: Asegúrate de que estos puertos estén abiertos en el firewall de GCP:
+     * - 3004: Microservicio de Autenticación (Auth)
+     * - 3001: Microservicio de Usuarios (Users)
+     * - 3002: Microservicio de Historial Médico (Medical History)
+     * - 4000: Servidor principal (Backend/CMS) - contiene: health, nutrition, appointments, alerts, activity, etc.
      */
-    val BASE_URL_AUTH_PROD = "http://$PROD_IP/auth/"
-    val BASE_URL_USERS_PROD = "http://$PROD_IP/users/"
-    val BASE_URL_MEDICAL_PROD = "http://$PROD_IP/medical/"
-    val BASE_URL_SERVER_PROD = "http://$PROD_IP/api/"
+    val BASE_URL_AUTH_PROD = "http://$PROD_IP:3004/"
+    val BASE_URL_USERS_PROD = "http://$PROD_IP:3001/"
+    val BASE_URL_MEDICAL_PROD = "http://$PROD_IP:3002/"
+    val BASE_URL_SERVER_PROD = "http://$PROD_IP:4000/"
     
     /**
      * URLs finales según el modo seleccionado

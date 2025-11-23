@@ -3357,9 +3357,19 @@
         };
       }
 
+      // Función para obtener la URL base del backend dinámicamente
       function getBackendBaseUrl() {
-        const config = getBackendConfig();
-        return `${config.protocol}://${config.host}:${config.port}`;
+        const hostname = window.location.hostname;
+        const protocol = window.location.protocol;
+        const port = '4000';
+        
+        // Si es localhost, usar localhost
+        if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '') {
+          return 'http://localhost:4000';
+        }
+        
+        // Para cualquier otra IP (GCP u otra), usar esa IP
+        return `${protocol}//${hostname}:${port}`;
       }
 
       function getHealthCheckUrl() {

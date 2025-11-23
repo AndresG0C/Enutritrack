@@ -26,7 +26,7 @@ if ! command_exists node; then
     sudo dnf install -y curl 
     curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo -E bash -
     sudo dnf install -y nodejs
-    echo "✅ Node.js $(node -v) instalado"
+echo "✅ Node.js $(node -v) instalado"
 else
     echo "✅ Node.js $(node -v) ya está instalado"
 fi
@@ -60,45 +60,16 @@ else
     fi
 fi
 
-# 4. Instalar PostgreSQL (pero lo deshabilitaremos porque usaremos Docker)
-echo "📦 Instalando PostgreSQL..."
-if ! command_exists psql; then
-    sudo dnf install -y postgresql-server postgresql-contrib
-    sudo postgresql-setup --initdb
-    sudo systemctl start postgresql
-    sudo systemctl enable postgresql
-    echo "✅ PostgreSQL instalado"
-else
-    echo "✅ PostgreSQL ya está instalado"
-fi
-
-# 4.5 Deshabilitar PostgreSQL nativo (usaremos solo Docker)
-echo "📦 Deshabilitando PostgreSQL nativo..."
-sudo systemctl stop postgresql
-sudo systemctl disable postgresql
-echo "✅ PostgreSQL nativo deshabilitado (usando solo Docker)"
-
-# 5. Instalar Nginx
-echo "📦 Instalando Nginx..."
-if ! command_exists nginx; then
-    sudo dnf install -y nginx
-    sudo systemctl start nginx
-    sudo systemctl enable nginx
-    echo "✅ Nginx instalado"
-else
-    echo "✅ Nginx ya está instalado"
-fi
-
-# 6. Instalar PM2
+# 4. Instalar PM2
 echo "📦 Instalando PM2..."
 if ! command_exists pm2; then
-    sudo npm install -g pm2
+sudo npm install -g pm2
     echo "✅ PM2 instalado"
 else
     echo "✅ PM2 ya está instalado"
 fi
 
-# 7. Verificar que el proyecto existe
+# 5. Verificar que el proyecto existe
 echo "📦 Verificando proyecto..."
 if [ ! -d "$PROJECT_ROOT/enutritrack-client" ]; then
     echo "❌ Error: Estructura del proyecto no encontrada"
@@ -114,7 +85,7 @@ fi
 
 echo "✅ Estructura del proyecto verificada"
 
-# 8. Verificar permisos de Docker antes de continuar
+# 6. Verificar permisos de Docker antes de continuar
 echo "🔍 Verificando permisos de Docker..."
 if ! docker ps > /dev/null 2>&1; then
     echo "❌ Error: Sin permisos para Docker"
@@ -132,7 +103,7 @@ else
     echo "✅ Permisos de Docker verificados"
 fi
 
-# 9. Instalar dependencias
+# 7. Instalar dependencias
 echo "📦 Instalando dependencias..."
 cd "$PROJECT_ROOT"
 
@@ -151,11 +122,7 @@ cd enutritrack-microservices
 npm install
 cd ..
 
-# 10. Configurar PostgreSQL para conexiones remotas (si es necesario) - Esto ya no es necesario porque usamos Docker
-# Pero por si acaso, eliminamos la configuración anterior y no hacemos nada en el PostgreSQL nativo.
-echo "📦 Saltando configuración de PostgreSQL nativo (usando Docker)..."
-
-# 11. Crear base de datos y usuario en PostgreSQL Docker
+# 8. Crear base de datos y usuario en PostgreSQL Docker
 echo "📦 Configurando base de datos en PostgreSQL Docker..."
 cd "$PROJECT_ROOT/enutritrack-server"
 
@@ -165,7 +132,7 @@ echo "📦 Levantando bases de datos con Docker..."
 # Verificar si los contenedores ya están corriendo
 if ! docker compose ps 2>/dev/null | grep -q "Up"; then
     echo "  Iniciando contenedores Docker..."
-    docker compose up -d
+docker compose up -d
 fi
 
 # Esperar y verificar que PostgreSQL esté corriendo
@@ -213,7 +180,7 @@ docker exec enutritrack_postgres psql -U postgres -c "CREATE USER enutritrack WI
 docker exec enutritrack_postgres psql -U postgres -c "CREATE DATABASE enutritrack OWNER enutritrack;" 2>/dev/null || echo "✅ Base de datos ya existe"
 docker exec enutritrack_postgres psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE enutritrack TO enutritrack;" 2>/dev/null || echo "✅ Permisos ya configurados"
 
-# 12. Inicializar PostgreSQL con manejo de errores
+# 9. Inicializar PostgreSQL con manejo de errores
 echo "📦 Inicializando PostgreSQL..."
 INIT_SUCCESS=false
 MAX_INIT_RETRIES=3
@@ -238,7 +205,7 @@ while [ $INIT_RETRY_COUNT -lt $MAX_INIT_RETRIES ]; do
     fi
 done
 
-# 12.1 Otorgar permisos completos al usuario enutritrack
+# 10. Otorgar permisos completos al usuario enutritrack
 echo "📦 Otorgando permisos en PostgreSQL..."
 docker exec enutritrack_postgres psql -U postgres -d enutritrack -c "
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO enutritrack;
@@ -249,7 +216,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO enutritrack;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO enutritrack;
 "
 
-# 12.3 Transferir propiedad de todas las tablas al usuario enutritrack
+# 11. Transferir propiedad de todas las tablas al usuario enutritrack
 echo "📦 Transferiendo propiedad de tablas al usuario enutritrack..."
 docker exec enutritrack_postgres psql -U postgres -d enutritrack -c "
 -- Transferir propiedad de todas las tablas existentes
@@ -297,7 +264,7 @@ END \$\$;
 
 echo "✅ Propiedad de tablas transferida a enutritrack"
 
-# 12.4 Configurar permisos por defecto para futuras tablas
+# 12. Configurar permisos por defecto para futuras tablas
 echo "📦 Configurando permisos por defecto..."
 docker exec enutritrack_postgres psql -U postgres -d enutritrack -c "
 -- Asegurar que el usuario enutritrack sea propietario de objetos futuros
@@ -313,7 +280,7 @@ ALTER DEFAULT PRIVILEGES FOR ROLE enutritrack IN SCHEMA public GRANT ALL ON FUNC
 ALTER DEFAULT PRIVILEGES FOR ROLE enutritrack IN SCHEMA public GRANT ALL ON TYPES TO enutritrack;
 "
 
-# 12.2 Aplicar Stored Procedures para el Dashboard
+# 13. Aplicar Stored Procedures para el Dashboard
 echo "📦 Aplicando Stored Procedures para el Dashboard..."
 
 # Verificar que el archivo de stored procedures existe
@@ -357,7 +324,7 @@ fi
 echo "✅ Permisos por defecto configurados"
 
 echo "✅ Permisos otorgados al usuario enutritrack"
-# 13. Configurar Couchbase
+# 14. Configurar Couchbase
 echo "📦 Configurando Couchbase..."
 COUCHBASE_URL="http://localhost:8091"
 USERNAME="Alfredo"
@@ -492,7 +459,38 @@ else
     echo "   Bucket: $BUCKET_NAME"
 fi
 
-# 14. Compilar aplicaciones
+# 15. Ejecutar TypeORM en modo dev para completar estructura de BD
+echo "📦 Ejecutando backend en modo desarrollo para que TypeORM valide/complete la estructura de BD..."
+echo "   Esto permite que TypeORM procese las entidades y valide la estructura..."
+
+cd "$PROJECT_ROOT/enutritrack-server"
+
+# Iniciar backend en modo dev en background
+npm run start:dev > /tmp/backend-typeorm.log 2>&1 &
+BACKEND_PID=$!
+
+# Esperar a que el backend se inicie y TypeORM procese
+echo "   Esperando que el backend se inicie y TypeORM procese las entidades (30 segundos)..."
+sleep 30
+
+# Verificar si el proceso sigue corriendo
+if ps -p $BACKEND_PID > /dev/null 2>&1; then
+    echo "   Backend está corriendo, esperando 20 segundos más para que TypeORM complete..."
+    sleep 20
+    # Detener el proceso
+    echo "   Deteniendo backend temporal..."
+    kill $BACKEND_PID 2>/dev/null || true
+    wait $BACKEND_PID 2>/dev/null || true
+    sleep 2
+    # Asegurarse de que el proceso se detuvo
+    kill -9 $BACKEND_PID 2>/dev/null || true
+    echo "✅ TypeORM ha procesado las entidades"
+else
+    echo "⚠️  Backend se detuvo antes de tiempo, pero continuando..."
+    echo "   Si hay errores, revisa: cat /tmp/backend-typeorm.log"
+fi
+
+# 16. Compilar aplicaciones
 echo "📦 Compilando aplicaciones..."
 cd "$PROJECT_ROOT/enutritrack-client"
 npm run build
@@ -503,432 +501,34 @@ npm run build
 cd "$PROJECT_ROOT/enutritrack-microservices"
 npm run build
 
-# 15. Obtener IP externa de la VM
-VM_IP=$(curl -s http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip -H "Metadata-Flavor: Google" 2>/dev/null || true)
-if [ -z "$VM_IP" ]; then
-    VM_IP=$(curl -s ifconfig.me 2>/dev/null || echo "IP-DESCONOCIDA")
-fi
-
-echo "🌐 IP externa de la VM: $VM_IP"
-
-# 16. Configurar Nginx
-echo "📦 Configurando Nginx..."
-
-# Definir ruta del frontend para usar en la configuración de Nginx
-FRONTEND_ROOT="$PROJECT_ROOT/enutritrack-client/dist"
-
-sudo tee /etc/nginx/conf.d/enutritrack.conf > /dev/null << NGINX_CONFIG
-# Configuración compartida para ambos servidores
-# Se define una función común para evitar duplicación
-
-# Servidor en puerto 80 (producción estándar)
-server {
-    listen 80;
-    server_name _;
-
-    # CMS/Dashboard del Backend - Rutas específicas del CMS (prioridad alta)
-    location ~ ^/auth/(login|dashboard|refresh)\$ {
-        proxy_pass http://localhost:4000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_cache_bypass \$http_upgrade;
-    }
-
-    # Otras rutas del CMS del backend (páginas HTML)
-    location ~ ^/(dashboard|patients-crud|doctors-crud|appointments|food|health|history-medical|medications|allergies|states|types|gender|specialties-crud) {
-        proxy_pass http://localhost:4000;
-        proxy_http_version 1.1;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    }
-
-    # Backend API
-    location /api/ {
-        proxy_pass http://localhost:4000/;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_cache_bypass \$http_upgrade;
-    }
-
-    # Microservicios - rutas que capturan con y sin barra final
-    location ~ ^/users(/|$) {
-        proxy_pass http://localhost:3001;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    }
-
-    location ~ ^/medical-history(/|$) {
-        proxy_pass http://localhost:3002;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    }
-
-    location ~ ^/nutrition(/|$) {
-        proxy_pass http://localhost:3003;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    }
-
-    location ~ ^/physical-activity(/|$) {
-        proxy_pass http://localhost:3005;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    }
-
-    location ~ ^/recommendations(/|$) {
-        proxy_pass http://localhost:3006;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    }
-
-    location ~ ^/doctors(/|$) {
-        proxy_pass http://localhost:3007;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    }
-
-    location ~ ^/citas-medicas(/|$) {
-        proxy_pass http://localhost:3008;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    }
-
-    location ~ ^/alerts(/|$) {
-        proxy_pass http://localhost:3009;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    }
-
-    # Microservicio de auth
-    location /auth/ {
-        proxy_pass http://localhost:3004;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    }
-
-    # Frontend (debe ir al final para capturar todo lo demás)
-    location / {
-        root ${FRONTEND_ROOT};
-        try_files \$uri \$uri/ /index.html;
-    }
-
-    client_max_body_size 50M;
-}
-
-# Servidor en puerto 5174 (para compatibilidad con Vite dev)
-server {
-    listen 5174;
-    server_name _;
-
-    # CMS/Dashboard del Backend - Rutas específicas del CMS (prioridad alta)
-    location ~ ^/auth/(login|dashboard|refresh)\$ {
-        proxy_pass http://localhost:4000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_cache_bypass \$http_upgrade;
-    }
-
-    # Otras rutas del CMS del backend (páginas HTML)
-    location ~ ^/(dashboard|patients-crud|doctors-crud|appointments|food|health|history-medical|medications|allergies|states|types|gender|specialties-crud) {
-        proxy_pass http://localhost:4000;
-        proxy_http_version 1.1;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    }
-
-    # Backend API
-    location /api/ {
-        proxy_pass http://localhost:4000/;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_cache_bypass \$http_upgrade;
-    }
-
-    # Microservicios - rutas que capturan con y sin barra final
-    location ~ ^/users(/|$) {
-        proxy_pass http://localhost:3001;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    }
-
-    location ~ ^/medical-history(/|$) {
-        proxy_pass http://localhost:3002;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    }
-
-    location ~ ^/nutrition(/|$) {
-        proxy_pass http://localhost:3003;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    }
-
-    location ~ ^/physical-activity(/|$) {
-        proxy_pass http://localhost:3005;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    }
-
-    location ~ ^/recommendations(/|$) {
-        proxy_pass http://localhost:3006;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    }
-
-    location ~ ^/doctors(/|$) {
-        proxy_pass http://localhost:3007;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    }
-
-    location ~ ^/citas-medicas(/|$) {
-        proxy_pass http://localhost:3008;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    }
-
-    location ~ ^/alerts(/|$) {
-        proxy_pass http://localhost:3009;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    }
-
-    # Microservicio de auth
-    location /auth/ {
-        proxy_pass http://localhost:3004;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    }
-
-    # Frontend (debe ir al final para capturar todo lo demás)
-    location / {
-        root ${FRONTEND_ROOT};
-        try_files \$uri \$uri/ /index.html;
-    }
-
-    client_max_body_size 50M;
-}
-NGINX_CONFIG
-
-# Eliminar configuración por defecto si existe
-sudo rm -f /etc/nginx/conf.d/default.conf
-
-# Verificar configuración de Nginx
-sudo nginx -t
-sudo systemctl restart nginx
-sudo systemctl enable nginx
-
-# 17. Configurar firewall (si está activo)
-if command_exists firewall-cmd; then
-    echo "📦 Configurando firewall..."
-    sudo firewall-cmd --permanent --add-service=http
-    sudo firewall-cmd --permanent --add-service=https
-    sudo firewall-cmd --reload
-    echo "✅ Firewall configurado"
-fi
-
-# 18. Crear ecosystem de PM2
-echo "📦 Configurando PM2..."
-mkdir -p "$PROJECT_ROOT/logs"
-
-cat > "$PROJECT_ROOT/ecosystem.config.js" << PM2_CONFIG
-module.exports = {
-  apps: [
-    {
-      name: 'enutritrack-backend',
-      script: './enutritrack-server/dist/main.js',
-      cwd: '$PROJECT_ROOT',
-      env: { NODE_ENV: 'production', PORT: 4000 },
-      error_file: './logs/backend-error.log',
-      out_file: './logs/backend-out.log',
-    },
-    {
-      name: 'enutritrack-gateway',
-      script: './enutritrack-microservices/dist/main.js',
-      cwd: '$PROJECT_ROOT',
-      env: { NODE_ENV: 'production', PORT: 3000 },
-      error_file: './logs/gateway-error.log',
-      out_file: './logs/gateway-out.log',
-    },
-    {
-      name: 'enutritrack-auth',
-      script: './enutritrack-microservices/dist/auth/main.js',
-      cwd: '$PROJECT_ROOT',
-      env: { NODE_ENV: 'production', PORT: 3004 },
-      error_file: './logs/auth-error.log',
-      out_file: './logs/auth-out.log',
-    },
-    {
-      name: 'enutritrack-user',
-      script: './enutritrack-microservices/dist/users/main.js',
-      cwd: '$PROJECT_ROOT',
-      env: { NODE_ENV: 'production', PORT: 3001 },
-      error_file: './logs/user-error.log',
-      out_file: './logs/user-out.log',
-    },
-    {
-      name: 'enutritrack-doctor',
-      script: './enutritrack-microservices/dist/doctor/main.js',
-      cwd: '$PROJECT_ROOT',
-      env: { NODE_ENV: 'production', PORT: 3007 },
-      error_file: './logs/doctor-error.log',
-      out_file: './logs/doctor-out.log',
-    },
-    {
-      name: 'enutritrack-nutrition',
-      script: './enutritrack-microservices/dist/nutrition/main.js',
-      cwd: '$PROJECT_ROOT',
-      env: { NODE_ENV: 'production', PORT: 3003 },
-      error_file: './logs/nutrition-error.log',
-      out_file: './logs/nutrition-out.log',
-    },
-    {
-      name: 'enutritrack-activity',
-      script: './enutritrack-microservices/dist/activity/main.js',
-      cwd: '$PROJECT_ROOT',
-      env: { NODE_ENV: 'production', PORT: 3005 },
-      error_file: './logs/activity-error.log',
-      out_file: './logs/activity-out.log',
-    },
-    {
-      name: 'enutritrack-recommendation',
-      script: './enutritrack-microservices/dist/recommendation/main.js',
-      cwd: '$PROJECT_ROOT',
-      env: { NODE_ENV: 'production', PORT: 3006 },
-      error_file: './logs/recommendation-error.log',
-      out_file: './logs/recommendation-out.log',
-    },
-    {
-      name: 'enutritrack-medical',
-      script: './enutritrack-microservices/dist/medical-history/main.js',
-      cwd: '$PROJECT_ROOT',
-      env: { NODE_ENV: 'production', PORT: 3002 },
-      error_file: './logs/medical-error.log',
-      out_file: './logs/medical-out.log',
-    },
-    {
-      name: 'enutritrack-citas',
-      script: './enutritrack-microservices/dist/citas/main.js',
-      cwd: '$PROJECT_ROOT',
-      env: { NODE_ENV: 'production', PORT: 3008 },
-      error_file: './logs/citas-error.log',
-      out_file: './logs/citas-out.log',
-    },
-    {
-      name: 'enutritrack-alertas',
-      script: './enutritrack-microservices/dist/alertas/main.js',
-      cwd: '$PROJECT_ROOT',
-      env: { NODE_ENV: 'production', PORT: 3009 },
-      error_file: './logs/alertas-error.log',
-      out_file: './logs/alertas-out.log',
-    },
-  ],
-};
-PM2_CONFIG
-
-# 19. Iniciar servicios con PM2
-echo "📦 Iniciando servicios..."
-cd "$PROJECT_ROOT"
-pm2 start ecosystem.config.js
-pm2 save
-sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u $USER --hp /home/$USER
-
 echo ""
-echo "✅ ¡Despliegue completado en CentOS 9!"
+echo "✅ ¡Construcción y configuración completada!"
 echo ""
 echo "═══════════════════════════════════════════════════════════════"
-echo "🌐 URLs de acceso:"
+echo "📋 Resumen de lo realizado:"
 echo "═══════════════════════════════════════════════════════════════"
 echo ""
-echo "   📱 Portal de Doctores (Frontend):"
-echo "      http://${VM_IP}/ (puerto 80)"
-echo "      http://${VM_IP}:5174/ (puerto 5174 - alternativo)"
-echo ""
-echo "   🏥 CMS/Dashboard de Administrador:"
-echo "      http://${VM_IP}/auth/login (puerto 80)"
-echo "      http://${VM_IP}:5174/auth/login (puerto 5174 - alternativo)"
-echo "      Credenciales: admin@enutritrack.com / admin123"
-echo ""
-echo "   📚 Documentación API (Swagger):"
-echo "      http://${VM_IP}/api/docs"
-echo ""
-echo "   🗄️  Consola Couchbase:"
-echo "      http://${VM_IP}:8091"
-echo "      Usuario: Alfredo"
-echo "      Password: alfredo124"
-echo ""
-echo "   ⚠️  NOTA: Si quieres usar el puerto 5174, asegúrate de abrirlo"
-echo "      en el firewall de GCP (regla de firewall TCP:5174)"
+echo "   ✅ Dependencias instaladas"
+echo "   ✅ Contenedores Docker levantados (PostgreSQL, Couchbase, Redis)"
+echo "   ✅ Base de datos PostgreSQL inicializada"
+echo "   ✅ Stored procedures aplicados"
+echo "   ✅ Couchbase configurado"
+echo "   ✅ TypeORM ejecutado en modo dev (validación de entidades)"
+echo "   ✅ Aplicaciones compiladas"
 echo ""
 echo "═══════════════════════════════════════════════════════════════"
-echo "📱 CONFIGURACIÓN DE APP MÓVIL (IMPORTANTE)"
+echo "🚀 Próximos pasos:"
 echo "═══════════════════════════════════════════════════════════════"
 echo ""
-echo "   Para usar la app móvil con este despliegue:"
-echo ""
-echo "   1. Abre Android Studio"
-echo "   2. Abre el archivo:"
-echo "      enutritrack-app/Enutritrackapp/app/src/main/java/com/example/enutritrack_app/config/ApiConfig.kt"
-echo ""
-echo "   3. Cambia estas dos líneas:"
-echo "      private const val PROD_IP = \"${VM_IP}\""
-echo "      private const val USE_PRODUCTION = true"
-echo ""
-echo "   4. Recompila la app (Build > Rebuild Project)"
-echo "   5. Instala el APK en tu dispositivo"
+echo "   Para iniciar los servicios, ejecuta:"
+echo "   ./start-services.sh"
 echo ""
 echo "═══════════════════════════════════════════════════════════════"
 echo "📝 Comandos útiles:"
 echo "═══════════════════════════════════════════════════════════════"
 echo ""
-echo "   Ver logs:"
-echo "   pm2 logs"
-echo ""
-echo "   Ver estado:"
-echo "   pm2 status"
-echo ""
-echo "   Reiniciar servicios:"
-echo "   pm2 restart all"
-echo ""
 echo "   Ver logs de PostgreSQL:"
 echo "   docker logs enutritrack_postgres"
-echo "   sudo journalctl -u postgresql -f"
 echo ""
 echo "   Ver logs de Couchbase:"
 echo "   docker logs enutritrack_couchbase"

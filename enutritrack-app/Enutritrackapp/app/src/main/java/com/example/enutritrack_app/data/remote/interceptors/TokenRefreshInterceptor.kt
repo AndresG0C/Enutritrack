@@ -1,7 +1,7 @@
 package com.example.enutritrack_app.data.remote.interceptors
 
 import android.content.Context
-import com.example.enutritrack_app.BuildConfig
+import com.example.enutritrack_app.config.ApiConfig
 import com.example.enutritrack_app.data.local.SecurityManager
 import com.example.enutritrack_app.data.remote.api.AuthApiService
 import com.example.enutritrack_app.data.remote.dto.RefreshTokenRequest
@@ -36,7 +36,7 @@ class TokenRefreshInterceptor(private val context: Context) : Interceptor {
                         try {
                             // Crear un Retrofit temporal para renovar token
                             val retrofit = Retrofit.Builder()
-                                .baseUrl(BuildConfig.BASE_URL_AUTH)
+                                .baseUrl(ApiConfig.BASE_URL_AUTH)
                                 .client(OkHttpClient())
                                 .addConverterFactory(GsonConverterFactory.create(Gson()))
                                 .build()
