@@ -11,10 +11,11 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./scripts/stored-procedures.sql:/docker-entrypoint-stored-procedures.d/stored-procedures.sql
     networks:
       - enutritrack-network
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres -d enutritrack']
+      test: [ 'CMD-SHELL', 'pg_isready -U postgres -d enutritrack' ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -45,7 +46,7 @@ services:
     networks:
       - enutritrack-network
     healthcheck:
-      test: ['CMD', 'redis-cli', '-a', 'redispassword', 'ping']
+      test: [ 'CMD', 'redis-cli', '-a', 'redispassword', 'ping' ]
       interval: 10s
       timeout: 3s
       retries: 5

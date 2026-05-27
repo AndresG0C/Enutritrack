@@ -65,6 +65,12 @@ Start-ServiceWindow -Title "Enutritrack - Users (3001)" -Directory "$ScriptDir\e
 # 5. Microservicio de Doctores
 Start-ServiceWindow -Title "Enutritrack - Doctors (3007)" -Directory "$ScriptDir\enutritrack-microservices" -Command "npm run dev:doctor"
 
+# 5. Microservicio de citas medicas
+Start-ServiceWindow -Title "Enutritrack - Doctors (3008)" -Directory "$ScriptDir\enutritrack-microservices" -Command "npm run dev:alertas"
+
+# 5. Microservicio de historial medico
+Start-ServiceWindow -Title "Enutritrack - Doctors (3009)" -Directory "$ScriptDir\enutritrack-microservices" -Command "npm run dev:citas"
+
 # 6. Microservicio de Nutricion
 Start-ServiceWindow -Title "Enutritrack - Nutrition (3003)" -Directory "$ScriptDir\enutritrack-microservices" -Command "npm run dev:nutrition"
 

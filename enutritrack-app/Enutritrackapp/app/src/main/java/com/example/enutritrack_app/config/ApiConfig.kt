@@ -30,6 +30,7 @@ object ApiConfig {
      * IP para desarrollo local (emulador Android)
      * 10.0.2.2 es la IP especial del emulador que apunta a localhost de la máquina host
      */
+
     private const val DEV_IP = "10.0.2.2"
     
     /**

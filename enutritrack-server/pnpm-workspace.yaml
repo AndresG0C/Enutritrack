@@ -1,0 +1,8 @@
+allowBuilds:
+  '@nestjs/core': true
+  '@scarf/scarf': true
+  bcrypt: true
+  couchbase: true
+  leveldown: true
+  msgpackr-extract: true
+  unrs-resolver: true

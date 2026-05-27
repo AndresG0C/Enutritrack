@@ -1,0 +1,8 @@
+allowBuilds:
+  '@google/genai': true
+  '@nestjs/core': true
+  '@scarf/scarf': true
+  bcrypt: true
+  couchbase: true
+  protobufjs: true
+  unrs-resolver: true
