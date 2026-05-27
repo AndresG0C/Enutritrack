@@ -65,25 +65,25 @@ Start-ServiceWindow -Title "Enutritrack - Users (3001)" -Directory "$ScriptDir\e
 # 5. Microservicio de Doctores
 Start-ServiceWindow -Title "Enutritrack - Doctors (3007)" -Directory "$ScriptDir\enutritrack-microservices" -Command "npm run dev:doctor"
 
-# 5. Microservicio de citas medicas
+# 6. Microservicio de citas medicas
 Start-ServiceWindow -Title "Enutritrack - Doctors (3008)" -Directory "$ScriptDir\enutritrack-microservices" -Command "npm run dev:alertas"
 
-# 5. Microservicio de historial medico
+# 7. Microservicio de historial medico
 Start-ServiceWindow -Title "Enutritrack - Doctors (3009)" -Directory "$ScriptDir\enutritrack-microservices" -Command "npm run dev:citas"
 
-# 6. Microservicio de Nutricion
+# 8. Microservicio de Nutricion
 Start-ServiceWindow -Title "Enutritrack - Nutrition (3003)" -Directory "$ScriptDir\enutritrack-microservices" -Command "npm run dev:nutrition"
 
-# 7. Microservicio de Actividad
+# 9. Microservicio de Actividad
 Start-ServiceWindow -Title "Enutritrack - Activity (3005)" -Directory "$ScriptDir\enutritrack-microservices" -Command "npm run dev:activity"
 
-# 8. Microservicio de Recomendaciones
+# 10. Microservicio de Recomendaciones
 Start-ServiceWindow -Title "Enutritrack - Recommendation (3006)" -Directory "$ScriptDir\enutritrack-microservices" -Command "npm run dev:recommendation"
 
-# 9. Microservicio de Historial Medico
+# 11. Microservicio de Historial Medico
 Start-ServiceWindow -Title "Enutritrack - Medical History (3002)" -Directory "$ScriptDir\enutritrack-microservices" -Command "npm run dev:medical"
 
-# 10. Frontend
+# 12. Frontend
 Start-ServiceWindow -Title "Enutritrack - Frontend (5174)" -Directory "$ScriptDir\enutritrack-client" -Command "npm run dev"
 
 Write-Host ""
