@@ -639,8 +639,8 @@ docker logs enutritrack_redis
 
 ## 🏆 Equipo
 
-- **Alfredo José** - Project Manager
+- **Andres González** - Project Manager
 - **Contribuidores**
   -- **Juan Carmona**
-  -- **Andres Gonzalez**
-  -- **Angel Muñoz**
+  -- **Julian Arias**
+  -- **Stefani Perez**
