@@ -938,11 +938,11 @@ WHERE c.email = 'admin@enutritrack.com'
 -- Crear 5 cuentas de doctores
 INSERT INTO cuentas (id, email, email_1, email_2, password_hash, tipo_cuenta, activa, created_at, updated_at)
 VALUES 
-  (uuid_generate_v4(), 'dr.perez@enutritrack.com', NULL, NULL, '$2b$10$KqMcR2WpdFQinFNXUpa/CYxiOmzosuH.KqMcR2WpdFQinFNXUpa/CYxi', 'doctor', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'dr.garcia@enutritrack.com', NULL, NULL, '$2b$10$KqMcR2WpdFQinFNXUpa/CYxiOmzosuH.KqMcR2WpdFQinFNXUpa/CYxi', 'doctor', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'dr.lopez@enutritrack.com', NULL, NULL, '$2b$10$KqMcR2WpdFQinFNXUpa/CYxiOmzosuH.KqMcR2WpdFQinFNXUpa/CYxi', 'doctor', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'dr.martinez@enutritrack.com', NULL, NULL, '$2b$10$KqMcR2WpdFQinFNXUpa/CYxiOmzosuH.KqMcR2WpdFQinFNXUpa/CYxi', 'doctor', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'dr.rodriguez@enutritrack.com', NULL, NULL, '$2b$10$KqMcR2WpdFQinFNXUpa/CYxiOmzosuH.KqMcR2WpdFQinFNXUpa/CYxi', 'doctor', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  (uuid_generate_v4(), 'dr.perez@enutritrack.com', NULL, NULL, '$2a$12$tCP.x1BGcTkbfgbum7pjre6doqpUc5fwN6D8yw.7rFYE9fkUS6Fwa', 'doctor', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'dr.garcia@enutritrack.com', NULL, NULL, '$2a$12$tCP.x1BGcTkbfgbum7pjre6doqpUc5fwN6D8yw.7rFYE9fkUS6Fwa', 'doctor', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'dr.lopez@enutritrack.com', NULL, NULL, '$2a$12$tCP.x1BGcTkbfgbum7pjre6doqpUc5fwN6D8yw.7rFYE9fkUS6Fwa', 'doctor', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'dr.martinez@enutritrack.com', NULL, NULL, '$2a$12$tCP.x1BGcTkbfgbum7pjre6doqpUc5fwN6D8yw.7rFYE9fkUS6Fwa', 'doctor', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'dr.rodriguez@enutritrack.com', NULL, NULL, '$2a$12$tCP.x1BGcTkbfgbum7pjre6doqpUc5fwN6D8yw.7rFYE9fkUS6Fwa', 'doctor', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON CONFLICT (email) DO NOTHING;
 
 -- Crear perfiles de doctores
@@ -993,26 +993,26 @@ WHERE c.tipo_cuenta = 'doctor'
 -- Crear 20 cuentas de usuarios (4 por doctor)
 INSERT INTO cuentas (id, email, email_1, email_2, password_hash, tipo_cuenta, activa, created_at, updated_at)
 VALUES 
-  (uuid_generate_v4(), 'maria.garcia@enutritrack.com', NULL, NULL, '$2b$10$KqMcR2WpdFQinFNXUpa/CYxiOmzosuH.KqMcR2WpdFQinFNXUpa/CYxi', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'juan.rodriguez@enutritrack.com', NULL, NULL, '$2b$10$KqMcR2WpdFQinFNXUpa/CYxiOmzosuH.KqMcR2WpdFQinFNXUpa/CYxi', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'ana.lopez@enutritrack.com', NULL, NULL, '$2b$10$KqMcR2WpdFQinFNXUpa/CYxiOmzosuH.KqMcR2WpdFQinFNXUpa/CYxi', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'carlos.martinez@enutritrack.com', NULL, NULL, '$2b$10$KqMcR2WpdFQinFNXUpa/CYxiOmzosuH.KqMcR2WpdFQinFNXUpa/CYxi', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'lucia.fernandez@enutritrack.com', NULL, NULL, '$2b$10$KqMcR2WpdFQinFNXUpa/CYxiOmzosuH.KqMcR2WpdFQinFNXUpa/CYxi', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'pedro.gonzalez@enutritrack.com', NULL, NULL, '$2b$10$KqMcR2WpdFQinFNXUpa/CYxiOmzosuH.KqMcR2WpdFQinFNXUpa/CYxi', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'sofia.herrera@enutritrack.com', NULL, NULL, '$2b$10$KqMcR2WpdFQinFNXUpa/CYxiOmzosuH.KqMcR2WpdFQinFNXUpa/CYxi', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'diego.torres@enutritrack.com', NULL, NULL, '$2b$10$KqMcR2WpdFQinFNXUpa/CYxiOmzosuH.KqMcR2WpdFQinFNXUpa/CYxi', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'isabella.morales@enutritrack.com', NULL, NULL, '$2b$10$KqMcR2WpdFQinFNXUpa/CYxiOmzosuH.KqMcR2WpdFQinFNXUpa/CYxi', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'mateo.jimenez@enutritrack.com', NULL, NULL, '$2b$10$KqMcR2WpdFQinFNXUpa/CYxiOmzosuH.KqMcR2WpdFQinFNXUpa/CYxi', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'valentina.ramirez@enutritrack.com', NULL, NULL, '$2b$10$KqMcR2WpdFQinFNXUpa/CYxiOmzosuH.KqMcR2WpdFQinFNXUpa/CYxi', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'santiago.castro@enutritrack.com', NULL, NULL, '$2b$10$KqMcR2WpdFQinFNXUpa/CYxiOmzosuH.KqMcR2WpdFQinFNXUpa/CYxi', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'camila.ortiz@enutritrack.com', NULL, NULL, '$2b$10$KqMcR2WpdFQinFNXUpa/CYxiOmzosuH.KqMcR2WpdFQinFNXUpa/CYxi', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'alejandro.vargas@enutritrack.com', NULL, NULL, '$2b$10$KqMcR2WpdFQinFNXUpa/CYxiOmzosuH.KqMcR2WpdFQinFNXUpa/CYxi', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'natalia.delgado@enutritrack.com', NULL, NULL, '$2b$10$KqMcR2WpdFQinFNXUpa/CYxiOmzosuH.KqMcR2WpdFQinFNXUpa/CYxi', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'sebastian.flores@enutritrack.com', NULL, NULL, '$2b$10$KqMcR2WpdFQinFNXUpa/CYxiOmzosuH.KqMcR2WpdFQinFNXUpa/CYxi', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'valeria.gutierrez@enutritrack.com', NULL, NULL, '$2b$10$KqMcR2WpdFQinFNXUpa/CYxiOmzosuH.KqMcR2WpdFQinFNXUpa/CYxi', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'daniel.ruiz@enutritrack.com', NULL, NULL, '$2b$10$KqMcR2WpdFQinFNXUpa/CYxiOmzosuH.KqMcR2WpdFQinFNXUpa/CYxi', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'emma.aguilar@enutritrack.com', NULL, NULL, '$2b$10$KqMcR2WpdFQinFNXUpa/CYxiOmzosuH.KqMcR2WpdFQinFNXUpa/CYxi', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'maximiliano.medina@enutritrack.com', NULL, NULL, '$2b$10$KqMcR2WpdFQinFNXUpa/CYxiOmzosuH.KqMcR2WpdFQinFNXUpa/CYxi', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  (uuid_generate_v4(), 'maria.garcia@enutritrack.com', NULL, NULL, '$2a$12$T1FZf5k0I6V.mfWb7XQjZ.ebUWZF7hQvMzkU9QhsKw2rWYRbLdkky', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'juan.rodriguez@enutritrack.com', NULL, NULL, '$2a$12$T1FZf5k0I6V.mfWb7XQjZ.ebUWZF7hQvMzkU9QhsKw2rWYRbLdkky', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'ana.lopez@enutritrack.com', NULL, NULL, '$2a$12$T1FZf5k0I6V.mfWb7XQjZ.ebUWZF7hQvMzkU9QhsKw2rWYRbLdkky', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'carlos.martinez@enutritrack.com', NULL, NULL, '$2a$12$T1FZf5k0I6V.mfWb7XQjZ.ebUWZF7hQvMzkU9QhsKw2rWYRbLdkky', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'lucia.fernandez@enutritrack.com', NULL, NULL, '$2a$12$T1FZf5k0I6V.mfWb7XQjZ.ebUWZF7hQvMzkU9QhsKw2rWYRbLdkky', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'pedro.gonzalez@enutritrack.com', NULL, NULL, '$2a$12$T1FZf5k0I6V.mfWb7XQjZ.ebUWZF7hQvMzkU9QhsKw2rWYRbLdkky', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'sofia.herrera@enutritrack.com', NULL, NULL, '$2a$12$T1FZf5k0I6V.mfWb7XQjZ.ebUWZF7hQvMzkU9QhsKw2rWYRbLdkky', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'diego.torres@enutritrack.com', NULL, NULL, '$2a$12$T1FZf5k0I6V.mfWb7XQjZ.ebUWZF7hQvMzkU9QhsKw2rWYRbLdkky', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'isabella.morales@enutritrack.com', NULL, NULL, '$2a$12$T1FZf5k0I6V.mfWb7XQjZ.ebUWZF7hQvMzkU9QhsKw2rWYRbLdkky', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'mateo.jimenez@enutritrack.com', NULL, NULL, '$2a$12$T1FZf5k0I6V.mfWb7XQjZ.ebUWZF7hQvMzkU9QhsKw2rWYRbLdkky', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'valentina.ramirez@enutritrack.com', NULL, NULL, '$2a$12$T1FZf5k0I6V.mfWb7XQjZ.ebUWZF7hQvMzkU9QhsKw2rWYRbLdkky', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'santiago.castro@enutritrack.com', NULL, NULL, '$2a$12$T1FZf5k0I6V.mfWb7XQjZ.ebUWZF7hQvMzkU9QhsKw2rWYRbLdkky', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'camila.ortiz@enutritrack.com', NULL, NULL, '$2a$12$T1FZf5k0I6V.mfWb7XQjZ.ebUWZF7hQvMzkU9QhsKw2rWYRbLdkky', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'alejandro.vargas@enutritrack.com', NULL, NULL, '$2a$12$T1FZf5k0I6V.mfWb7XQjZ.ebUWZF7hQvMzkU9QhsKw2rWYRbLdkky', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'natalia.delgado@enutritrack.com', NULL, NULL, '$2a$12$T1FZf5k0I6V.mfWb7XQjZ.ebUWZF7hQvMzkU9QhsKw2rWYRbLdkky', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'sebastian.flores@enutritrack.com', NULL, NULL, '$2a$12$T1FZf5k0I6V.mfWb7XQjZ.ebUWZF7hQvMzkU9QhsKw2rWYRbLdkky', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'valeria.gutierrez@enutritrack.com', NULL, NULL, '$2a$12$T1FZf5k0I6V.mfWb7XQjZ.ebUWZF7hQvMzkU9QhsKw2rWYRbLdkky', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'daniel.ruiz@enutritrack.com', NULL, NULL, '$2a$12$T1FZf5k0I6V.mfWb7XQjZ.ebUWZF7hQvMzkU9QhsKw2rWYRbLdkky', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'emma.aguilar@enutritrack.com', NULL, NULL, '$2a$12$T1FZf5k0I6V.mfWb7XQjZ.ebUWZF7hQvMzkU9QhsKw2rWYRbLdkky', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'maximiliano.medina@enutritrack.com', NULL, NULL, '$2a$12$T1FZf5k0I6V.mfWb7XQjZ.ebUWZF7hQvMzkU9QhsKw2rWYRbLdkky', 'usuario', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON CONFLICT (email) DO NOTHING;
 
 -- Crear perfiles de usuarios (4 por doctor)

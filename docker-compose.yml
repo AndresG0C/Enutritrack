@@ -10,8 +10,8 @@ services:
       - '5433:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./scripts/stored-procedures.sql:/docker-entrypoint-stored-procedures.d/stored-procedures.sql
+      - ./enutritrack-server/scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./enutritrack-server/scripts/stored-procedures.sql:/docker-entrypoint-stored-procedures.d/stored-procedures.sql
     networks:
       - enutritrack-network
     healthcheck:
