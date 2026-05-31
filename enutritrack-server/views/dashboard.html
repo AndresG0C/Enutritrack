@@ -4159,189 +4159,61 @@
         return 'Buenas noches';
       }
 
-      // Specialties
-      async function loadSpecialties() {
-        try {
-          const specialties = await apiCall('/specialties');
-          allSpecialties = specialties;
-          renderSpecialties(specialties);
-        } catch (error) {
-          document.getElementById('specialties-table').innerHTML =
-            '<tr><td colspan="3" class="empty-state">Error al cargar especialidades</td></tr>';
-        }
-      }
+      // ============================================
+      // ESPECIALIDADES - Usando iframe (CORRECTO)
+      // ============================================
 
-      function renderSpecialties(specialties) {
-        const tbody = document.getElementById('specialties-table');
+      // Variable para controlar si el iframe ya está cargado
+      let specialtiesIframeLoaded = false;
 
-        if (!specialties || specialties.length === 0) {
-          tbody.innerHTML =
-            '<tr><td colspan="3" class="empty-state">No hay especialidades registradas</td></tr>';
-          return;
-        }
-
-        tbody.innerHTML = specialties
-          .map(
-            (specialty) => `
-            <tr>
-                <td>
-                    <div class="specialty-card">
-                        <div class="specialty-avatar">${getInitials(specialty.nombre)}</div>
-                        <div class="specialty-info">
-                            <h4>${specialty.nombre}</h4>
-                            <p>${specialty.descripcion || 'Sin descripción'}</p>
-                        </div>
-                    </div>
-                </td>
-                <td>
-                    <div style="font-weight: 600; color: #1f2937;">${specialty.total_doctores || 0}</div>
-                    <div style="font-size: 0.75rem; color: #6b7280;">doctores asignados</div>
-                </td>
-                <td>
-                    <div class="action-buttons">
-                        <button class="btn btn-primary btn-sm" onclick="editSpecialty('${specialty.id}')">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                            </svg>
-                            Editar
-                        </button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteSpecialty('${specialty.id}')">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                            </svg>
-                            Eliminar
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `,
-          )
-          .join('');
-      }
-
-      function filterSpecialties(search) {
-        const filtered = allSpecialties.filter(
-          (s) =>
-            s.nombre.toLowerCase().includes(search.toLowerCase()) ||
-            (s.descripcion &&
-              s.descripcion.toLowerCase().includes(search.toLowerCase())),
-        );
-        renderSpecialties(filtered);
-      }
-
-      function showCreateSpecialtyModal() {
-        currentSpecialtyId = null;
-        document.getElementById('specialty-modal-title').textContent =
-          'Crear Nueva Especialidad';
-        document.getElementById('specialty-form').reset();
-        document.getElementById('specialty-id').value = '';
-        openModal('specialty-modal');
-      }
-
-      async function editSpecialty(specialtyId) {
-        try {
-          const specialty = await apiCall(`/specialties/${specialtyId}`);
-          currentSpecialtyId = specialtyId;
-
-          document.getElementById('specialty-modal-title').textContent =
-            'Editar Especialidad';
-          document.getElementById('specialty-id').value = specialty.id;
-          document.getElementById('specialty-nombre').value = specialty.nombre;
-          document.getElementById('specialty-descripcion').value =
-            specialty.descripcion || '';
-
-          openModal('specialty-modal');
-        } catch (error) {
-          console.error('Error loading specialty:', error);
-          alert('Error al cargar los datos de la especialidad');
-        }
-      }
-
-      async function saveSpecialty() {
-        const form = document.getElementById('specialty-form');
-        if (!form.checkValidity()) {
-          form.reportValidity();
-          return;
-        }
-
-        try {
-          const specialtyData = {
-            nombre: document.getElementById('specialty-nombre').value,
-            descripcion: document.getElementById('specialty-descripcion').value,
-          };
-
-          if (currentSpecialtyId) {
-            // Actualizar especialidad existente
-            await apiCall(`/specialties/${currentSpecialtyId}`, {
-              method: 'PATCH',
-              body: JSON.stringify(specialtyData),
-            });
-            alert('Especialidad actualizada exitosamente');
+      function loadSpecialties() {
+          console.log('🔄 Cargando vista de especialidades (iframe)');
+          
+          const iframe = document.getElementById('specialties-crud-frame');
+          if (!iframe) {
+              console.error('❌ Iframe de especialidades no encontrado');
+              return;
+          }
+          
+          // Si el iframe ya está cargado, solo recargarlo para actualizar datos
+          if (specialtiesIframeLoaded) {
+              console.log('🔄 Recargando iframe de especialidades');
+              const currentSrc = iframe.src;
+              iframe.src = '';
+              setTimeout(() => {
+                  iframe.src = currentSrc;
+              }, 100);
           } else {
-            // Crear nueva especialidad
-            await apiCall('/specialties', {
-              method: 'POST',
-              body: JSON.stringify(specialtyData),
-            });
-            alert('Especialidad creada exitosamente');
+              // Primera carga - asegurar que el src está correcto
+              if (!iframe.src || iframe.src === 'about:blank') {
+                  iframe.src = 'specialties-crud.html';
+              }
+              specialtiesIframeLoaded = true;
           }
-
-          closeModal('specialty-modal');
-          loadSpecialties(); // Recargar la lista
-        } catch (error) {
-          console.error('Error saving specialty:', error);
-          alert(
-            'Error al guardar la especialidad: ' +
-              (error.message || 'Error desconocido'),
-          );
-        }
       }
 
-      async function deleteSpecialty(specialtyId) {
-        if (
-          !confirm(
-            '¿Estás seguro de que deseas eliminar esta especialidad? Esta acción no se puede deshacer.',
-          )
-        ) {
-          return;
-        }
-
-        try {
-          await apiCall(`/specialties/${specialtyId}`, {
-            method: 'DELETE',
-          });
-          alert('Especialidad eliminada exitosamente');
-          loadSpecialties(); // Recargar la lista
-        } catch (error) {
-          console.error('Error deleting specialty:', error);
-          alert(
-            'Error al eliminar la especialidad: ' +
-              (error.message || 'Error desconocido'),
-          );
-        }
-      }
-
-      async function showSpecialtyDoctors(specialtyId, specialtyName) {
-        try {
-          const doctors = await apiCall(
-            `/dashboard/specialties/${specialtyId}/doctors`,
-          );
-
-          if (!doctors || doctors.length === 0) {
-            alert(
-              `La especialidad ${specialtyName} no tiene doctores asignados`,
-            );
-            return;
+      // Escuchar mensajes del iframe (opcional, para comunicación)
+      window.addEventListener('message', function(event) {
+          // Verificar que el mensaje viene del iframe de especialidades
+          const iframe = document.getElementById('specialties-crud-frame');
+          if (event.source === iframe?.contentWindow) {
+              console.log('📨 Mensaje recibido del iframe de especialidades:', event.data);
+              
+              // Puedes manejar diferentes tipos de mensajes aquí
+              switch(event.data.type) {
+                  case 'specialty-saved':
+                      console.log('✅ Especialidad guardada/actualizada');
+                      // Opcional: actualizar alguna estadística en el dashboard
+                      break;
+                  case 'specialty-deleted':
+                      console.log('🗑️ Especialidad eliminada');
+                      break;
+                  case 'error':
+                      console.error('❌ Error en especialidades:', event.data.message);
+                      break;
+              }
           }
-
-          // Aquí se podría abrir un modal mostrando los doctores
-          alert(
-            `${specialtyName} tiene ${doctors.length} doctor(es) asignado(s)`,
-          );
-        } catch (error) {
-          alert('Error al cargar doctores de la especialidad');
-        }
-      }
+      });
 
       // Doctors
       async function loadDoctors() {
