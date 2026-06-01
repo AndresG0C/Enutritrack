@@ -22,8 +22,8 @@ build/
 **/.terraform/*
 
 # Ignorar los archivos de estado (tienen datos sensibles)
-*.tfstate
-*.tfstate.*
+**/*.tfstate
+**/*.tfstate.backup
 
 # Archivos de log
 *.log
