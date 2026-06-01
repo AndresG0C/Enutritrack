@@ -504,7 +504,7 @@
         if (!token) throw new Error('No autenticado');
 
         // ✅ URL DIRECTA - sin window.parent.getBackendBaseUrl
-        const baseUrl = 'http://35.239.67.227:4000';
+        const baseUrl = 'http://localhost:4000';
         const url = `${baseUrl}${endpoint}`;
 
         console.log('🌐 Request:', options.method || 'GET', url);
@@ -688,7 +688,7 @@
           console.log('Specialty ID:', specialtyId);
 
           // ✅ URL DIRECTA - sin window.parent.getBackendBaseUrl
-          const baseUrl = 'http://35.239.67.227:4000';
+          const baseUrl = 'http://localhost:4000';
           const url = `${baseUrl}/specialties/${specialtyId}`;
           console.log('URL:', url);
 
