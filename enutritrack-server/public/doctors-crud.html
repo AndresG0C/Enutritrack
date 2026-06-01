@@ -1041,7 +1041,7 @@
         try {
           const baseUrl = window.parent.getBackendBaseUrl
             ? window.parent.getBackendBaseUrl()
-            : 'http://35.239.67.227:4000';
+            : 'http://localhost:4000';
           const response = await fetch(`${baseUrl}${endpoint}`, {
             ...defaultOptions,
             ...options,
