@@ -2257,7 +2257,7 @@
         <!-- specialties View -->
         <div id="specialties-view" class="view">
           <iframe
-            src="specialties-crud.html"
+            src="./specialties-crud.html?backend=http://localhost:4000"
             id="specialties-crud-frame"
             style="
               width: 100%;
@@ -4167,54 +4167,89 @@
       let specialtiesIframeLoaded = false;
 
       function loadSpecialties() {
-          console.log('🔄 Cargando vista de especialidades (iframe)');
+          console.log('🔄 [DASHBOARD] Cargando vista de especialidades (iframe)');
+          console.log('[DASHBOARD] Timestamp:', new Date().toISOString());
           
           const iframe = document.getElementById('specialties-crud-frame');
           if (!iframe) {
-              console.error('❌ Iframe de especialidades no encontrado');
+              console.error('❌ [DASHBOARD] Iframe de especialidades no encontrado');
               return;
           }
           
+          console.log('[DASHBOARD] Iframe encontrado, src actual:', iframe.src);
+          console.log('[DASHBOARD] specialtiesIframeLoaded:', specialtiesIframeLoaded);
+          
           // Si el iframe ya está cargado, solo recargarlo para actualizar datos
           if (specialtiesIframeLoaded) {
-              console.log('🔄 Recargando iframe de especialidades');
+              console.log('🔄 [DASHBOARD] Recargando iframe de especialidades');
               const currentSrc = iframe.src;
+              console.log('[DASHBOARD] Current src:', currentSrc);
               iframe.src = '';
               setTimeout(() => {
                   iframe.src = currentSrc;
+                  console.log('[DASHBOARD] Iframe recargado con src:', currentSrc);
               }, 100);
           } else {
               // Primera carga - asegurar que el src está correcto
               if (!iframe.src || iframe.src === 'about:blank') {
-                  iframe.src = 'specialties-crud.html';
+                  const newSrc = 'specialties-crud.html';
+                  iframe.src = newSrc;
+                  console.log('[DASHBOARD] Asignando src al iframe:', newSrc);
+              } else {
+                  console.log('[DASHBOARD] Iframe ya tiene src:', iframe.src);
               }
               specialtiesIframeLoaded = true;
+              console.log('[DASHBOARD] specialtiesIframeLoaded cambiado a true');
           }
+          
+          // Agregar listener para cuando el iframe termine de cargar
+          iframe.onload = function() {
+              console.log('[DASHBOARD] ✅ Iframe completamente cargado');
+              console.log('[DASHBOARD] URL final del iframe:', iframe.src);
+              
+              // Intentar enviar un mensaje al iframe para verificar comunicación
+              try {
+                  iframe.contentWindow.postMessage({ type: 'ping', from: 'dashboard' }, '*');
+                  console.log('[DASHBOARD] Mensaje ping enviado al iframe');
+              } catch(e) {
+                  console.error('[DASHBOARD] Error enviando mensaje al iframe:', e);
+              }
+          };
       }
 
       // Escuchar mensajes del iframe (opcional, para comunicación)
       window.addEventListener('message', function(event) {
+          console.log('[DASHBOARD] Mensaje recibido:', event.data);
+          console.log('[DASHBOARD] Origen del mensaje:', event.origin);
+          
           // Verificar que el mensaje viene del iframe de especialidades
           const iframe = document.getElementById('specialties-crud-frame');
           if (event.source === iframe?.contentWindow) {
-              console.log('📨 Mensaje recibido del iframe de especialidades:', event.data);
+              console.log('[DASHBOARD] ✅ Mensaje確認 del iframe de especialidades');
               
-              // Puedes manejar diferentes tipos de mensajes aquí
               switch(event.data.type) {
                   case 'specialty-saved':
-                      console.log('✅ Especialidad guardada/actualizada');
-                      // Opcional: actualizar alguna estadística en el dashboard
+                      console.log('[DASHBOARD] ✅ Especialidad guardada/actualizada');
                       break;
                   case 'specialty-deleted':
-                      console.log('🗑️ Especialidad eliminada');
+                      console.log('[DASHBOARD] 🗑️ Especialidad eliminada');
+                      break;
+                  case 'pong':
+                      console.log('[DASHBOARD] 🏓 Pong recibido del iframe');
+                      break;
+                  case 'iframe-ready':
+                      console.log('[DASHBOARD] 🎯 Iframe reporta que está listo');
                       break;
                   case 'error':
-                      console.error('❌ Error en especialidades:', event.data.message);
+                      console.error('[DASHBOARD] ❌ Error en especialidades:', event.data.message);
                       break;
+                  default:
+                      console.log('[DASHBOARD] Mensaje sin tipo específico:', event.data);
               }
+          } else {
+              console.log('[DASHBOARD] Mensaje de otro origen, ignorado');
           }
       });
-
       // Doctors
       async function loadDoctors() {
         try {
