@@ -41,7 +41,9 @@ async function bootstrap() {
       tryItOutEnabled: true,
     },
   });
-  await app.listen(3007);
+
+  const port = process.env.PORT || 3007;
+  await app.listen(port, '0.0.0.0');
   console.log('Doctor Service running on port 3007 (HTTP) and 3107 (TCP)');
 }
 bootstrap();

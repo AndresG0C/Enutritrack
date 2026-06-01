@@ -21,8 +21,10 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
+
+# Instalamos solo dependencias de producción
+RUN npm install --only=production
 
 # El Gateway suele exponer el puerto 3000 para recibir todo el tráfico externo
 EXPOSE 3000

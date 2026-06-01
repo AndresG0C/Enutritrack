@@ -17,3 +17,13 @@ build/
 
 # Cachés
 .cache/
+
+# Ignorar la carpeta oculta de Terraform
+**/.terraform/*
+
+# Ignorar los archivos de estado (tienen datos sensibles)
+*.tfstate
+*.tfstate.*
+
+# Archivos de log
+*.log

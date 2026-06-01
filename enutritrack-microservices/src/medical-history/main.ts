@@ -43,7 +43,8 @@ async function bootstrap() {
     },
   });
 
-  await app.listen(3002);
+  const port = process.env.PORT || 3002;
+  await app.listen(port, '0.0.0.0');
   console.log('Medical Service running on port 3002 (HTTP) and 3102 (TCP)');
 }
 bootstrap();

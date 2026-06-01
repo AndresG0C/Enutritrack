@@ -41,7 +41,9 @@ async function bootstrap() {
       tryItOutEnabled: true,
     },
   });
-  await app.listen(3003);
+
+  const port = process.env.PORT || 3003;
+  await app.listen(port, '0.0.0.0');
   console.log('Nutrition Service running on port 3003 (HTTP) and 3103 (TCP)');
 }
 bootstrap();

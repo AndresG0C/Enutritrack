@@ -11,6 +11,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DoctorModule } from './doctor/doctor.module';
 import { CitasMedicasModule } from './citas/citas-medicas.module';
 import { AlertsModule } from './alertas/alertas.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -19,11 +20,11 @@ import { AlertsModule } from './alertas/alertas.module';
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
-      port: 5433,
-      username: 'enutritrack',
-      password: 'enutritrack2024',
-      database: 'enutritrack',
+      host: process.env.DB_HOST || 'localhost',
+      port: parseInt(process.env.DB_PORT ?? '5433', 10),
+      username: process.env.DB_USER || 'enutritrack',
+      password: process.env.DB_PASSWORD || 'enutritrack2024',
+      database: process.env.DB_NAME || 'enutritrack',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: false, // Usar migraciones en lugar de sync
       migrations: ['src/migration/*.ts'],
@@ -39,5 +40,6 @@ import { AlertsModule } from './alertas/alertas.module';
     RecommendationModule,
     AlertsModule,
   ],
+  controllers: [AppController],
 })
-export class AppModule {}
+export class AppModule { }
