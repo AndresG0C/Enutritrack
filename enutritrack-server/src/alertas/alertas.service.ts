@@ -28,8 +28,7 @@ export class AlertasService {
         'tipo_alerta', 
         'tipo_alerta.categoria',
         'nivel_prioridad', 
-        'estado_alerta',
-        'recomendacion'
+        'estado_alerta'
       ],
       order: { fecha_deteccion: 'DESC' }
     });
@@ -44,8 +43,7 @@ export class AlertasService {
         'tipo_alerta', 
         'tipo_alerta.categoria',
         'nivel_prioridad', 
-        'estado_alerta',
-        'recomendacion'
+        'estado_alerta'
       ],
       order: { fecha_deteccion: 'DESC' }
     });
@@ -60,8 +58,7 @@ export class AlertasService {
         'tipo_alerta', 
         'tipo_alerta.categoria',
         'nivel_prioridad', 
-        'estado_alerta',
-        'recomendacion'
+        'estado_alerta'
       ],
       order: { fecha_deteccion: 'DESC' }
     });
@@ -78,7 +75,6 @@ export class AlertasService {
         'tipo_alerta.categoria',
         'nivel_prioridad', 
         'estado_alerta',
-        'recomendacion',
         'resuelta_por_doctor'
       ]
     });
