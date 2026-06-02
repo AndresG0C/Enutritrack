@@ -10,6 +10,6 @@ output "listener_arn" {
   value = aws_lb_listener.http.arn
 }
 
-output "target_group_frontend_arn" {
-  value = aws_lb_target_group.frontend.arn
+output "target_group_cms_arn" {
+  value = aws_lb_target_group.cms.arn
 }

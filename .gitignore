@@ -18,6 +18,10 @@ build/
 # Cachés
 .cache/
 
+# ============================================
+# TERRAFORM
+# ============================================
+
 # Ignorar la carpeta oculta de Terraform
 **/.terraform/*
 
@@ -25,5 +29,23 @@ build/
 **/*.tfstate
 **/*.tfstate.backup
 
-# Archivos de log
-*.log
+# Ignorar archivos de variables (CONTRAST PASSWORDS)
+**/*.tfvars
+**/*.tfvars.json
+
+# Ignorar archivos de plan (pueden contener secretos)
+**/*.tfplan
+
+# Ignorar overrides
+**/override.tf
+**/override.tf.json
+**_override.tf
+**_override.tf.json
+
+# Ignorar CLI config
+**/.terraformrc
+**/terraform.rc
+
+# Logs de crash
+crash.log
+crash.*.log

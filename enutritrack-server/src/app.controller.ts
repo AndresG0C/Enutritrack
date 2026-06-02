@@ -1,7 +1,7 @@
 // src/app.controller.ts
 import { Controller, Get, HttpCode } from '@nestjs/common';
 
-@Controller('health/health')
+@Controller('health/check')
 export class AppController {
     @Get()
     @HttpCode(200)
