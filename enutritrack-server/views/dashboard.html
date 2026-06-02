@@ -4343,6 +4343,39 @@
         }
       }
 
+      function loadAlerts() {
+          console.log('🔍🔍🔍 [DASHBOARD] loadAlerts INICIADA');
+          
+          const iframe = document.getElementById('alerts-crud-frame');
+          if (!iframe) {
+              console.error('❌ Iframe de alertas no encontrado');
+              return;
+          }
+          
+          console.log('[DASHBOARD] src actual del iframe:', iframe.src);
+          
+          // Si el src es el dashboard, forzar a alerts.html
+          if (iframe.src.includes('/auth/dashboard')) {
+              console.log('[DASHBOARD] Iframe apunta al dashboard, corrigiendo...');
+              iframe.src = '/alerts.html';
+              return;
+          }
+          
+          // Si el src ya es alerts.html, no hacer nada
+          if (iframe.src.includes('alerts.html')) {
+              console.log('[DASHBOARD] Iframe ya está en alerts.html, no recargo');
+              return;
+          }
+          
+          // Solo recargar si es necesario
+          const currentSrc = iframe.src;
+          iframe.src = '';
+          setTimeout(() => {
+              iframe.src = currentSrc;
+              console.log('[DASHBOARD] Iframe recargado');
+          }, 100);
+      }
+
       // Doctors
       async function loadDoctors() {
         try {

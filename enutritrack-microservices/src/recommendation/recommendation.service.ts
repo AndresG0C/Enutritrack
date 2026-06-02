@@ -3,6 +3,7 @@ import {
   Logger,
   NotFoundException,
   BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan } from 'typeorm';
@@ -21,7 +22,7 @@ import {
 @Injectable()
 export class RecommendationsService {
   private readonly logger = new Logger(RecommendationsService.name);
-  private ai: GoogleGenAI;
+  private ai: GoogleGenAI | null = null;
   private aiEnabled: boolean = false;
 
   constructor(
@@ -32,39 +33,49 @@ export class RecommendationsService {
     @InjectRepository(RecommendationData)
     private dataRepository: Repository<RecommendationData>,
   ) {
-    const apiKey = 'AIzaSyDLlWwK-6h36QBsnDrkipml89VspYDGALg';
-    if (apiKey) {
-      this.ai = new GoogleGenAI({ apiKey });
-      this.aiEnabled = true;
-      this.logger.log(
-        '✅ IA habilitada - Gemini API configurada con @google/genai',
+    this.initializeAI();
+  }
+
+  // ─────────────────────────────────────────────
+  //  INICIALIZACIÓN DE IA
+  // ─────────────────────────────────────────────
+
+  private initializeAI(): void {
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    if (!apiKey) {
+      this.logger.warn(
+        '⚠️  IA deshabilitada — GEMINI_API_KEY no está configurada en las variables de entorno.',
       );
-      this.testAIConnection();
-    } else {
-      this.logger.warn('❌ IA deshabilitada - GEMINI_API_KEY no configurada');
       this.aiEnabled = false;
+      return;
     }
+
+    this.ai = new GoogleGenAI({ apiKey });
+    this.aiEnabled = true;
+    this.logger.log('🔑 GEMINI_API_KEY detectada — probando conexión...');
+    this.testAIConnection();
   }
 
   private async testAIConnection(): Promise<void> {
-    if (!this.aiEnabled) return;
-
     try {
-      this.logger.log('🧪 Probando conexión con Gemini 2.5 Flash...');
-
-      const response = await this.ai.models.generateContent({
+      const response = await this.ai!.models.generateContent({
         model: 'gemini-2.5-flash',
-        contents: "Responde con 'OK' si la conexión funciona",
+        contents: "Responde únicamente con 'OK'",
       });
-
-      this.logger.log(`✅ Conexión exitosa: ${response.text}`);
+      this.logger.log(`✅ Conexión con Gemini exitosa: ${response.text?.trim()}`);
     } catch (error) {
-      this.logger.error(`❌ Error en conexión: ${error.message}`);
+      this.logger.error(
+        `❌ No se pudo conectar con Gemini: ${error.message}`,
+      );
       this.aiEnabled = false;
     }
   }
 
-  // ========== TIPOS DE RECOMENDACIÓN ==========
+  // ─────────────────────────────────────────────
+  //  TIPOS DE RECOMENDACIÓN
+  // ─────────────────────────────────────────────
+
   async createType(
     createTypeDto: CreateRecommendationTypeDto,
   ): Promise<RecommendationType> {
@@ -72,22 +83,18 @@ export class RecommendationsService {
       const type = this.typeRepository.create(createTypeDto);
       return await this.typeRepository.save(type);
     } catch (error) {
-      this.logger.error(`Error creating recommendation type: ${error.message}`);
+      this.logger.error(`Error al crear tipo de recomendación: ${error.message}`);
       throw new BadRequestException('Error al crear el tipo de recomendación');
     }
   }
 
   async findAllTypes(): Promise<RecommendationType[]> {
-    return this.typeRepository.find({
-      order: { nombre: 'ASC' },
-    });
+    return this.typeRepository.find({ order: { nombre: 'ASC' } });
   }
 
   async findTypeById(id: string): Promise<RecommendationType> {
     const type = await this.typeRepository.findOne({ where: { id } });
-    if (!type) {
-      throw new NotFoundException('Tipo de recomendación no encontrado');
-    }
+    if (!type) throw new NotFoundException('Tipo de recomendación no encontrado');
     return type;
   }
 
@@ -102,19 +109,20 @@ export class RecommendationsService {
 
   async deleteType(id: string): Promise<void> {
     const result = await this.typeRepository.delete(id);
-    if (result.affected === 0) {
+    if (result.affected === 0)
       throw new NotFoundException('Tipo de recomendación no encontrado');
-    }
   }
 
-  // ========== RECOMENDACIONES ==========
+  // ─────────────────────────────────────────────
+  //  RECOMENDACIONES
+  // ─────────────────────────────────────────────
 
   async create(createDto: CreateRecommendationDto): Promise<Recommendation> {
     try {
       const recommendation = this.recommendationRepository.create(createDto);
       return await this.recommendationRepository.save(recommendation);
     } catch (error) {
-      this.logger.error(`Error creating recommendation: ${error.message}`);
+      this.logger.error(`Error al crear recomendación: ${error.message}`);
       throw new BadRequestException('Error al crear la recomendación');
     }
   }
@@ -122,279 +130,130 @@ export class RecommendationsService {
   async createWithAI(
     createAIDto: CreateAIRecommendationDto,
   ): Promise<Recommendation> {
-    try {
-      const userData = await this.getUserDataForAI(createAIDto.usuario_id);
-      const recommendationType = await this.typeRepository.findOne({
-        where: { id: createAIDto.tipo_recomendacion_id },
-      });
-
-      if (!recommendationType) {
-        throw new NotFoundException('Tipo de recomendación no encontrado');
-      }
-
-      const aiContent = await this.generateAIContent(
-        recommendationType,
-        userData,
-        createAIDto.contexto_adicional,
+    // Verificar disponibilidad de IA antes de continuar
+    if (!this.aiEnabled) {
+      throw new InternalServerErrorException(
+        'El servicio de IA no está disponible. Verifica que GEMINI_API_KEY esté configurada correctamente.',
       );
-
-      const recommendation = this.recommendationRepository.create({
-        usuario_id: createAIDto.usuario_id,
-        tipo_recomendacion_id: createAIDto.tipo_recomendacion_id,
-        contenido: aiContent,
-        prioridad: createAIDto.prioridad || 'media',
-        vigencia_hasta:
-          createAIDto.vigencia_hasta ||
-          this.calculateDefaultExpiry(recommendationType.nombre),
-        activa: true,
-      });
-
-      return await this.recommendationRepository.save(recommendation);
-    } catch (error) {
-      this.logger.error(`Error creating AI recommendation: ${error.message}`);
-      return this.createFallbackRecommendation(createAIDto);
     }
+
+    const recommendationType = await this.typeRepository.findOne({
+      where: { id: createAIDto.tipo_recomendacion_id },
+    });
+
+    if (!recommendationType) {
+      throw new NotFoundException('Tipo de recomendación no encontrado');
+    }
+
+    const userData = await this.getUserData(createAIDto.usuario_id);
+
+    const aiContent = await this.generateAIContent(
+      recommendationType,
+      userData,
+      createAIDto.contexto_adicional,
+    );
+
+    const recommendation = this.recommendationRepository.create({
+      usuario_id: createAIDto.usuario_id,
+      tipo_recomendacion_id: createAIDto.tipo_recomendacion_id,
+      contenido: aiContent,
+      prioridad: createAIDto.prioridad ?? 'media',
+      vigencia_hasta:
+        createAIDto.vigencia_hasta ??
+        this.calculateDefaultExpiry(recommendationType.nombre),
+      activa: true,
+    });
+
+    return this.recommendationRepository.save(recommendation);
   }
+
+  // ─────────────────────────────────────────────
+  //  GENERACIÓN DE CONTENIDO CON IA
+  // ─────────────────────────────────────────────
 
   private async generateAIContent(
     type: RecommendationType,
     userData: any,
     additionalContext?: string,
   ): Promise<string> {
-    // Si la IA no está disponible, usar fallback inmediatamente
-    if (!this.aiEnabled) {
-      this.logger.log('IA no disponible, usando contenido de respaldo');
-      return this.getEnhancedFallbackContent(type, userData, additionalContext);
-    }
+    const prompt = this.buildPrompt(type, userData, additionalContext);
+
+    this.logger.log('🚀 Generando recomendación con Gemini 2.5 Flash...');
 
     try {
-      const prompt = this.buildAIPrompt(type, userData, additionalContext);
-
-      this.logger.log('🚀 Generando contenido con Gemini 2.5 Flash...');
-
-      const response = await this.ai.models.generateContent({
+      const response = await this.ai!.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: prompt,
       });
 
-      this.logger.log('✅ Contenido generado exitosamente con IA');
-      return response.text ?? '';
-    } catch (error) {
-      this.logger.error(`❌ Error en generación de IA: ${error.message}`);
+      const text = response.text?.trim();
 
-      // Información detallada para debugging
-      if (error.response) {
+      if (!text) {
+        throw new Error('Gemini devolvió una respuesta vacía');
+      }
+
+      this.logger.log('✅ Recomendación generada exitosamente por IA');
+      return text;
+    } catch (error) {
+      this.logger.error(`❌ Error al generar contenido con IA: ${error.message}`);
+
+      // Marcar IA como no disponible si el error es de autenticación/permisos
+      if (error?.status === 403 || error?.code === 403) {
+        this.aiEnabled = false;
         this.logger.error(
-          `Detalles del error: ${JSON.stringify(error.response.data)}`,
+          '🔒 IA deshabilitada por error de permisos (403). Verifica que la API key sea válida y tenga acceso a Gemini.',
         );
       }
 
-      return this.getEnhancedFallbackContent(type, userData, additionalContext);
+      throw new InternalServerErrorException(
+        `No se pudo generar la recomendación con IA: ${error.message}`,
+      );
     }
   }
 
-  private buildAIPrompt(
+  private buildPrompt(
     type: RecommendationType,
     userData: any,
     additionalContext?: string,
   ): string {
     return `
-Eres un asistente médico especializado en ${type.nombre}. 
-Genera una recomendación personalizada en español para el paciente.
+Eres un asistente médico especializado en ${type.nombre}.
+Genera una recomendación personalizada en español para el siguiente paciente.
 
 Datos del paciente:
 - Nombre: ${userData.nombre}
-- Edad: ${userData.edad}
+- Edad: ${userData.edad} años
 - Género: ${userData.genero}
 - Altura: ${userData.altura} cm
 - Peso actual: ${userData.peso_actual} kg
 - Objetivo de peso: ${userData.peso_objetivo} kg
 - Nivel de actividad: ${userData.nivel_actividad}
+${additionalContext ? `\nContexto adicional: ${additionalContext}` : ''}
 
-${additionalContext ? `Contexto adicional: ${additionalContext}` : ''}
-
-La recomendación debe ser:
-- Práctica y aplicable en la vida diaria
-- Basada en evidencia científica
-- Personalizada para este paciente específico
-- Clara y fácil de entender
+La recomendación debe:
+- Ser práctica y aplicable en la vida diaria
+- Estar basada en evidencia científica
+- Estar personalizada para este paciente
+- Ser clara y fácil de entender
 - Incluir consejos específicos y medibles
-- En español, con un tono profesional pero cercano
+- Usar un tono profesional pero cercano
 
 Formato de respuesta:
-- Comienza con un título descriptivo
+- Inicia con un título descriptivo
 - Organiza la información en secciones claras
-- Usa emojis relevantes para hacerlo más amigable
-- Incluye recomendaciones específicas, horarios si es necesario
-- Termina con recordatorios importantes
-
-Genera una recomendación completa y detallada:
-`;
+- Usa emojis relevantes
+- Incluye horarios o frecuencias cuando aplique
+- Finaliza con recordatorios importantes
+`.trim();
   }
 
-  private getEnhancedFallbackContent(
-    type: RecommendationType,
-    userData: any,
-    additionalContext?: string,
-  ): string {
-    const typeName = type.nombre.toLowerCase();
-    const userName = userData.nombre || 'Paciente';
-    const age = userData.edad || 'no especificada';
-    const weight = userData.peso_actual || 'no especificado';
-    const activity = userData.nivel_actividad || 'moderado';
+  // ─────────────────────────────────────────────
+  //  HELPERS
+  // ─────────────────────────────────────────────
 
-    const templates = {
-      nutrición: `
-🔸 **RECOMENDACIÓN NUTRICIONAL PERSONALIZADA** 🔸
-
-**Paciente:** ${userName}
-**Edad:** ${age} años
-**Peso actual:** ${weight} kg
-**Nivel de actividad:** ${activity}
-
-📋 **PLAN NUTRICIONAL RECOMENDADO:**
-
-🥗 **Desayuno (7:00 - 8:00 AM):**
-- 1 porción de proteína (huevos, yogur griego)
-- 1 porción de carbohidratos complejos (avena, pan integral)
-- 1 fruta fresca
-- Bebida sin azúcar (café, té, agua)
-
-🥗 **Almuerzo (12:00 - 1:00 PM):**
-- Ensalada verde con verduras variadas
-- 150g de proteína magra (pollo, pescado, legumbres)
-- 1 porción de carbohidratos (arroz integral, quinoa)
-- 1 cucharada de grasas saludables (aguacate, aceite de oliva)
-
-🥗 **Merienda (4:00 - 5:00 PM):**
-- Frutos secos (puñado de almendras o nueces)
-- 1 fruta o yogur natural
-
-🥗 **Cena (7:00 - 8:00 PM):**
-- Proteína ligera (pescado blanco, tofu)
-- Verduras al vapor o salteadas
-- Evitar carbohidratos pesados
-
-💧 **Hidratación:**
-- 8-10 vasos de agua al día
-- Limitar bebidas azucaradas
-- Infusiones naturales permitidas
-
-${additionalContext ? `\n⚡ **Consideraciones específicas:** ${additionalContext}` : ''}
-
-🎯 **OBJETIVOS SEMANALES:**
-- Mantener horarios consistentes
-- Incluir 5 porciones de frutas/verduras diarias
-- Limitar alimentos procesados
-- Controlar porciones
-
-⚠️ **CONSULTA PROFESIONAL:** Esta recomendación es general. Para un plan personalizado, consulta con un nutricionista.
-      `,
-
-      ejercicio: `
-🔸 **PLAN DE EJERCICIO PERSONALIZADO** 🔸
-
-**Paciente:** ${userName}
-**Edad:** ${age} años
-**Nivel de actividad:** ${activity}
-
-🏃 **RUTINA SEMANAL RECOMENDADA:**
-
-**Lunes - Cardio (30-45 minutos):**
-- Caminata rápida o trote suave
-- Ciclismo estático o natación
-- Estiramientos finales
-
-**Martes - Fuerza Superior (25-35 minutos):**
-- Flexiones de pecho (3 series x 10-15 repeticiones)
-- Fondos de tríceps (3 series x 12 repeticiones)
-- Plancha abdominal (3 series x 30 segundos)
-
-**Miércoles - Descanso Activo:**
-- Caminata ligera 20 minutos
-- Estiramientos suaves
-- Movilidad articular
-
-**Jueves - Cardio Intervalo (20-30 minutos):**
-- 1 minuto trote rápido + 2 minutos caminata
-- Repetir 8-10 veces
-- Enfriamiento progresivo
-
-**Viernes - Fuerza Inferior (25-35 minutos):**
-- Sentadillas (3 series x 15 repeticiones)
-- Zancadas (3 series x 12 por pierna)
-- Elevación de talones (3 series x 20 repeticiones)
-
-**Sábado - Actividad Recreativa:**
-- Natación, baile o senderismo
-- Deporte de preferencia
-- 45-60 minutos de disfrute
-
-**Domingo - Descanso Total:**
-- Recuperación muscular
-- Hidratación adecuada
-- Sueño reparador
-
-${additionalContext ? `\n⚡ **Consideraciones específicas:** ${additionalContext}` : ''}
-
-📊 **PARÁMETROS DE CONTROL:**
-- Frecuencia cardiaca en zona segura
-- Hidratación constante durante ejercicio
-- Progresión gradual de intensidad
-- Escuchar las señales del cuerpo
-
-⚠️ **PRECAUCIÓN:** Detener actividad ante dolor intenso. Consultar médico antes de iniciar nueva rutina.
-      `,
-
-      medical: `
-🔸 **RECOMENDACIONES GENERALES DE SALUD** 🔸
-
-**Paciente:** ${userName}
-**Edad:** ${age} años
-
-🏥 **CUIDADOS DE SALUD RECOMENDADOS:**
-
-📅 **Control Médico Regular:**
-- Chequeo anual completo
-- Control de presión arterial mensual
-- Exámenes de laboratorio según edad
-- Visita al dentista cada 6 meses
-
-💊 **Medicación y Suplementos:**
-- Tomar medicamentos según prescripción
-- No automedicarse
-- Consultar sobre suplementos vitamínicos
-- Mantener vacunación al día
-
-🛌 **Hábitos Saludables:**
-- Dormir 7-8 horas diarias
-- Manejar el estrés con técnicas de relajación
-- Mantener actividad social
-- Evitar tabaco y limitar alcohol
-
-${additionalContext ? `\n⚡ **Consideraciones específicas:** ${additionalContext}` : ''}
-
-🚨 **SEÑALES DE ALERTA - CONSULTAR MÉDICO:**
-- Dolor persistente
-- Fiebre alta prolongada
-- Cambios repentinos de peso
-- Síntomas inusuales o preocupantes
-
-🔍 **PREVENCIÓN:**
-- Estilo de vida saludable
-- Ejercicio regular
-- Alimentación balanceada
-- Revisiones periódicas
-
-⚠️ **IMPORTANTE:** Estas son recomendaciones generales. Consulte con su médico para atención personalizada.
-      `,
-    };
-
-    return templates[typeName] || templates.medical;
-  }
-
-  private async getUserDataForAI(userId: string): Promise<any> {
-    // En una implementación real, aquí buscarías los datos del usuario en la base de datos
+  private async getUserData(userId: string): Promise<any> {
+    // TODO: reemplazar con consulta real a la base de datos de usuarios
+    // Ejemplo: return this.usersService.findOne(userId);
     return {
       nombre: 'Paciente',
       edad: 35,
@@ -409,45 +268,20 @@ ${additionalContext ? `\n⚡ **Consideraciones específicas:** ${additionalConte
   private calculateDefaultExpiry(typeName: string): Date {
     const expiry = new Date();
     const type = typeName.toLowerCase();
-    if (type.includes('nutrition') || type.includes('nutrición'))
+    if (type.includes('nutrición') || type.includes('nutrition'))
       expiry.setDate(expiry.getDate() + 30);
-    else if (type.includes('exercise') || type.includes('ejercicio'))
+    else if (type.includes('ejercicio') || type.includes('exercise'))
       expiry.setDate(expiry.getDate() + 14);
-    else if (type.includes('medical') || type.includes('salud'))
+    else if (type.includes('salud') || type.includes('medical'))
       expiry.setDate(expiry.getDate() + 90);
-    else expiry.setDate(expiry.getDate() + 7);
+    else
+      expiry.setDate(expiry.getDate() + 7);
     return expiry;
   }
 
-  private async createFallbackRecommendation(
-    createAIDto: CreateAIRecommendationDto,
-  ): Promise<Recommendation> {
-    const type = await this.typeRepository.findOne({
-      where: { id: createAIDto.tipo_recomendacion_id },
-    });
-
-    if (!type) {
-      throw new NotFoundException('Tipo de recomendación no encontrado');
-    }
-
-    const userData = await this.getUserDataForAI(createAIDto.usuario_id);
-    const fallbackContent = this.getEnhancedFallbackContent(
-      type,
-      userData,
-      createAIDto.contexto_adicional,
-    );
-
-    return this.create({
-      usuario_id: createAIDto.usuario_id,
-      tipo_recomendacion_id: createAIDto.tipo_recomendacion_id,
-      contenido: fallbackContent,
-      prioridad: createAIDto.prioridad || 'media',
-      vigencia_hasta:
-        createAIDto.vigencia_hasta || this.calculateDefaultExpiry(type.nombre),
-      activa: true,
-      is_ai_generated: false,
-    } as CreateRecommendationDto);
-  }
+  // ─────────────────────────────────────────────
+  //  CRUD DE RECOMENDACIONES
+  // ─────────────────────────────────────────────
 
   async findAllByUser(
     userId: string,
@@ -458,7 +292,6 @@ ${additionalContext ? `\n⚡ **Consideraciones específicas:** ${additionalConte
       where.activa = true;
       where.vigencia_hasta = MoreThan(new Date());
     }
-
     return this.recommendationRepository.find({
       where,
       relations: ['tipo_recomendacion', 'datos'],
@@ -483,11 +316,8 @@ ${additionalContext ? `\n⚡ **Consideraciones específicas:** ${additionalConte
       where: { id },
       relations: ['tipo_recomendacion', 'datos'],
     });
-
-    if (!recommendation) {
+    if (!recommendation)
       throw new NotFoundException('Recomendación no encontrada');
-    }
-
     return recommendation;
   }
 
@@ -508,13 +338,8 @@ ${additionalContext ? `\n⚡ **Consideraciones específicas:** ${additionalConte
 
   async delete(id: string): Promise<void> {
     const result = await this.recommendationRepository.delete(id);
-    if (result.affected === 0) {
+    if (result.affected === 0)
       throw new NotFoundException('Recomendación no encontrada');
-    }
-  }
-
-  async getRecommendationTypes(): Promise<RecommendationType[]> {
-    return this.typeRepository.find({ order: { nombre: 'ASC' } });
   }
 
   async addRecommendationData(
@@ -532,47 +357,47 @@ ${additionalContext ? `\n⚡ **Consideraciones específicas:** ${additionalConte
     return this.dataRepository.save(data);
   }
 
-  // Nuevo método para diagnóstico de IA
+  // ─────────────────────────────────────────────
+  //  DIAGNÓSTICO
+  // ─────────────────────────────────────────────
+
   async healthCheck() {
-    const startTime = Date.now();
-    const uptime = Math.floor((Date.now() - startTime) / 1000);
-
-    const aiStatus = this.aiEnabled ? 'connected' : 'disabled';
-
     return {
       status: 'online',
       timestamp: new Date().toISOString(),
-      uptime: uptime,
       service: process.env.SERVICE_NAME || 'Microservicio de recomendaciones',
       version: process.env.APP_VERSION || '1.2.0',
       ai: {
-        status: aiStatus,
+        status: this.aiEnabled ? 'connected' : 'disabled',
         provider: 'Google Gemini',
         model: 'gemini-2.5-flash',
+        message: this.aiEnabled
+          ? 'IA operativa'
+          : 'IA no disponible — verifica GEMINI_API_KEY en las variables de entorno',
       },
     };
   }
 
-  // Método para probar la IA
   async testAI(): Promise<any> {
     if (!this.aiEnabled) {
       return {
         status: 'disabled',
-        message: 'IA no está habilitada. Verifica GEMINI_API_KEY',
+        message:
+          'IA no está habilitada. Verifica que GEMINI_API_KEY esté definida en las variables de entorno.',
+        timestamp: new Date().toISOString(),
       };
     }
 
     try {
-      const response = await this.ai.models.generateContent({
+      const response = await this.ai!.models.generateContent({
         model: 'gemini-2.5-flash',
-        contents:
-          'Responde con un breve mensaje confirmando que la IA está funcionando correctamente.',
+        contents: 'Confirma brevemente que la IA está funcionando.',
       });
 
       return {
         status: 'success',
         message: 'Conexión con Gemini 2.5 Flash exitosa',
-        response: response.text,
+        response: response.text?.trim(),
         timestamp: new Date().toISOString(),
       };
     } catch (error) {
