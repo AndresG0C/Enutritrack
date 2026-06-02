@@ -62,7 +62,7 @@ variable "db_password" {
 variable "db_instance_class" {
   description = "Tipo de instancia para RDS"
   type        = string
-  default     = "db.t3.micro"
+  default     = "db.t2.micro"
 }
 
 variable "db_allocated_storage" {
@@ -78,7 +78,7 @@ variable "db_allocated_storage" {
 variable "couchbase_instance_type" {
   description = "Tipo de instancia EC2 para Couchbase"
   type        = string
-  default     = "t3.medium"
+  default     = "t2.medium"
 }
 
 variable "assign_couchbase_eip" {

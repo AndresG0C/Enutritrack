@@ -17,7 +17,7 @@ db_username = "enutritrack"
 db_password = "enutritrack2024"
 
 # Couchbase
-couchbase_instance_type = "t3.medium"
+couchbase_instance_type = "t2.medium"
 assign_couchbase_eip    = true
 
 # ECS

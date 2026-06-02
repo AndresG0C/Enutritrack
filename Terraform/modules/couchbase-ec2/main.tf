@@ -46,6 +46,13 @@ resource "aws_instance" "couchbase" {
     }
   }
 
+  lifecycle {
+    ignore_changes = [
+      ami,       # Ignorar cambios de AMI (evita recreación innecesaria)
+      user_data, # Ignorar cambios en user_data después del primer deploy
+    ]
+  }
+
   tags = {
     Project     = var.project_name
     Environment = var.environment
