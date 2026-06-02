@@ -24,53 +24,56 @@ resource "aws_cloudwatch_dashboard" "main" {
 
   dashboard_body = jsonencode({
     widgets = [
+      # Widget 1: ECS CPU
       {
         type = "metric"
         properties = {
           metrics = [
-            ["AWS/ECS", "CPUUtilization", "ServiceName", var.ecs_service_name, "ClusterName", var.cluster_name],
+            ["AWS/ECS", "CPUUtilization", "ServiceName", var.ecs_service_name, "ClusterName", var.cluster_name]
+          ]
+          period = 300
+          stat   = "Average"
+          region = var.aws_region
+          title  = "ECS CPU Usage"
+        }
+      },
+      # Widget 2: ECS Memory
+      {
+        type = "metric"
+        properties = {
+          metrics = [
             ["AWS/ECS", "MemoryUtilization", "ServiceName", var.ecs_service_name, "ClusterName", var.cluster_name]
           ]
           period = 300
           stat   = "Average"
           region = var.aws_region
-          title  = "ECS CPU & Memory Usage"
+          title  = "ECS Memory Usage"
         }
       },
+      # Widget 3: RDS Connections
       {
         type = "metric"
         properties = {
           metrics = [
-            ["AWS/RDS", "DatabaseConnections", "DBInstanceIdentifier", var.rds_identifier],
-            ["AWS/RDS", "CPUUtilization", "DBInstanceIdentifier", var.rds_identifier]
+            ["AWS/RDS", "DatabaseConnections", "DBInstanceIdentifier", var.rds_identifier]
           ]
           period = 300
           stat   = "Average"
-          title  = "RDS Metrics"
-        }
-      },
-      {
-        type = "metric"
-        properties = {
-          metrics = [
-            ["AWS/ElastiCache", "CPUUtilization", "CacheClusterId", var.redis_cluster_id],
-            ["AWS/ElastiCache", "CurrConnections", "CacheClusterId", var.redis_cluster_id]
-          ]
-          period = 300
-          stat   = "Average"
-          title  = "Redis Metrics"
-        }
-      },
-      {
-        type = "log"
-        properties = {
-          title  = "ECS Error Logs"
           region = var.aws_region
-          query  = "fields @timestamp, @message | filter @logStream like /ecs/ | filter @message like /(?i)(error|exception|fail)/ | sort @timestamp desc | limit 50"
-          time_range = {
-            from = "-1h"
-            to   = "now"
-          }
+          title  = "RDS Connections"
+        }
+      },
+      # Widget 4: Redis CPU
+      {
+        type = "metric"
+        properties = {
+          metrics = [
+            ["AWS/ElastiCache", "CPUUtilization", "CacheClusterId", var.redis_cluster_id]
+          ]
+          period = 300
+          stat   = "Average"
+          region = var.aws_region
+          title  = "Redis CPU"
         }
       }
     ]

@@ -142,10 +142,12 @@ locals {
 module "task_definition_frontend" {
   source = "./modules/ecs/task-definition"
 
+  depends_on = [terraform_data.deploy]
+
   project_name       = var.project_name
   service_name       = "enutritrack-client"
   image              = "${module.ecr.repository_urls["enutritrack-client"]}:latest"
-  container_port     = 5174
+  container_port     = 80
   cpu                = "256"
   memory             = "512"
   execution_role_arn = module.iam.labrole_arn
@@ -166,7 +168,7 @@ module "ecs_service_frontend" {
   enable_alb          = true
   target_group_arn    = module.alb_frontend.target_group_frontend_arn
   container_name      = "enutritrack-client"
-  container_port      = 5174
+  container_port      = 80
 }
 
 # ===========================================
@@ -174,6 +176,8 @@ module "ecs_service_frontend" {
 # ===========================================
 module "task_definition_cms" {
   source = "./modules/ecs/task-definition"
+
+  depends_on = [terraform_data.deploy, module.rds]
 
   project_name       = var.project_name
   service_name       = "enutritrack-server-cms"
@@ -210,6 +214,8 @@ module "ecs_service_cms" {
 module "task_definition_auth" {
   source = "./modules/ecs/task-definition"
 
+  depends_on = [terraform_data.deploy]
+
   project_name       = var.project_name
   service_name       = "enutritrack-microservices-auth"
   image              = "${module.ecr.repository_urls["enutritrack-microservices-auth"]}:latest"
@@ -239,6 +245,8 @@ module "ecs_service_auth" {
 # Users (puerto 3002)
 module "task_definition_users" {
   source = "./modules/ecs/task-definition"
+
+  depends_on = [terraform_data.deploy]
 
   project_name       = var.project_name
   service_name       = "enutritrack-microservices-users"
@@ -270,6 +278,8 @@ module "ecs_service_users" {
 module "task_definition_doctor" {
   source = "./modules/ecs/task-definition"
 
+  depends_on = [terraform_data.deploy]
+
   project_name       = var.project_name
   service_name       = "enutritrack-microservices-doctor"
   image              = "${module.ecr.repository_urls["enutritrack-microservices-doctor"]}:latest"
@@ -299,6 +309,8 @@ module "ecs_service_doctor" {
 # Nutrition (puerto 3004)
 module "task_definition_nutrition" {
   source = "./modules/ecs/task-definition"
+
+  depends_on = [terraform_data.deploy]
 
   project_name       = var.project_name
   service_name       = "enutritrack-microservices-nutrition"
@@ -330,6 +342,8 @@ module "ecs_service_nutrition" {
 module "task_definition_activity" {
   source = "./modules/ecs/task-definition"
 
+  depends_on = [terraform_data.deploy]
+
   project_name       = var.project_name
   service_name       = "enutritrack-microservices-activity"
   image              = "${module.ecr.repository_urls["enutritrack-microservices-activity"]}:latest"
@@ -359,6 +373,8 @@ module "ecs_service_activity" {
 # Recommendation (puerto 3006)
 module "task_definition_recommendation" {
   source = "./modules/ecs/task-definition"
+
+  depends_on = [terraform_data.deploy]
 
   project_name       = var.project_name
   service_name       = "enutritrack-microservices-recommendation"
@@ -390,6 +406,8 @@ module "ecs_service_recommendation" {
 module "task_definition_medical_history" {
   source = "./modules/ecs/task-definition"
 
+  depends_on = [terraform_data.deploy]
+
   project_name       = var.project_name
   service_name       = "enutritrack-microservices-medical-history"
   image              = "${module.ecr.repository_urls["enutritrack-microservices-medical-history"]}:latest"
@@ -420,6 +438,8 @@ module "ecs_service_medical_history" {
 module "task_definition_alertas" {
   source = "./modules/ecs/task-definition"
 
+  depends_on = [terraform_data.deploy]
+
   project_name       = var.project_name
   service_name       = "enutritrack-microservices-alertas"
   image              = "${module.ecr.repository_urls["enutritrack-microservices-alertas"]}:latest"
@@ -449,6 +469,8 @@ module "ecs_service_alertas" {
 # Citas (puerto 3009)
 module "task_definition_citas" {
   source = "./modules/ecs/task-definition"
+
+  depends_on = [terraform_data.deploy]
 
   project_name       = var.project_name
   service_name       = "enutritrack-microservices-citas"
@@ -581,4 +603,30 @@ module "cloudwatch" {
   ecs_services     = var.repositories
   rds_identifier   = module.rds.rds_address
   redis_cluster_id = "${var.project_name}-redis-${var.environment}"
+}
+
+#############################################
+# EJECUTAR SCRIPT COMPLETO (subir imágenes + SQL)
+#############################################
+
+resource "terraform_data" "deploy" {
+  depends_on = [
+    module.ecr,
+    module.rds,
+    module.ecs_cluster,
+    module.alb_frontend,
+    module.alb_cms
+  ]
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      echo "========================================="
+      echo "Ejecutando script de despliegue completo..."
+      echo "========================================="
+      powershell -ExecutionPolicy Bypass -File "${path.cwd}/../upload-all.ps1" -Action all
+      echo "========================================="
+      echo "✅ Despliegue completado"
+      echo "========================================="
+    EOT
+  }
 }

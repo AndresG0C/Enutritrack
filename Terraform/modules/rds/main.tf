@@ -20,10 +20,10 @@ resource "aws_db_parameter_group" "this" {
   name   = "${var.project_name}-pg-5433"
   family = "postgres15"
 
-  parameter {
-    name  = "port"
-    value = "5433"
-  }
+  # parameter {
+  #   name  = "port"
+  #   value = "5433"
+  # }
 
   tags = {
     Name = "${var.project_name}-pg-5433"
@@ -38,7 +38,7 @@ resource "aws_db_instance" "this" {
   identifier = "${var.project_name}-postgres-${var.environment}"
 
   engine         = "postgres"
-  engine_version = "15.5"
+  engine_version = "15.10"
   instance_class = var.instance_class
 
   db_name  = var.db_name

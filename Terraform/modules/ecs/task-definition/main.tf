@@ -15,7 +15,7 @@ resource "aws_ecs_task_definition" "this" {
   task_role_arn      = var.task_role_arn
 
   container_definitions = templatefile(
-    "${path.module}/../../templates/task-definition.json.tpl",
+    "${path.root}/templates/task-definition.json.tpl",
     {
       service_name   = var.service_name
       image          = var.image
