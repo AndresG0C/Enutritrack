@@ -24,4 +24,4 @@ COPY --from=builder /app/dist ./dist
 
 EXPOSE 3005
 
-CMD ["node", "dist/src/activity/main.js"]
+CMD ["node", "dist/main.js"]

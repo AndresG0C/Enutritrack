@@ -1,7 +1,6 @@
 -- public.alimentos definition
 
 -- Drop table
-
 -- DROP TABLE public.alimentos;
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

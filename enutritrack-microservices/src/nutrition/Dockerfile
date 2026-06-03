@@ -24,4 +24,4 @@ COPY --from=builder /app/dist ./dist
 
 EXPOSE 3003
 
-CMD ["node", "dist/src/nutrition/main.js"]
+CMD ["node", "dist/main.js"]

@@ -24,4 +24,4 @@ COPY --from=builder /app/dist ./dist
 
 EXPOSE 3008
 
-CMD ["node", "dist/src/citas/main.js"]
+CMD ["node", "dist/main.js"]

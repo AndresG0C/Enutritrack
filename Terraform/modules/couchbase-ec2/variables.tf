@@ -7,7 +7,13 @@ variable "environment" {
 }
 
 variable "private_subnets" {
-  type = list(string)
+  type    = list(string)
+  default = []
+}
+
+variable "public_subnets" {
+  type    = list(string)
+  default = []
 }
 
 variable "security_group_id" {
@@ -54,4 +60,10 @@ variable "iam_instance_profile_name" {
 variable "assign_eip" {
   type    = bool
   default = false
+}
+
+variable "key_name" {
+  description = "Nombre de la key pair para SSH"
+  type        = string
+  default     = null
 }

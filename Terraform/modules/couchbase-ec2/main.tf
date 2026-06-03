@@ -1,4 +1,3 @@
-
 #############################################
 # COUCHBASE EC2 INSTANCE
 #############################################
@@ -22,10 +21,13 @@ resource "aws_instance" "couchbase" {
   ami           = data.aws_ami.amazon_linux_2.id
   instance_type = var.instance_type
 
-  subnet_id              = var.private_subnets[0]
+  # Usar public_subnets si se proporciona (para IP pública), si no usar private_subnets
+  subnet_id = length(var.public_subnets) > 0 ? var.public_subnets[0] : var.private_subnets[0]
+
   vpc_security_group_ids = [var.security_group_id]
 
-  associate_public_ip_address = false
+  associate_public_ip_address = length(var.public_subnets) > 0 ? true : false
+  key_name                    = var.key_name
 
   user_data = templatefile("${path.module}/user-data.sh", {
     cluster_name = var.cluster_name

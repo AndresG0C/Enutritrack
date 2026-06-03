@@ -1,4 +1,4 @@
-# --- ETAPA 1: Compilación del Gateway ---
+# --- BUILD STAGE ---
 FROM node:20-alpine AS builder
 WORKDIR /app
 
@@ -7,26 +7,21 @@ RUN npm install --legacy-peer-deps
 
 COPY . .
 
-# Compilar el Gateway (NestJS compilará el main.ts de la raíz)
-RUN npm run build
+RUN npm run build -- gateway
 
-# Limpiar dependencias de desarrollo
+# opcional pero recomendado
 RUN npm prune --production
 
-
-# --- ETAPA 2: Ejecución ---
+# --- RUN STAGE ---
 FROM node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 
 COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 
-# Instalamos solo dependencias de producción
-RUN npm install --only=production
-
-# El Gateway suele exponer el puerto 3000 para recibir todo el tráfico externo
 EXPOSE 3000
 
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/src/main.js"]

@@ -76,11 +76,12 @@ module "couchbase" {
   project_name      = var.project_name
   environment       = var.environment
   private_subnets   = module.vpc.private_subnets
+  public_subnets    = module.vpc.public_subnets
   security_group_id = module.security_groups.couchbase_sg_id
   instance_type     = var.couchbase_instance_type
   assign_eip        = var.assign_couchbase_eip
+  key_name          = aws_key_pair.couchbase_key.key_name
 }
-
 #############################################
 # ALB - FRONTEND
 #############################################
@@ -126,6 +127,7 @@ locals {
     { name = "DB_NAME", value = module.rds.rds_db_name },
     { name = "DB_USER", value = module.rds.rds_username },
     { name = "DB_PASSWORD", value = var.db_password },
+    { name = "DB_SSL", value = "require" },
     { name = "REDIS_HOST", value = module.redis.redis_endpoint },
     { name = "REDIS_PORT", value = tostring(module.redis.redis_port) },
     { name = "COUCHBASE_HOST", value = module.couchbase.couchbase_private_ip },
@@ -141,8 +143,6 @@ locals {
 # ===========================================
 module "task_definition_frontend" {
   source = "./modules/ecs/task-definition"
-
-  depends_on = [terraform_data.deploy]
 
   project_name       = var.project_name
   service_name       = "enutritrack-client"
@@ -177,8 +177,6 @@ module "ecs_service_frontend" {
 module "task_definition_cms" {
   source = "./modules/ecs/task-definition"
 
-  depends_on = [terraform_data.deploy, module.rds]
-
   project_name       = var.project_name
   service_name       = "enutritrack-server-cms"
   image              = "${module.ecr.repository_urls["enutritrack-server-cms"]}:latest"
@@ -210,11 +208,39 @@ module "ecs_service_cms" {
 # 3. MICROSERVICIOS - INTERNOS (sin ALB)
 # ===========================================
 
+# Gateway (puerto 3000)
+module "task_definition_gateway" {
+  source = "./modules/ecs/task-definition"
+
+  project_name       = var.project_name
+  service_name       = "enutritrack-microservices-gateway"
+  image              = "${module.ecr.repository_urls["enutritrack-microservices-gateway"]}:latest"
+  container_port     = 3000
+  cpu                = "256"
+  memory             = "512"
+  execution_role_arn = module.iam.labrole_arn
+  task_role_arn      = module.iam.labrole_arn
+  env_vars           = local.common_env_vars
+}
+
+module "ecs_service_gateway" {
+  source = "./modules/ecs/service"
+
+  project_name        = var.project_name
+  service_name        = "enutritrack-microservices-gateway"
+  cluster_id          = module.ecs_cluster.cluster_id
+  task_definition_arn = module.task_definition_gateway.task_definition_arn
+  desired_count       = var.desired_count
+  subnet_ids          = module.vpc.private_subnets
+  security_group_ids  = [module.security_groups.ecs_sg_id]
+  enable_alb          = false # o true si necesita ALB
+  container_name      = "enutritrack-microservices-gateway"
+  container_port      = 3000
+}
+
 # Auth (puerto 3001)
 module "task_definition_auth" {
   source = "./modules/ecs/task-definition"
-
-  depends_on = [terraform_data.deploy]
 
   project_name       = var.project_name
   service_name       = "enutritrack-microservices-auth"
@@ -246,8 +272,6 @@ module "ecs_service_auth" {
 module "task_definition_users" {
   source = "./modules/ecs/task-definition"
 
-  depends_on = [terraform_data.deploy]
-
   project_name       = var.project_name
   service_name       = "enutritrack-microservices-users"
   image              = "${module.ecr.repository_urls["enutritrack-microservices-users"]}:latest"
@@ -277,8 +301,6 @@ module "ecs_service_users" {
 # Doctor (puerto 3003)
 module "task_definition_doctor" {
   source = "./modules/ecs/task-definition"
-
-  depends_on = [terraform_data.deploy]
 
   project_name       = var.project_name
   service_name       = "enutritrack-microservices-doctor"
@@ -310,8 +332,6 @@ module "ecs_service_doctor" {
 module "task_definition_nutrition" {
   source = "./modules/ecs/task-definition"
 
-  depends_on = [terraform_data.deploy]
-
   project_name       = var.project_name
   service_name       = "enutritrack-microservices-nutrition"
   image              = "${module.ecr.repository_urls["enutritrack-microservices-nutrition"]}:latest"
@@ -341,8 +361,6 @@ module "ecs_service_nutrition" {
 # Activity (puerto 3005)
 module "task_definition_activity" {
   source = "./modules/ecs/task-definition"
-
-  depends_on = [terraform_data.deploy]
 
   project_name       = var.project_name
   service_name       = "enutritrack-microservices-activity"
@@ -374,8 +392,6 @@ module "ecs_service_activity" {
 module "task_definition_recommendation" {
   source = "./modules/ecs/task-definition"
 
-  depends_on = [terraform_data.deploy]
-
   project_name       = var.project_name
   service_name       = "enutritrack-microservices-recommendation"
   image              = "${module.ecr.repository_urls["enutritrack-microservices-recommendation"]}:latest"
@@ -405,8 +421,6 @@ module "ecs_service_recommendation" {
 # Medical History (puerto 3007)
 module "task_definition_medical_history" {
   source = "./modules/ecs/task-definition"
-
-  depends_on = [terraform_data.deploy]
 
   project_name       = var.project_name
   service_name       = "enutritrack-microservices-medical-history"
@@ -438,8 +452,6 @@ module "ecs_service_medical_history" {
 module "task_definition_alertas" {
   source = "./modules/ecs/task-definition"
 
-  depends_on = [terraform_data.deploy]
-
   project_name       = var.project_name
   service_name       = "enutritrack-microservices-alertas"
   image              = "${module.ecr.repository_urls["enutritrack-microservices-alertas"]}:latest"
@@ -469,8 +481,6 @@ module "ecs_service_alertas" {
 # Citas (puerto 3009)
 module "task_definition_citas" {
   source = "./modules/ecs/task-definition"
-
-  depends_on = [terraform_data.deploy]
 
   project_name       = var.project_name
   service_name       = "enutritrack-microservices-citas"
@@ -606,27 +616,114 @@ module "cloudwatch" {
 }
 
 #############################################
-# EJECUTAR SCRIPT COMPLETO (subir imágenes + SQL)
+# SECURITY GROUP PARA EC2 TEMPORAL (SSH)
 #############################################
 
-resource "terraform_data" "deploy" {
-  depends_on = [
-    module.ecr,
-    module.rds,
-    module.ecs_cluster,
-    module.alb_frontend,
-    module.alb_cms
-  ]
+resource "aws_security_group" "temp_ssh" {
+  name        = "${var.project_name}-temp-ssh-sg"
+  description = "Security group for temporary EC2 (SSH access)"
+  vpc_id      = module.vpc.vpc_id
 
-  provisioner "local-exec" {
-    command = <<-EOT
-      echo "========================================="
-      echo "Ejecutando script de despliegue completo..."
-      echo "========================================="
-      powershell -ExecutionPolicy Bypass -File "${path.cwd}/../upload-all.ps1" -Action all
-      echo "========================================="
-      echo "✅ Despliegue completado"
-      echo "========================================="
-    EOT
+  ingress {
+    description = "SSH from my IP"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # Solo tu IP
   }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.project_name}-temp-ssh-sg"
+  }
+}
+
+#############################################
+# GENERAR KEY PAIR PARA SSH (SOLO PARA EC2 TEMPORAL)
+#############################################
+
+resource "tls_private_key" "temp_key" {
+  algorithm = "RSA"
+  rsa_bits  = 2048
+}
+
+resource "aws_key_pair" "temp_key" {
+  key_name   = "temp-key"
+  public_key = tls_private_key.temp_key.public_key_openssh
+}
+
+resource "local_file" "temp_private_key" {
+  content  = tls_private_key.temp_key.private_key_pem
+  filename = "${path.cwd}/temp-key.pem"
+}
+
+#############################################
+# EC2 PUBLICA TEMPORAL PARA EJECUTAR SCRIPTS SQL
+#############################################
+
+data "aws_ami" "amazon_linux_2_temp" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
+resource "aws_instance" "temp_sql_runner" {
+  ami                         = data.aws_ami.amazon_linux_2_temp.id
+  instance_type               = "t3.nano"
+  subnet_id                   = module.vpc.public_subnets[0]
+  vpc_security_group_ids      = [aws_security_group.temp_ssh.id]
+  associate_public_ip_address = true
+  key_name                    = aws_key_pair.temp_key.key_name
+
+  tags = {
+    Name = "${var.project_name}-temp-sql-runner"
+  }
+}
+
+output "temp_sql_runner_public_ip" {
+  value = aws_instance.temp_sql_runner.public_ip
+}
+
+resource "aws_security_group_rule" "rds_allow_temp" {
+  type                     = "ingress"
+  from_port                = 5433
+  to_port                  = 5433
+  protocol                 = "tcp"
+  security_group_id        = module.security_groups.rds_sg_id
+  source_security_group_id = aws_security_group.temp_ssh.id
+}
+
+
+#############################################
+# GENERAR KEY PAIR PARA COUCHBASE
+#############################################
+
+resource "tls_private_key" "couchbase_key" {
+  algorithm = "RSA"
+  rsa_bits  = 2048
+}
+
+resource "aws_key_pair" "couchbase_key" {
+  key_name   = "couchbase-key"
+  public_key = tls_private_key.couchbase_key.public_key_openssh
+}
+
+resource "local_file" "couchbase_private_key" {
+  content  = tls_private_key.couchbase_key.private_key_pem
+  filename = "${path.cwd}/couchbase-key.pem"
 }

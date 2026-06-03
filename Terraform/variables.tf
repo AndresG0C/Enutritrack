@@ -33,7 +33,6 @@ variable "vpc_cidr" {
 variable "admin_ip" {
   description = "Tu IP pública para acceder a Couchbase UI (ej: 190.242.30.60)"
   type        = string
-  default     = "0.0.0.0"
 }
 
 #############################################
@@ -113,6 +112,7 @@ variable "repositories" {
   default = [
     "enutritrack-client",
     "enutritrack-server-cms",
+    "enutritrack-microservices-gateway",
     "enutritrack-microservices-auth",
     "enutritrack-microservices-users",
     "enutritrack-microservices-doctor",

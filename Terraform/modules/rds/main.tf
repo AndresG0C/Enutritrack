@@ -20,10 +20,10 @@ resource "aws_db_parameter_group" "this" {
   name   = "${var.project_name}-pg-5433"
   family = "postgres15"
 
-  # parameter {
-  #   name  = "port"
-  #   value = "5433"
-  # }
+  parameter {
+    name  = "rds.force_ssl"
+    value = "0" # 0 = no forzar SSL, 1 = forzar SSL
+  }
 
   tags = {
     Name = "${var.project_name}-pg-5433"

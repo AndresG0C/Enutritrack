@@ -20,13 +20,14 @@ import { AppController } from './app.controller';
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.DB_HOST || 'localhost',
+      host: process.env.DB_HOST ?? 'localhost',
       port: parseInt(process.env.DB_PORT ?? '5433', 10),
-      username: process.env.DB_USER || 'enutritrack',
-      password: process.env.DB_PASSWORD || 'enutritrack2024',
-      database: process.env.DB_NAME || 'enutritrack',
+      username: process.env.DB_USER ?? 'enutritrack',      // ✅ Usar variable
+      password: process.env.DB_PASSWORD ?? 'enutritrack2024', // ✅ Usar variable
+      database: process.env.DB_NAME ?? 'enutritrack',      // ✅ Usar variable
+      ssl: process.env.DB_SSL === 'require' ? { rejectUnauthorized: false } : false, // ✅ AGREGAR SSL
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: false, // Usar migraciones en lugar de sync
+      synchronize: false,
       migrations: ['src/migration/*.ts'],
       autoLoadEntities: true,
     }),

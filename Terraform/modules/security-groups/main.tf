@@ -140,7 +140,6 @@ resource "aws_security_group" "redis" {
 
 #############################################
 # SECURITY GROUP: COUCHBASE (EC2)
-# Admin restringido + servicios desde ECS
 #############################################
 
 resource "aws_security_group" "couchbase" {
@@ -148,25 +147,42 @@ resource "aws_security_group" "couchbase" {
   description = "Security group for Couchbase EC2"
   vpc_id      = var.vpc_id
 
-  # UI Admin (solo tu IP)
+  ##################################################
+  # SSH - SOLO TU IP
+  ##################################################
+  ingress {
+    description = "SSH from admin IP"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ##################################################
+  # ADMIN UI - SOLO TU IP
+  ##################################################
   ingress {
     description = "Couchbase Admin UI"
     from_port   = 8091
     to_port     = 8091
     protocol    = "tcp"
-    cidr_blocks = ["${var.admin_ip}/32"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Query Service (N1QL) - desde ECS
+  ##################################################
+  # CLUSTER MANAGER - ECS
+  ##################################################
   ingress {
-    description     = "Couchbase Query from ECS"
-    from_port       = 8093
-    to_port         = 8093
+    description     = "Couchbase Cluster Manager from ECS"
+    from_port       = 8091
+    to_port         = 8091
     protocol        = "tcp"
     security_groups = [aws_security_group.ecs.id]
   }
 
-  # Views / Indexes - desde ECS
+  ##################################################
+  # VIEWS / INDEX
+  ##################################################
   ingress {
     description     = "Couchbase Views from ECS"
     from_port       = 8092
@@ -175,7 +191,20 @@ resource "aws_security_group" "couchbase" {
     security_groups = [aws_security_group.ecs.id]
   }
 
-  # Search - desde ECS
+  ##################################################
+  # QUERY (N1QL)
+  ##################################################
+  ingress {
+    description     = "Couchbase Query from ECS"
+    from_port       = 8093
+    to_port         = 8093
+    protocol        = "tcp"
+    security_groups = [aws_security_group.ecs.id]
+  }
+
+  ##################################################
+  # SEARCH (FTS)
+  ##################################################
   ingress {
     description     = "Couchbase Search from ECS"
     from_port       = 8094
@@ -184,15 +213,20 @@ resource "aws_security_group" "couchbase" {
     security_groups = [aws_security_group.ecs.id]
   }
 
-  # Data port (SDK) - desde ECS
+  ##################################################
+  # DATA SERVICE (SDK)
+  ##################################################
   ingress {
-    description     = "Couchbase Data from ECS"
+    description     = "Couchbase Data Service from ECS"
     from_port       = 11210
     to_port         = 11210
     protocol        = "tcp"
     security_groups = [aws_security_group.ecs.id]
   }
 
+  ##################################################
+  # SALIDA
+  ##################################################
   egress {
     from_port   = 0
     to_port     = 0

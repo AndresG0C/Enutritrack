@@ -24,4 +24,4 @@ COPY --from=builder /app/dist ./dist
 
 EXPOSE 3009
 
-CMD ["node", "dist/src/alertas/main.js"]
+CMD ["node", "dist/main.js"]

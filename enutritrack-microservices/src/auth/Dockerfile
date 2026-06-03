@@ -24,4 +24,4 @@ COPY --from=builder /app/dist ./dist
 
 EXPOSE 3004
 
-CMD ["node", "dist/src/auth/main.js"]
+CMD ["node", "dist/main.js"]

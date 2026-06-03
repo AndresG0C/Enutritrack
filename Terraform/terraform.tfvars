@@ -6,7 +6,7 @@ project_name = "enutritrack"
 environment  = "dev"
 
 # IP de administración para Couchbase UI
-admin_ip = "190.242.30.60" # CAMBIA POR TU IP REAL
+admin_ip = "186.169.55.241/32" # CAMBIA POR TU IP REAL
 
 # Networking
 vpc_cidr = "10.0.0.0/16"
@@ -17,7 +17,7 @@ db_username = "enutritrack"
 db_password = "enutritrack2024"
 
 # Couchbase
-couchbase_instance_type = "t2.medium"
+couchbase_instance_type = "t3.large"
 assign_couchbase_eip    = true
 
 # ECS
@@ -28,6 +28,7 @@ desired_count = 1
 repositories = [
   "enutritrack-client",
   "enutritrack-server-cms",
+  "enutritrack-microservices-gateway",
   "enutritrack-microservices-auth",
   "enutritrack-microservices-users",
   "enutritrack-microservices-doctor",
