@@ -11,6 +11,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DoctorModule } from './doctor/doctor.module';
 import { CitasMedicasModule } from './citas/citas-medicas.module';
 import { AlertsModule } from './alertas/alertas.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -19,13 +20,14 @@ import { AlertsModule } from './alertas/alertas.module';
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
-      port: 5433,
-      username: 'enutritrack',
-      password: 'enutritrack2024',
-      database: 'enutritrack',
+      host: process.env.DB_HOST ?? 'localhost',
+      port: parseInt(process.env.DB_PORT ?? '5433', 10),
+      username: process.env.DB_USER ?? 'enutritrack',      // ✅ Usar variable
+      password: process.env.DB_PASSWORD ?? 'enutritrack2024', // ✅ Usar variable
+      database: process.env.DB_NAME ?? 'enutritrack',      // ✅ Usar variable
+      ssl: process.env.DB_SSL === 'require' ? { rejectUnauthorized: false } : false, // ✅ AGREGAR SSL
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: false, // Usar migraciones en lugar de sync
+      synchronize: false,
       migrations: ['src/migration/*.ts'],
       autoLoadEntities: true,
     }),
@@ -39,5 +41,6 @@ import { AlertsModule } from './alertas/alertas.module';
     RecommendationModule,
     AlertsModule,
   ],
+  controllers: [AppController],
 })
-export class AppModule {}
+export class AppModule { }

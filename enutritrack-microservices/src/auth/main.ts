@@ -44,7 +44,9 @@ async function bootstrap() {
       tryItOutEnabled: true,
     },
   });
-  await app.listen(3004);
+
+  const port = process.env.PORT || 3004;
+  await app.listen(port, '0.0.0.0');
   console.log(
     'Authenticated Service running on port 3004 (HTTP) and 3104 (TCP)',
   );

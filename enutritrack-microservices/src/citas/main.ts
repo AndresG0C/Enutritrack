@@ -43,7 +43,8 @@ async function bootstrap() {
     },
   });
 
-  await app.listen(3008);
+  const port = process.env.PORT || 3008;
+  await app.listen(port, '0.0.0.0');
   console.log('Citas Service running on port 3008 (HTTP) and 3108 (TCP)');
 }
 bootstrap();

@@ -9,13 +9,14 @@ export class CouchbaseService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit() {
     try {
-      this.cluster = await couchbase.connect(
-        process.env.COUCHBASE_URL || 'couchbase://localhost',
-        {
-          username: process.env.COUCHBASE_USERNAME || 'Admin',
-          password: process.env.COUCHBASE_PASSWORD || 'admin123',
-        },
-      );
+      const host = process.env.COUCHBASE_HOST || 'localhost';
+      // const port = process.env.COUCHBASE_PORT || '8091';
+      const connectionString = `couchbase://${host}`;
+
+      this.cluster = await couchbase.connect(connectionString, {
+        username: process.env.COUCHBASE_USERNAME || 'Admin',
+        password: process.env.COUCHBASE_PASSWORD || 'admin123',
+      });
 
       this.bucket = this.cluster.bucket(
         process.env.COUCHBASE_BUCKET || 'enutritrack',
