@@ -295,7 +295,7 @@ const DashboardHeader = ({ user }) => {
             darkMode ? "text-white" : "text-gray-900"
           } mb-2`}
         >
-          {getTimeBasedGreeting()}, Dr. {user.nombre.split(" ")[0]}
+          {getTimeBasedGreeting()}, {user.nombre.split(" ")[0]}
         </h1>
         <div className="flex items-center space-x-6">
           <p
@@ -1559,7 +1559,7 @@ const Sidebar = ({
                   darkMode ? "text-white" : "text-gray-900"
                 } truncate`}
               >
-                Dr. {user.nombre}
+               {user.nombre}
               </p>
               <p
                 className={`text-xs ${
@@ -1661,7 +1661,7 @@ const Header = ({ onToggleSidebar, user, onLogout }) => {
                       darkMode ? "text-white" : "text-gray-900"
                     }`}
                   >
-                    Dr. {user.nombre.split(" ")[0]}
+                   {user.nombre.split(" ")[0]}
                   </p>
                   <p
                     className={`text-xs ${
@@ -1700,7 +1700,7 @@ const Header = ({ onToggleSidebar, user, onLogout }) => {
                         darkMode ? "text-white" : "text-gray-900"
                       }`}
                     >
-                      Dr. {user?.nombre}
+                     {user?.nombre}
                     </p>
                     <p
                       className={`text-xs ${
