@@ -64,6 +64,7 @@
     "couchbase": "^4.5.0",
     "generative-ai": "^0.1.4",
     "js2xmlparser": "^5.0.0",
+    "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "pg": "^8.16.3",

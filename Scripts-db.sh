@@ -25,6 +25,7 @@ sudo amazon-linux-extras install postgresql14 -y
 cd C:\ENUTRITRACK\enutritrack\terraform
 terraform output temp_sql_runner_public_ip
 
+
 scp -i temp-key.pem ../enutritrack-server/scripts/init-db.sql ec2-user@<DIR IP>:/tmp/init-db.sql
 scp -i temp-key.pem ../enutritrack-server/scripts/stored-procedures.sql ec2-user@<DIR IP>:/tmp/stored-procedures.sql
 
@@ -45,7 +46,7 @@ PGPASSWORD="enutritrack2024" psql "sslmode=require host=enutritrack-postgres-dev
 # ============================================
 cd C:\ENUTRITRACK\enutritrack\terraform
 
-terraform apply -replace="module.ecs_service_cms.aws_ecs_service.this" -replace="module.ecs_service_gateway.aws_ecs_service.this" -replace="module.ecs_service_auth.aws_ecs_service.this" -replace="module.ecs_service_users.aws_ecs_service.this" -replace="module.ecs_service_doctor.aws_ecs_service.this" -replace="module.ecs_service_nutrition.aws_ecs_service.this" -replace="module.ecs_service_activity.aws_ecs_service.this" -replace="module.ecs_service_recommendation.aws_ecs_service.this" -replace="module.ecs_service_medical_history.aws_ecs_service.this" -replace="module.ecs_service_alertas.aws_ecs_service.this" -replace="module.ecs_service_citas.aws_ecs_service.this" -auto-approve
+terraform apply -replace="module.ecs_service_cms.aws_ecs_service.this" -replace="module.ecs_service_auth.aws_ecs_service.this" -replace="module.ecs_service_users.aws_ecs_service.this" -replace="module.ecs_service_doctor.aws_ecs_service.this" -replace="module.ecs_service_nutrition.aws_ecs_service.this" -replace="module.ecs_service_activity.aws_ecs_service.this" -replace="module.ecs_service_recommendation.aws_ecs_service.this" -replace="module.ecs_service_medical_history.aws_ecs_service.this" -replace="module.ecs_service_alertas.aws_ecs_service.this" -replace="module.ecs_service_citas.aws_ecs_service.this" -auto-approve
 
 # ============================================
 # 8. VERIFICAR HEALTH CHECKS

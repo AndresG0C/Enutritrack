@@ -112,7 +112,6 @@ variable "repositories" {
   default = [
     "enutritrack-client",
     "enutritrack-server-cms",
-    "enutritrack-microservices-gateway",
     "enutritrack-microservices-auth",
     "enutritrack-microservices-users",
     "enutritrack-microservices-doctor",

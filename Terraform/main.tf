@@ -10,14 +10,41 @@ module "vpc" {
 }
 
 #############################################
-# SECURITY GROUPS
+# ALB - MICROSERVICIOS (PRIMERO - para obtener su SG ID)
+#############################################
+module "alb_microservices" {
+  source = "./modules/alb-microservices"
+
+  project_name            = var.project_name
+  environment             = var.environment
+  vpc_id                  = module.vpc.vpc_id
+  public_subnets          = module.vpc.public_subnets
+  allowed_security_groups = [] # Temporal, se actualizará después
+}
+
+#############################################
+# SECURITY GROUPS (AHORA RECIBE EL SG DEL ALB MICROSERVICIOS)
 #############################################
 module "security_groups" {
   source = "./modules/security-groups"
 
-  project_name = var.project_name
-  vpc_id       = module.vpc.vpc_id
-  admin_ip     = var.admin_ip
+  project_name            = var.project_name
+  vpc_id                  = module.vpc.vpc_id
+  admin_ip                = var.admin_ip
+  alb_microservices_sg_id = module.alb_microservices.alb_sg_id
+}
+
+#############################################
+# ACTUALIZAR ALB MICROSERVICIOS CON EL SG DE FRONTEND/CMS
+#############################################
+resource "aws_security_group_rule" "allow_from_alb_sg" {
+  type                     = "ingress"
+  from_port                = 80
+  to_port                  = 80
+  protocol                 = "tcp"
+  security_group_id        = module.alb_microservices.alb_sg_id
+  source_security_group_id = module.security_groups.alb_sg_id
+  description              = "HTTP from Frontend and CMS ALBs"
 }
 
 #############################################
@@ -82,6 +109,7 @@ module "couchbase" {
   assign_eip        = var.assign_couchbase_eip
   key_name          = aws_key_pair.couchbase_key.key_name
 }
+
 #############################################
 # ALB - FRONTEND
 #############################################
@@ -134,12 +162,24 @@ locals {
     { name = "COUCHBASE_PORT", value = "8091" },
     { name = "COUCHBASE_USERNAME", value = "Admin" },
     { name = "COUCHBASE_PASSWORD", value = "admin123" },
-    { name = "COUCHBASE_BUCKET", value = "enutritrack" }
+    { name = "COUCHBASE_BUCKET", value = "enutritrack" },
+
+    # URLs de microservicios
+    { name = "MICROSERVICES_BASE_URL", value = "http://${module.alb_microservices.alb_dns_name}" },
+    { name = "USERS_SERVICE_URL", value = "http://${module.alb_microservices.alb_dns_name}/users" },
+    { name = "MEDICAL_HISTORY_SERVICE_URL", value = "http://${module.alb_microservices.alb_dns_name}/medical-history" },
+    { name = "NUTRITION_SERVICE_URL", value = "http://${module.alb_microservices.alb_dns_name}/nutrition" },
+    { name = "AUTH_SERVICE_URL", value = "http://${module.alb_microservices.alb_dns_name}/auth" },
+    { name = "ACTIVITY_SERVICE_URL", value = "http://${module.alb_microservices.alb_dns_name}/activity" },
+    { name = "RECOMMENDATION_SERVICE_URL", value = "http://${module.alb_microservices.alb_dns_name}/recommendation" },
+    { name = "DOCTOR_SERVICE_URL", value = "http://${module.alb_microservices.alb_dns_name}/doctor" },
+    { name = "CITAS_SERVICE_URL", value = "http://${module.alb_microservices.alb_dns_name}/citas" },
+    { name = "ALERTAS_SERVICE_URL", value = "http://${module.alb_microservices.alb_dns_name}/alertas" }
   ]
 }
 
 # ===========================================
-# 1. FRONTEND - Expuesto al ALB Frontend (puerto 5174)
+# 1. FRONTEND - Expuesto al ALB Frontend
 # ===========================================
 module "task_definition_frontend" {
   source = "./modules/ecs/task-definition"
@@ -152,7 +192,9 @@ module "task_definition_frontend" {
   memory             = "512"
   execution_role_arn = module.iam.labrole_arn
   task_role_arn      = module.iam.labrole_arn
-  env_vars           = local.common_env_vars
+  env_vars = concat(local.common_env_vars, [
+    { name = "BACKEND_URL", value = module.alb_microservices.alb_dns_name }
+  ])
 }
 
 module "ecs_service_frontend" {
@@ -172,7 +214,7 @@ module "ecs_service_frontend" {
 }
 
 # ===========================================
-# 2. CMS - Expuesto al ALB CMS (puerto 4000)
+# 2. CMS - Expuesto al ALB CMS
 # ===========================================
 module "task_definition_cms" {
   source = "./modules/ecs/task-definition"
@@ -205,77 +247,17 @@ module "ecs_service_cms" {
 }
 
 # ===========================================
-# 3. MICROSERVICIOS - INTERNOS (sin ALB)
+# 3. MICROSERVICIOS
 # ===========================================
 
-# Gateway (puerto 3000)
-module "task_definition_gateway" {
-  source = "./modules/ecs/task-definition"
-
-  project_name       = var.project_name
-  service_name       = "enutritrack-microservices-gateway"
-  image              = "${module.ecr.repository_urls["enutritrack-microservices-gateway"]}:latest"
-  container_port     = 3000
-  cpu                = "256"
-  memory             = "512"
-  execution_role_arn = module.iam.labrole_arn
-  task_role_arn      = module.iam.labrole_arn
-  env_vars           = local.common_env_vars
-}
-
-module "ecs_service_gateway" {
-  source = "./modules/ecs/service"
-
-  project_name        = var.project_name
-  service_name        = "enutritrack-microservices-gateway"
-  cluster_id          = module.ecs_cluster.cluster_id
-  task_definition_arn = module.task_definition_gateway.task_definition_arn
-  desired_count       = var.desired_count
-  subnet_ids          = module.vpc.private_subnets
-  security_group_ids  = [module.security_groups.ecs_sg_id]
-  enable_alb          = false # o true si necesita ALB
-  container_name      = "enutritrack-microservices-gateway"
-  container_port      = 3000
-}
-
-# Auth (puerto 3001)
-module "task_definition_auth" {
-  source = "./modules/ecs/task-definition"
-
-  project_name       = var.project_name
-  service_name       = "enutritrack-microservices-auth"
-  image              = "${module.ecr.repository_urls["enutritrack-microservices-auth"]}:latest"
-  container_port     = 3001
-  cpu                = "256"
-  memory             = "512"
-  execution_role_arn = module.iam.labrole_arn
-  task_role_arn      = module.iam.labrole_arn
-  env_vars           = local.common_env_vars
-}
-
-module "ecs_service_auth" {
-  source = "./modules/ecs/service"
-
-  project_name        = var.project_name
-  service_name        = "enutritrack-microservices-auth"
-  cluster_id          = module.ecs_cluster.cluster_id
-  task_definition_arn = module.task_definition_auth.task_definition_arn
-  desired_count       = var.desired_count
-  subnet_ids          = module.vpc.private_subnets
-  security_group_ids  = [module.security_groups.ecs_sg_id]
-  enable_alb          = false
-  container_name      = "enutritrack-microservices-auth"
-  container_port      = 3001
-}
-
-# Users (puerto 3002)
+# Users (puerto 3001)
 module "task_definition_users" {
   source = "./modules/ecs/task-definition"
 
   project_name       = var.project_name
   service_name       = "enutritrack-microservices-users"
   image              = "${module.ecr.repository_urls["enutritrack-microservices-users"]}:latest"
-  container_port     = 3002
+  container_port     = 3001
   cpu                = "256"
   memory             = "512"
   execution_role_arn = module.iam.labrole_arn
@@ -293,19 +275,20 @@ module "ecs_service_users" {
   desired_count       = var.desired_count
   subnet_ids          = module.vpc.private_subnets
   security_group_ids  = [module.security_groups.ecs_sg_id]
-  enable_alb          = false
+  enable_alb          = true
+  target_group_arn    = module.alb_microservices.users_target_group_arn
   container_name      = "enutritrack-microservices-users"
-  container_port      = 3002
+  container_port      = 3001
 }
 
-# Doctor (puerto 3003)
-module "task_definition_doctor" {
+# Medical History (puerto 3002)
+module "task_definition_medical_history" {
   source = "./modules/ecs/task-definition"
 
   project_name       = var.project_name
-  service_name       = "enutritrack-microservices-doctor"
-  image              = "${module.ecr.repository_urls["enutritrack-microservices-doctor"]}:latest"
-  container_port     = 3003
+  service_name       = "enutritrack-microservices-medical-history"
+  image              = "${module.ecr.repository_urls["enutritrack-microservices-medical-history"]}:latest"
+  container_port     = 3002
   cpu                = "256"
   memory             = "512"
   execution_role_arn = module.iam.labrole_arn
@@ -313,29 +296,30 @@ module "task_definition_doctor" {
   env_vars           = local.common_env_vars
 }
 
-module "ecs_service_doctor" {
+module "ecs_service_medical_history" {
   source = "./modules/ecs/service"
 
   project_name        = var.project_name
-  service_name        = "enutritrack-microservices-doctor"
+  service_name        = "enutritrack-microservices-medical-history"
   cluster_id          = module.ecs_cluster.cluster_id
-  task_definition_arn = module.task_definition_doctor.task_definition_arn
+  task_definition_arn = module.task_definition_medical_history.task_definition_arn
   desired_count       = var.desired_count
   subnet_ids          = module.vpc.private_subnets
   security_group_ids  = [module.security_groups.ecs_sg_id]
-  enable_alb          = false
-  container_name      = "enutritrack-microservices-doctor"
-  container_port      = 3003
+  enable_alb          = true
+  target_group_arn    = module.alb_microservices.medical_history_target_group_arn
+  container_name      = "enutritrack-microservices-medical-history"
+  container_port      = 3002
 }
 
-# Nutrition (puerto 3004)
+# Nutrition (puerto 3003)
 module "task_definition_nutrition" {
   source = "./modules/ecs/task-definition"
 
   project_name       = var.project_name
   service_name       = "enutritrack-microservices-nutrition"
   image              = "${module.ecr.repository_urls["enutritrack-microservices-nutrition"]}:latest"
-  container_port     = 3004
+  container_port     = 3003
   cpu                = "256"
   memory             = "512"
   execution_role_arn = module.iam.labrole_arn
@@ -353,8 +337,40 @@ module "ecs_service_nutrition" {
   desired_count       = var.desired_count
   subnet_ids          = module.vpc.private_subnets
   security_group_ids  = [module.security_groups.ecs_sg_id]
-  enable_alb          = false
+  enable_alb          = true
+  target_group_arn    = module.alb_microservices.nutrition_target_group_arn
   container_name      = "enutritrack-microservices-nutrition"
+  container_port      = 3003
+}
+
+# Auth (puerto 3004)
+module "task_definition_auth" {
+  source = "./modules/ecs/task-definition"
+
+  project_name       = var.project_name
+  service_name       = "enutritrack-microservices-auth"
+  image              = "${module.ecr.repository_urls["enutritrack-microservices-auth"]}:latest"
+  container_port     = 3004
+  cpu                = "256"
+  memory             = "512"
+  execution_role_arn = module.iam.labrole_arn
+  task_role_arn      = module.iam.labrole_arn
+  env_vars           = local.common_env_vars
+}
+
+module "ecs_service_auth" {
+  source = "./modules/ecs/service"
+
+  project_name        = var.project_name
+  service_name        = "enutritrack-microservices-auth"
+  cluster_id          = module.ecs_cluster.cluster_id
+  task_definition_arn = module.task_definition_auth.task_definition_arn
+  desired_count       = var.desired_count
+  subnet_ids          = module.vpc.private_subnets
+  security_group_ids  = [module.security_groups.ecs_sg_id]
+  enable_alb          = true
+  target_group_arn    = module.alb_microservices.auth_target_group_arn
+  container_name      = "enutritrack-microservices-auth"
   container_port      = 3004
 }
 
@@ -383,7 +399,8 @@ module "ecs_service_activity" {
   desired_count       = var.desired_count
   subnet_ids          = module.vpc.private_subnets
   security_group_ids  = [module.security_groups.ecs_sg_id]
-  enable_alb          = false
+  enable_alb          = true
+  target_group_arn    = module.alb_microservices.activity_target_group_arn
   container_name      = "enutritrack-microservices-activity"
   container_port      = 3005
 }
@@ -413,18 +430,19 @@ module "ecs_service_recommendation" {
   desired_count       = var.desired_count
   subnet_ids          = module.vpc.private_subnets
   security_group_ids  = [module.security_groups.ecs_sg_id]
-  enable_alb          = false
+  enable_alb          = true
+  target_group_arn    = module.alb_microservices.recommendation_target_group_arn
   container_name      = "enutritrack-microservices-recommendation"
   container_port      = 3006
 }
 
-# Medical History (puerto 3007)
-module "task_definition_medical_history" {
+# Doctor (puerto 3007)
+module "task_definition_doctor" {
   source = "./modules/ecs/task-definition"
 
   project_name       = var.project_name
-  service_name       = "enutritrack-microservices-medical-history"
-  image              = "${module.ecr.repository_urls["enutritrack-microservices-medical-history"]}:latest"
+  service_name       = "enutritrack-microservices-doctor"
+  image              = "${module.ecr.repository_urls["enutritrack-microservices-doctor"]}:latest"
   container_port     = 3007
   cpu                = "256"
   memory             = "512"
@@ -433,59 +451,30 @@ module "task_definition_medical_history" {
   env_vars           = local.common_env_vars
 }
 
-module "ecs_service_medical_history" {
+module "ecs_service_doctor" {
   source = "./modules/ecs/service"
 
   project_name        = var.project_name
-  service_name        = "enutritrack-microservices-medical-history"
+  service_name        = "enutritrack-microservices-doctor"
   cluster_id          = module.ecs_cluster.cluster_id
-  task_definition_arn = module.task_definition_medical_history.task_definition_arn
+  task_definition_arn = module.task_definition_doctor.task_definition_arn
   desired_count       = var.desired_count
   subnet_ids          = module.vpc.private_subnets
   security_group_ids  = [module.security_groups.ecs_sg_id]
-  enable_alb          = false
-  container_name      = "enutritrack-microservices-medical-history"
+  enable_alb          = true
+  target_group_arn    = module.alb_microservices.doctor_target_group_arn
+  container_name      = "enutritrack-microservices-doctor"
   container_port      = 3007
 }
 
-# Alertas (puerto 3008)
-module "task_definition_alertas" {
-  source = "./modules/ecs/task-definition"
-
-  project_name       = var.project_name
-  service_name       = "enutritrack-microservices-alertas"
-  image              = "${module.ecr.repository_urls["enutritrack-microservices-alertas"]}:latest"
-  container_port     = 3008
-  cpu                = "256"
-  memory             = "512"
-  execution_role_arn = module.iam.labrole_arn
-  task_role_arn      = module.iam.labrole_arn
-  env_vars           = local.common_env_vars
-}
-
-module "ecs_service_alertas" {
-  source = "./modules/ecs/service"
-
-  project_name        = var.project_name
-  service_name        = "enutritrack-microservices-alertas"
-  cluster_id          = module.ecs_cluster.cluster_id
-  task_definition_arn = module.task_definition_alertas.task_definition_arn
-  desired_count       = var.desired_count
-  subnet_ids          = module.vpc.private_subnets
-  security_group_ids  = [module.security_groups.ecs_sg_id]
-  enable_alb          = false
-  container_name      = "enutritrack-microservices-alertas"
-  container_port      = 3008
-}
-
-# Citas (puerto 3009)
+# Citas (puerto 3008)
 module "task_definition_citas" {
   source = "./modules/ecs/task-definition"
 
   project_name       = var.project_name
   service_name       = "enutritrack-microservices-citas"
   image              = "${module.ecr.repository_urls["enutritrack-microservices-citas"]}:latest"
-  container_port     = 3009
+  container_port     = 3008
   cpu                = "256"
   memory             = "512"
   execution_role_arn = module.iam.labrole_arn
@@ -503,8 +492,40 @@ module "ecs_service_citas" {
   desired_count       = var.desired_count
   subnet_ids          = module.vpc.private_subnets
   security_group_ids  = [module.security_groups.ecs_sg_id]
-  enable_alb          = false
+  enable_alb          = true
+  target_group_arn    = module.alb_microservices.citas_target_group_arn
   container_name      = "enutritrack-microservices-citas"
+  container_port      = 3008
+}
+
+# Alertas (puerto 3009)
+module "task_definition_alertas" {
+  source = "./modules/ecs/task-definition"
+
+  project_name       = var.project_name
+  service_name       = "enutritrack-microservices-alertas"
+  image              = "${module.ecr.repository_urls["enutritrack-microservices-alertas"]}:latest"
+  container_port     = 3009
+  cpu                = "256"
+  memory             = "512"
+  execution_role_arn = module.iam.labrole_arn
+  task_role_arn      = module.iam.labrole_arn
+  env_vars           = local.common_env_vars
+}
+
+module "ecs_service_alertas" {
+  source = "./modules/ecs/service"
+
+  project_name        = var.project_name
+  service_name        = "enutritrack-microservices-alertas"
+  cluster_id          = module.ecs_cluster.cluster_id
+  task_definition_arn = module.task_definition_alertas.task_definition_arn
+  desired_count       = var.desired_count
+  subnet_ids          = module.vpc.private_subnets
+  security_group_ids  = [module.security_groups.ecs_sg_id]
+  enable_alb          = true
+  target_group_arn    = module.alb_microservices.alertas_target_group_arn
+  container_name      = "enutritrack-microservices-alertas"
   container_port      = 3009
 }
 
@@ -512,90 +533,68 @@ module "ecs_service_citas" {
 # AUTO SCALING
 # ===========================================
 
-# Frontend
 module "autoscaling_frontend" {
-  source = "./modules/autoscaling"
-
+  source       = "./modules/autoscaling"
   cluster_name = module.ecs_cluster.cluster_name
   service_name = module.ecs_service_frontend.service_name
 }
 
-# CMS
 module "autoscaling_cms" {
-  source = "./modules/autoscaling"
-
+  source       = "./modules/autoscaling"
   cluster_name = module.ecs_cluster.cluster_name
   service_name = module.ecs_service_cms.service_name
 }
 
-# Auth
 module "autoscaling_auth" {
-  source = "./modules/autoscaling"
-
+  source       = "./modules/autoscaling"
   cluster_name = module.ecs_cluster.cluster_name
   service_name = module.ecs_service_auth.service_name
 }
 
-# Users
 module "autoscaling_users" {
-  source = "./modules/autoscaling"
-
+  source       = "./modules/autoscaling"
   cluster_name = module.ecs_cluster.cluster_name
   service_name = module.ecs_service_users.service_name
 }
 
-# Doctor
 module "autoscaling_doctor" {
-  source = "./modules/autoscaling"
-
+  source       = "./modules/autoscaling"
   cluster_name = module.ecs_cluster.cluster_name
   service_name = module.ecs_service_doctor.service_name
 }
 
-# Nutrition
 module "autoscaling_nutrition" {
-  source = "./modules/autoscaling"
-
+  source       = "./modules/autoscaling"
   cluster_name = module.ecs_cluster.cluster_name
   service_name = module.ecs_service_nutrition.service_name
 }
 
-# Activity
 module "autoscaling_activity" {
-  source = "./modules/autoscaling"
-
+  source       = "./modules/autoscaling"
   cluster_name = module.ecs_cluster.cluster_name
   service_name = module.ecs_service_activity.service_name
 }
 
-# Recommendation
 module "autoscaling_recommendation" {
-  source = "./modules/autoscaling"
-
+  source       = "./modules/autoscaling"
   cluster_name = module.ecs_cluster.cluster_name
   service_name = module.ecs_service_recommendation.service_name
 }
 
-# Medical History
 module "autoscaling_medical_history" {
-  source = "./modules/autoscaling"
-
+  source       = "./modules/autoscaling"
   cluster_name = module.ecs_cluster.cluster_name
   service_name = module.ecs_service_medical_history.service_name
 }
 
-# Alertas
 module "autoscaling_alertas" {
-  source = "./modules/autoscaling"
-
+  source       = "./modules/autoscaling"
   cluster_name = module.ecs_cluster.cluster_name
   service_name = module.ecs_service_alertas.service_name
 }
 
-# Citas
 module "autoscaling_citas" {
-  source = "./modules/autoscaling"
-
+  source       = "./modules/autoscaling"
   cluster_name = module.ecs_cluster.cluster_name
   service_name = module.ecs_service_citas.service_name
 }
@@ -629,7 +628,7 @@ resource "aws_security_group" "temp_ssh" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # Solo tu IP
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
@@ -707,7 +706,6 @@ resource "aws_security_group_rule" "rds_allow_temp" {
   security_group_id        = module.security_groups.rds_sg_id
   source_security_group_id = aws_security_group.temp_ssh.id
 }
-
 
 #############################################
 # GENERAR KEY PAIR PARA COUCHBASE

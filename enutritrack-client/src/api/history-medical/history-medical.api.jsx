@@ -2,8 +2,8 @@
 import { medicalAPI } from "../../api/axios";
 
 export const createMedicalHistoryRequest = (medicalHistory) =>
-  medicalAPI.post("/medical-history", medicalHistory);
+  medicalAPI.post("/", medicalHistory);
 export const getMedicalHistoryByUserRequest = (userId) =>
-  medicalAPI.get(`/medical-history/${userId}`);
+  medicalAPI.get(`/${userId}`);
 export const updateMedicalHistoryRequest = (userId, medicalHistory) =>
-  medicalAPI.patch(`/medical-history/${userId}`, medicalHistory);
+  medicalAPI.patch(`/${userId}`, medicalHistory);

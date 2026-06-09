@@ -7,10 +7,9 @@ RUN npm install --legacy-peer-deps
 
 COPY . .
 
-RUN npm run build -- alertas
+# Compilar todo (esto genera dist/ con todos los microservicios)
+RUN npm run build
 
-# opcional pero recomendado
-RUN npm prune --production
 
 # --- RUN STAGE ---
 FROM node:20-alpine AS runner
@@ -24,4 +23,4 @@ COPY --from=builder /app/dist ./dist
 
 EXPOSE 3009
 
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/alertas/main.js"]

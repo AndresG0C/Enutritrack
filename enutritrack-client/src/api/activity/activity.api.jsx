@@ -1,22 +1,22 @@
 import { activityAPI } from "../axios";
 
 export const createPhysicalActivityRequest = (activityData) =>
-  activityAPI.post("/physical-activity", activityData);
+  activityAPI.post("/", activityData);
 export const getPhysicalActivitiesByUserRequest = (userId) =>
-  activityAPI.get(`/physical-activity/user/${userId}`);
+  activityAPI.get(`/user/${userId}`);
 export const getPhysicalActivityByIdRequest = (id) =>
-  activityAPI.get(`/physical-activity/${id}`);
+  activityAPI.get(`/${id}`);
 export const updatePhysicalActivityRequest = (id, activityData) =>
-  activityAPI.put(`/physical-activity/${id}`, activityData);
+  activityAPI.put(`/${id}`, activityData);
 export const deletePhysicalActivityRequest = (id) =>
-  activityAPI.delete(`/physical-activity/${id}`);
+  activityAPI.delete(`/${id}`);
 export const getActivityTypesRequest = () =>
-  activityAPI.get("/physical-activity/types");
+  activityAPI.get("/types");
 export const getWeeklySummaryRequest = (userId, startDate) =>
   activityAPI.get(
-    `/physical-activity/user/${userId}/weekly-summary?startDate=${startDate.toISOString()}`
+    `/user/${userId}/weekly-summary?startDate=${startDate.toISOString()}`
   );
 export const getMonthlyStatsRequest = (userId, year, month) =>
   activityAPI.get(
-    `/physical-activity/user/${userId}/monthly-stats?year=${year}&month=${month}`
+    `/user/${userId}/monthly-stats?year=${year}&month=${month}`
   );
