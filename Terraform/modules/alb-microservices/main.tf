@@ -352,7 +352,7 @@ resource "aws_lb_listener_rule" "activity" {
 
   condition {
     path_pattern {
-      values = ["/activity*"]
+      values = ["/physical-activity*"]
     }
   }
 }
@@ -420,7 +420,7 @@ resource "aws_lb_listener_rule" "alertas" {
 
   condition {
     path_pattern {
-      values = ["/alertas*"]
+      values = ["/alerts*"]
     }
   }
 }
