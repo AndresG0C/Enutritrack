@@ -7,10 +7,8 @@ RUN npm install --legacy-peer-deps
 
 COPY . .
 
-RUN npm run build -- recommendation
-
-# opcional pero recomendado
-RUN npm prune --production
+# Compilar todo (esto genera dist/ con todos los microservicios)
+RUN npm run build
 
 # --- RUN STAGE ---
 FROM node:20-alpine AS runner
@@ -22,6 +20,6 @@ COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 
-EXPOSE 3007
+EXPOSE 3006
 
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/recommendation/main.js"]

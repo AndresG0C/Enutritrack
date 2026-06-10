@@ -64,6 +64,14 @@ resource "aws_security_group" "ecs" {
     security_groups = [aws_security_group.alb.id]
   }
 
+  ingress {
+    description     = "Microservices ALB to ECS"
+    from_port       = 3000
+    to_port         = 4000
+    protocol        = "tcp"
+    security_groups = [var.alb_microservices_sg_id]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0

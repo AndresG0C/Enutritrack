@@ -2,28 +2,28 @@
 import { citasAPI } from "../../api/axios";
 
 export const createAppointmentRequest = (appointmentData) =>
-  citasAPI.post("/citas-medicas", appointmentData);
+  citasAPI.post("/", appointmentData);
 
 export const getAppointmentsRequest = (filters = {}) =>
-  citasAPI.get("/citas-medicas", { params: filters });
+  citasAPI.get("/", { params: filters });
 
 export const getAppointmentByIdRequest = (id) =>
-  citasAPI.get(`/citas-medicas/${id}`);
+  citasAPI.get(`/${id}`);
 
 export const updateAppointmentRequest = (id, appointmentData) =>
-  citasAPI.patch(`/citas-medicas/${id}`, appointmentData);
+  citasAPI.patch(`/${id}`, appointmentData);
 
 export const deleteAppointmentRequest = (id) =>
-  citasAPI.delete(`/citas-medicas/${id}`);
+  citasAPI.delete(`/${id}`);
 
 export const changeAppointmentStateRequest = (id, stateId) =>
-  citasAPI.patch(`/citas-medicas/${id}/estado/${stateId}`);
+  citasAPI.patch(`/${id}/estado/${stateId}`);
 
 export const getAppointmentStatesRequest = () =>
-  citasAPI.get("/citas-medicas/estados");
+  citasAPI.get("/estados");
 
 export const getConsultationTypesRequest = () =>
-  citasAPI.get("/citas-medicas/tipos-consulta");
+  citasAPI.get("/tipos-consulta");
 
 export const getMyAppointmentsRequest = (filters = {}) =>
-  citasAPI.get("/citas-medicas/mis-citas", { params: filters });
+  citasAPI.get("/mis-citas", { params: filters });

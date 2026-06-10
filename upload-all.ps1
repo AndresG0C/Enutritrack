@@ -7,9 +7,8 @@ $ACCOUNT = "127348835096"
 $REGION = "us-east-1"
 
 $repos = @(
-   "enutritrack-client",
+    "enutritrack-client",
     "enutritrack-server-cms",
-    "enutritrack-microservices-gateway",
     "enutritrack-microservices-auth",
     "enutritrack-microservices-users",
     "enutritrack-microservices-doctor",
@@ -40,24 +39,26 @@ function Invoke-ImageUpload {
     foreach ($repo in $repos) {
         Write-Host "`nSubiendo $repo..." -ForegroundColor Yellow
         
-        # Verificar que la imagen local existe
-        $localImage = docker images --format "{{.Repository}}" | Where-Object { $_ -eq "andresg0c/$repo" }
+        # Verificar que la imagen local existe (ahora solo con el nombre del repo)
+        $localImage = docker images --format "{{.Repository}}" | Where-Object { $_ -eq $repo }
         if (-not $localImage) {
-            Write-Host "WARNING: Imagen andresg0c/$repo no encontrada localmente" -ForegroundColor Red
+            Write-Host "WARNING: Imagen $repo no encontrada localmente" -ForegroundColor Red
+            Write-Host "Construyela primero con: docker build -t $repo ." -ForegroundColor Yellow
             continue
         }
         
-        # Taggear
+        # Taggear (ya no hay andresg0c)
         Write-Host "   Taggeando imagen..." -ForegroundColor Gray
-        docker tag "andresg0c/$repo" "$ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$repo`:latest" 2>&1
+        docker tag $repo "$ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$repo`:latest" 2>&1
         
         # Subir
         Write-Host "   Subiendo a ECR (esto puede tomar varios minutos)..." -ForegroundColor Gray
         $pushResult = docker push "$ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$repo`:latest" 2>&1
         
         if ($LASTEXITCODE -eq 0) {
-            Write-Host "   $repo subida correctamente" -ForegroundColor Green
-        } else {
+            Write-Host "   ✅ $repo subida correctamente" -ForegroundColor Green
+        }
+        else {
             Write-Host "   ERROR: No se pudo subir $repo" -ForegroundColor Red
             Write-Host $pushResult -ForegroundColor Red
             exit 1
@@ -71,8 +72,10 @@ function Invoke-ImageUpload {
 
 if ($Action -eq "images") {
     Invoke-ImageUpload
-} elseif ($Action -eq "all") {
+}
+elseif ($Action -eq "all") {
     Invoke-ImageUpload
-} else {
+}
+else {
     Write-Host "Uso: .\upload-images.ps1 -Action images" -ForegroundColor Cyan
 }

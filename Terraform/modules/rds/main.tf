@@ -18,7 +18,7 @@ resource "aws_db_subnet_group" "this" {
 
 resource "aws_db_parameter_group" "this" {
   name   = "${var.project_name}-pg-5433"
-  family = "postgres15"
+  family = "postgres16"
 
   parameter {
     name  = "rds.force_ssl"
@@ -38,7 +38,7 @@ resource "aws_db_instance" "this" {
   identifier = "${var.project_name}-postgres-${var.environment}"
 
   engine         = "postgres"
-  engine_version = "15.10"
+  engine_version = "16.14"
   instance_class = var.instance_class
 
   db_name  = var.db_name

@@ -25,3 +25,7 @@ output "couchbase_private_ip" {
 output "couchbase_public_ip" {
   value = module.couchbase.couchbase_public_ip
 }
+
+output "alb_sg_id" {
+  value = module.alb_microservices.alb_sg_id # ← Referencia al módulo
+}
