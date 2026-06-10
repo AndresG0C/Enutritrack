@@ -23,5 +23,5 @@ COUCHBASE_BUCKET=enutritrack
 # JWT
 JWT_SECRET=${jwt_secret}
 
-# API Gateway
-API_GATEWAY_URL=${api_gateway_url}
+# Gemini API Key
+GEMINI_API_KEY=${gemini_api_key}

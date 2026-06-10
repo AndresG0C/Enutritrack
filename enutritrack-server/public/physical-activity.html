@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -268,7 +269,8 @@
             gap: 0.5rem;
         }
 
-        .loading, .empty-state {
+        .loading,
+        .empty-state {
             text-align: center;
             padding: 3rem;
             color: #6b7280;
@@ -431,13 +433,14 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
             <h1>Tipos de Actividad Física</h1>
             <button class="btn btn-primary" onclick="showCreateTipoActividadModal()">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
                 Nuevo Tipo
             </button>
@@ -468,9 +471,11 @@
                 <div class="filter-group">
                     <div class="search-box">
                         <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
-                        <input type="text" id="search-tipos" placeholder="Buscar actividades..." onkeyup="filterTiposActividad()">
+                        <input type="text" id="search-tipos" placeholder="Buscar actividades..."
+                            onkeyup="filterTiposActividad()">
                     </div>
                     <select class="filter-select" id="categoria-filter" onchange="filterByCategoria()">
                         <option value="">Todas las categorías</option>
@@ -492,7 +497,8 @@
                     <tr>
                         <td colspan="6" class="loading">
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="24" height="24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                             </svg>
                             <p>Cargando tipos de actividad...</p>
                         </td>
@@ -509,35 +515,37 @@
                 <h3 id="tipo-actividad-modal-title">Nuevo Tipo de Actividad</h3>
                 <button class="modal-close" onclick="closeModal('tipo-actividad-modal')">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
             <div class="modal-body">
                 <form id="tipo-actividad-form">
                     <input type="hidden" id="tipo-actividad-id">
-                    
+
                     <div class="form-group">
                         <label class="form-label">Nombre de la Actividad *</label>
-                        <input type="text" class="form-control" id="tipo-actividad-nombre" placeholder="Ej: Caminata rápida, Natación, Ciclismo" required>
+                        <input type="text" class="form-control" id="tipo-actividad-nombre"
+                            placeholder="Ej: Caminata rápida, Natación, Ciclismo" required>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Categoría</label>
-                        <input type="text" class="form-control" id="tipo-actividad-categoria" placeholder="Ej: Cardio, Fuerza, Deportes">
+                        <input type="text" class="form-control" id="tipo-actividad-categoria"
+                            placeholder="Ej: Cardio, Fuerza, Deportes">
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Valor MET (Equivalente Metabólico) *</label>
-                        <input type="number" class="form-control" id="tipo-actividad-met" 
-                               placeholder="3.5" step="0.1" min="1" max="20" required
-                               oninput="updateIntensityIndicator()">
-                        
+                        <input type="number" class="form-control" id="tipo-actividad-met" placeholder="3.5" step="0.1"
+                            min="1" max="20" required oninput="updateIntensityIndicator()">
+
                         <div class="met-info">
                             <h4>¿Qué es el valor MET?</h4>
-                            <p>El MET (Metabolic Equivalent of Task) mide la intensidad de una actividad física. 
+                            <p>El MET (Metabolic Equivalent of Task) mide la intensidad de una actividad física.
                                 Un MET es la energía que consumes en reposo.</p>
-                            
+
                             <div class="intensity-indicator">
                                 <div class="intensity-dot active" id="intensity-low"></div>
                                 <div class="intensity-dot" id="intensity-moderate"></div>
@@ -546,7 +554,7 @@
                                     Intensidad: <span id="intensity-label">Baja</span>
                                 </div>
                             </div>
-                            
+
                             <div class="calorie-example" id="calorie-example">
                                 Ejemplo: Una persona de 70kg quemaría aproximadamente 0 calorías en 30 minutos.
                             </div>
@@ -555,8 +563,8 @@
 
                     <div class="form-group">
                         <label class="form-label">Descripción</label>
-                        <textarea class="form-control form-textarea" id="tipo-actividad-descripcion" 
-                                  placeholder="Describe la actividad, técnica, beneficios..."></textarea>
+                        <textarea class="form-control form-textarea" id="tipo-actividad-descripcion"
+                            placeholder="Describe la actividad, técnica, beneficios..."></textarea>
                     </div>
                 </form>
             </div>
@@ -566,7 +574,7 @@
                 </button>
                 <button class="btn btn-primary" onclick="saveTipoActividad()">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
                     Guardar Actividad
                 </button>
@@ -578,33 +586,67 @@
         let allTiposActividad = [];
         let currentTipoActividadId = null;
 
+        // Función para obtener la URL base del backend dinámicamente
+        function getBackendBaseUrl() {
+            const hostname = window.location.hostname;
+            const protocol = window.location.protocol;
+
+            if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '') {
+                return 'http://localhost:4000';
+            }
+            return `${protocol}//${hostname}`;
+        }
+
+        // Función fetch unificada
+        async function fetchCall(endpoint, options = {}) {
+            const token = localStorage.getItem('access_token');
+            if (!token) throw new Error('No autenticado');
+
+            const baseUrl = getBackendBaseUrl();
+            const url = `${baseUrl}${endpoint}`;
+
+            const response = await fetch(url, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                ...options
+            });
+
+            if (response.status === 401) {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+                window.parent.location.href = '/auth/login';
+                return null;
+            }
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || `Error ${response.status}`);
+            }
+
+            if (options.method === 'DELETE') {
+                return { success: true };
+            }
+
+            return await response.json();
+        }
+
         // Inicializar
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             loadTiposActividad();
         });
 
         // Cargar tipos de actividad desde la API
         async function loadTiposActividad() {
             try {
-                const token = localStorage.getItem('access_token');
-                const response = await fetch('/tipos-actividad', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error('Error al cargar tipos de actividad');
-                }
-
-                allTiposActividad = await response.json();
+                allTiposActividad = await fetchCall('/tipos-actividad');
                 renderTiposActividad(allTiposActividad);
                 updateStats(allTiposActividad);
                 populateCategoriaFilter(allTiposActividad);
             } catch (error) {
                 console.error('Error:', error);
-                document.getElementById('tipos-actividad-table').innerHTML = 
+                document.getElementById('tipos-actividad-table').innerHTML =
                     '<tr><td colspan="6" class="empty-state">Error al cargar tipos de actividad</td></tr>';
             }
         }
@@ -612,58 +654,36 @@
         // Renderizar tabla de tipos de actividad
         function renderTiposActividad(tipos) {
             const tbody = document.getElementById('tipos-actividad-table');
-            
+
             if (!tipos || tipos.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No hay tipos de actividad registrados</td></tr>';
                 return;
             }
 
             tbody.innerHTML = tipos.map(tipo => `
-                <tr>
-                    <td>
-                        <strong>${tipo.nombre}</strong>
-                    </td>
-                    <td>
-                        ${tipo.categoria ? `<span class="categoria-tag">${tipo.categoria}</span>` : '<span style="color: #9ca3af;">Sin categoría</span>'}
-                    </td>
-                    <td>
-                        <span class="badge met-badge">${tipo.met_value} MET</span>
-                    </td>
-                    <td>
-                        <span class="badge ${getIntensityBadgeClass(tipo.met_value)}">
-                            ${getIntensityLabel(tipo.met_value)}
-                        </span>
-                    </td>
-                    <td>
-                        <small style="color: #6b7280;">${tipo.descripcion || 'Sin descripción'}</small>
-                    </td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="btn btn-primary btn-sm" onclick="editTipoActividad('${tipo.id}')">
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="14" height="14">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                </svg>
-                                Editar
-                            </button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteTipoActividad('${tipo.id}')">
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="14" height="14">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                </svg>
-                                Eliminar
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
+            <tr>
+                <td><strong>${tipo.nombre}</strong></td>
+                <td>${tipo.categoria ? `<span class="categoria-tag">${tipo.categoria}</span>` : '<span style="color: #9ca3af;">Sin categoría</span>'}</td>
+                <td><span class="badge met-badge">${tipo.met_value} MET</span></td>
+                <td><span class="badge ${getIntensityBadgeClass(tipo.met_value)}">${getIntensityLabel(tipo.met_value)}</span></td>
+                <td><small style="color: #6b7280;">${tipo.descripcion || 'Sin descripción'}</small></td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary btn-sm" onclick="editTipoActividad('${tipo.id}')">Editar</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteTipoActividad('${tipo.id}')">Eliminar</button>
+                    </div>
+                 </td>
+            </tr>
+        `).join('');
         }
 
         // Actualizar estadísticas
         function updateStats(tipos) {
             const totalTipos = tipos.length;
             const categorias = [...new Set(tipos.map(t => t.categoria).filter(Boolean))];
-            const avgMet = tipos.length > 0 ? 
+            const avgMet = tipos.length > 0 ?
                 (tipos.reduce((sum, t) => sum + parseFloat(t.met_value), 0) / tipos.length).toFixed(1) : 0;
-            const maxMet = tipos.length > 0 ? 
+            const maxMet = tipos.length > 0 ?
                 Math.max(...tipos.map(t => parseFloat(t.met_value))).toFixed(1) : 0;
 
             document.getElementById('total-tipos').textContent = totalTipos;
@@ -676,7 +696,7 @@
         function populateCategoriaFilter(tipos) {
             const select = document.getElementById('categoria-filter');
             const categorias = [...new Set(tipos.map(t => t.categoria).filter(Boolean))];
-            
+
             categorias.forEach(categoria => {
                 const option = document.createElement('option');
                 option.value = categoria;
@@ -689,8 +709,8 @@
         function filterTiposActividad() {
             const searchTerm = document.getElementById('search-tipos').value.toLowerCase();
             const categoria = document.getElementById('categoria-filter').value;
-            
-            let filtered = allTiposActividad.filter(tipo => 
+
+            let filtered = allTiposActividad.filter(tipo =>
                 tipo.nombre.toLowerCase().includes(searchTerm) ||
                 (tipo.descripcion && tipo.descripcion.toLowerCase().includes(searchTerm))
             );
@@ -719,19 +739,7 @@
         // Editar tipo de actividad
         async function editTipoActividad(tipoId) {
             try {
-                const token = localStorage.getItem('access_token');
-                const response = await fetch(`/tipos-actividad/${tipoId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error('Error al cargar tipo de actividad');
-                }
-
-                const tipo = await response.json();
+                const tipo = await fetchCall(`/tipos-actividad/${tipoId}`);
                 currentTipoActividadId = tipoId;
 
                 document.getElementById('tipo-actividad-modal-title').textContent = 'Editar Tipo de Actividad';
@@ -742,7 +750,6 @@
                 document.getElementById('tipo-actividad-descripcion').value = tipo.descripcion || '';
 
                 updateIntensityIndicator();
-
                 openModal('tipo-actividad-modal');
             } catch (error) {
                 console.error('Error:', error);
@@ -750,7 +757,7 @@
             }
         }
 
-        // Guardar tipo de actividad (crear o actualizar)
+        // Guardar tipo de actividad
         async function saveTipoActividad() {
             const form = document.getElementById('tipo-actividad-form');
             if (!form.checkValidity()) {
@@ -766,22 +773,10 @@
             };
 
             try {
-                const token = localStorage.getItem('access_token');
                 const url = currentTipoActividadId ? `/tipos-actividad/${currentTipoActividadId}` : '/tipos-actividad';
                 const method = currentTipoActividadId ? 'PATCH' : 'POST';
 
-                const response = await fetch(url, {
-                    method: method,
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(tipoActividadData)
-                });
-
-                if (!response.ok) {
-                    throw new Error('Error al guardar tipo de actividad');
-                }
+                await fetchCall(url, { method: method, body: JSON.stringify(tipoActividadData) });
 
                 alert(currentTipoActividadId ? 'Tipo de actividad actualizado exitosamente' : 'Tipo de actividad creado exitosamente');
                 closeModal('tipo-actividad-modal');
@@ -794,24 +789,10 @@
 
         // Eliminar tipo de actividad
         async function deleteTipoActividad(tipoId) {
-            if (!confirm('¿Está seguro de que desea eliminar este tipo de actividad? Esta acción no se puede deshacer.')) {
-                return;
-            }
+            if (!confirm('¿Está seguro de que desea eliminar este tipo de actividad?')) return;
 
             try {
-                const token = localStorage.getItem('access_token');
-                const response = await fetch(`/tipos-actividad/${tipoId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error('Error al eliminar tipo de actividad');
-                }
-
+                await fetchCall(`/tipos-actividad/${tipoId}`, { method: 'DELETE' });
                 alert('Tipo de actividad eliminado exitosamente');
                 loadTiposActividad();
             } catch (error) {
@@ -823,15 +804,14 @@
         // Actualizar indicador de intensidad
         function updateIntensityIndicator() {
             const metValue = parseFloat(document.getElementById('tipo-actividad-met').value) || 1;
-            
-            // Reset all dots
+
             document.getElementById('intensity-low').className = 'intensity-dot';
             document.getElementById('intensity-moderate').className = 'intensity-dot';
             document.getElementById('intensity-high').className = 'intensity-dot';
-            
+
             let intensityLabel = '';
             let intensityColor = '';
-            
+
             if (metValue < 3) {
                 document.getElementById('intensity-low').className = 'intensity-dot active';
                 intensityLabel = 'Baja';
@@ -845,19 +825,16 @@
                 intensityLabel = 'Alta';
                 intensityColor = '#ef4444';
             }
-            
+
             document.getElementById('intensity-label').textContent = intensityLabel;
             document.getElementById('intensity-label').style.color = intensityColor;
-            
-            // Calcular ejemplo de calorías quemadas
-            const calories = calculateCaloriesBurned(metValue, 70, 30); // 70kg, 30 minutos
-            document.getElementById('calorie-example').innerHTML = 
+
+            const calories = calculateCaloriesBurned(metValue, 70, 30);
+            document.getElementById('calorie-example').innerHTML =
                 `Ejemplo: Una persona de 70kg quemaría aproximadamente <strong>${calories} calorías</strong> en 30 minutos.`;
         }
 
-        // Calcular calorías quemadas (fórmula simplificada)
         function calculateCaloriesBurned(met, weightKg, minutes) {
-            // Fórmula: MET * peso(kg) * tiempo(horas)
             const calories = met * weightKg * (minutes / 60);
             return Math.round(calories);
         }
@@ -875,22 +852,15 @@
             return 'badge-danger';
         }
 
-        function openModal(modalId) {
-            document.getElementById(modalId).classList.add('active');
-        }
+        function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
+        function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
 
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
-
-        // Cerrar modal al hacer clic fuera
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.classList.remove('active');
-                }
+                if (e.target === modal) modal.classList.remove('active');
             });
         });
     </script>
 </body>
+
 </html>

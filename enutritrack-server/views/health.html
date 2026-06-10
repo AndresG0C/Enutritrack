@@ -525,7 +525,7 @@
   </div>
 
   <script>
-    // Datos iniciales de los microservicios con URLs completas (sin puertos)
+    // Datos iniciales de los microservicios con paths CORREGIDOS
     const initialServices = [
       {
         id: 1,
@@ -559,35 +559,35 @@
         id: 5,
         name: 'Servicio de Actividad Fisica',
         url: '',
-        path: 'activity',
+        path: 'physical-activity',
         status: 'unknown',
       },
       {
         id: 6,
         name: 'Servicio de Recomendaciones',
         url: '',
-        path: 'recommendation',
+        path: 'recommendations',
         status: 'unknown',
       },
       {
         id: 7,
         name: 'Servicio de Doctor',
         url: '',
-        path: 'doctor',
+        path: 'doctors',
         status: 'unknown',
       },
       {
         id: 8,
         name: 'Servicio de Citas Medicas',
         url: '',
-        path: 'citas',
+        path: 'citas-medicas',
         status: 'unknown',
       },
       {
         id: 9,
         name: 'Servicio de Alertas',
         url: '',
-        path: 'alertas',
+        path: 'alerts',
         status: 'unknown',
       },
     ];
@@ -599,6 +599,17 @@
     // Intervalo de monitoreo (60 segundos)
     let monitoringInterval;
     const MONITORING_INTERVAL_MS = 60000;
+
+    // Función para obtener la URL base del backend (ALB de microservicios)
+    function getBackendBaseUrl() {
+      const hostname = window.location.hostname;
+      const protocol = window.location.protocol;
+
+      if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '') {
+        return 'http://localhost';
+      }
+      return `${protocol}//${hostname}`;
+    }
 
     // Función para verificar el estado de un servicio
     async function checkServiceStatus(service) {
@@ -641,8 +652,10 @@
       renderServices();
 
       // Actualizar timestamp
-      document.getElementById('last-updated').textContent =
-        `Última verificación: ${new Date().toLocaleTimeString()}`;
+      const lastUpdated = document.getElementById('last-updated');
+      if (lastUpdated) {
+        lastUpdated.textContent = `Última verificación: ${new Date().toLocaleTimeString()}`;
+      }
 
       // Guardar en localStorage
       localStorage.setItem('microservices', JSON.stringify(services));
@@ -651,6 +664,7 @@
     // Función para renderizar los servicios
     function renderServices() {
       const container = document.getElementById('services-container');
+      if (!container) return;
       container.innerHTML = '';
 
       services.forEach((service) => {
@@ -678,21 +692,25 @@
             statusText = 'Desconocido';
         }
 
-        const displayUrl = service.url ? `${service.url}/${service.path}` : 'No configurado';
+        let displayUrl = 'No configurado';
+        if (service.url) {
+          let cleanUrl = service.url.replace(/^https?:\/\//, '').replace(/:\d+$/, '');
+          displayUrl = `${cleanUrl}/${service.path}`;
+        }
 
         serviceCard.innerHTML = `
             <div class="service-header">
-              <div class="service-name">${service.name}</div>
-              <div class="status-indicator ${statusClass}" title="${statusText}"></div>
+                <div class="service-name">${service.name}</div>
+                <div class="status-indicator ${statusClass}" title="${statusText}"></div>
             </div>
             <div class="service-details">
-              <div class="service-url">${displayUrl}</div>
+                <div class="service-url">${displayUrl}</div>
             </div>
             <div class="service-actions">
-              <button class="btn btn-secondary" onclick="checkSingleService(${service.id})">Verificar ahora</button>
-              <button class="btn btn-primary" onclick="editService(${service.id})">Editar</button>
+                <button class="btn btn-secondary" onclick="checkSingleService(${service.id})">Verificar ahora</button>
+                <button class="btn btn-primary" onclick="editService(${service.id})">Editar</button>
             </div>
-          `;
+        `;
 
         container.appendChild(serviceCard);
       });
@@ -705,38 +723,36 @@
       const service = services.find((s) => s.id === serviceId);
       if (!service) return;
 
-      // Mostrar estado de verificación
       service.status = 'unknown';
       renderServices();
 
-      // Verificar el servicio
       const status = await checkServiceStatus(service);
       service.status = status;
 
-      // Actualizar la vista
       renderServices();
-
-      // Guardar en localStorage
       localStorage.setItem('microservices', JSON.stringify(services));
     }
 
     // Función para renderizar el formulario de configuración
     function renderConfigForm() {
       const form = document.getElementById('config-form');
+      if (!form) return;
       form.innerHTML = '';
 
       services.forEach((service) => {
         const formGroup = document.createElement('div');
         formGroup.className = 'form-group';
 
+        const baseUrlExample = getBackendBaseUrl();
+
         formGroup.innerHTML = `
             <label for="service-${service.id}-name">${service.name}</label>
             <input type="text" id="service-${service.id}-url" 
                    value="${service.url}" 
-                   placeholder="Ej: http://enutritrack-microservices-123.elb.amazonaws.com"
+                   placeholder="Ej: ${baseUrlExample}"
                    style="width: 100%; padding: 0.75rem; margin-bottom: 0.5rem; border: 2px solid #e5e7eb; border-radius: 12px;">
             <small style="display: block; color: #6b7280; font-size: 0.75rem;">
-              URL base del ALB (sin puerto, sin path). Ejemplo: http://alb-dns.amazonaws.com
+              URL base del ALB (sin puerto, sin path). Ejemplo: ${baseUrlExample}
             </small>
             <div style="font-size: 0.75rem; color: #10b981; margin-top: 0.25rem;">
               Health check será: ${service.url || 'URL'}/${service.path}/health/check
@@ -754,19 +770,12 @@
       const greenLight = document.getElementById('green-light');
       const statusSummary = document.getElementById('status-summary');
 
-      // Contar estados
-      const statusCounts = {
-        error: 0,
-        warning: 0,
-        healthy: 0,
-        unknown: 0,
-      };
+      const statusCounts = { error: 0, warning: 0, healthy: 0, unknown: 0 };
 
       services.forEach((service) => {
         statusCounts[service.status]++;
       });
 
-      // Determinar estado general
       let overallStatus = 'unknown';
       let statusText = '';
 
@@ -786,12 +795,10 @@
         statusText = 'Desconocido - No se ha verificado el estado';
       }
 
-      // Actualizar semáforo
-      redLight.classList.toggle('active', overallStatus === 'error');
-      yellowLight.classList.toggle('active', overallStatus === 'warning');
-      greenLight.classList.toggle('active', overallStatus === 'healthy');
-
-      statusSummary.textContent = `Estado general: ${statusText}`;
+      if (redLight) redLight.classList.toggle('active', overallStatus === 'error');
+      if (yellowLight) yellowLight.classList.toggle('active', overallStatus === 'warning');
+      if (greenLight) greenLight.classList.toggle('active', overallStatus === 'healthy');
+      if (statusSummary) statusSummary.textContent = `Estado general: ${statusText}`;
     }
 
     // Función para editar un servicio
@@ -799,12 +806,8 @@
       const service = services.find((s) => s.id === serviceId);
       if (!service) return;
 
-      // Desplazamos a la sección de configuración
-      document
-        .querySelector('.config-section')
-        .scrollIntoView({ behavior: 'smooth' });
+      document.querySelector('.config-section').scrollIntoView({ behavior: 'smooth' });
 
-      // Y resaltamos el servicio correspondiente
       const urlInput = document.getElementById(`service-${serviceId}-url`);
 
       if (urlInput) {
@@ -826,59 +829,48 @@
 
         if (urlInput) {
           let url = urlInput.value.trim();
-          // Eliminar barra final si existe
+
+          // Eliminar barra final
           if (url.endsWith('/')) {
             url = url.slice(0, -1);
           }
+
+          // ✅ Eliminar puerto si existe
+          url = url.replace(/:\d+$/, '');
+
+          // ✅ Agregar http:// si no tiene
+          if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            url = 'http://' + url;
+          }
+
           service.url = url;
-          // Al cambiar la configuración, el estado vuelve a desconocido
           service.status = 'unknown';
         }
       });
 
-      // Actualizar la vista
       renderServices();
-
-      // Guardar en localStorage
       localStorage.setItem('microservices', JSON.stringify(services));
-
       alert('Configuración guardada correctamente');
-
-      // Verificar todos los servicios después de guardar
       checkAllServices();
     }
-
     // Función para restablecer la configuración
     function resetConfiguration() {
-      if (
-        confirm(
-          '¿Estás seguro de que deseas restablecer la configuración a los valores predeterminados?',
-        )
-      ) {
+      if (confirm('¿Estás seguro de que deseas restablecer la configuración a los valores predeterminados?')) {
         services = JSON.parse(JSON.stringify(initialServices));
         localStorage.setItem('microservices', JSON.stringify(services));
         renderServices();
         renderConfigForm();
         alert('Configuración restablecida');
-
-        // Verificar todos los servicios después de restablecer
         checkAllServices();
       }
     }
 
     // Iniciar monitoreo automático
     function startMonitoring() {
-      // Verificar inmediatamente
       checkAllServices();
-
-      // Configurar intervalo periódico
-      monitoringInterval = setInterval(
-        checkAllServices,
-        MONITORING_INTERVAL_MS,
-      );
+      monitoringInterval = setInterval(checkAllServices, MONITORING_INTERVAL_MS);
     }
 
-    // Detener monitoreo automático
     function stopMonitoring() {
       if (monitoringInterval) {
         clearInterval(monitoringInterval);
@@ -890,22 +882,17 @@
       renderServices();
       renderConfigForm();
 
-      // Asignar event listeners a los botones
-      document
-        .getElementById('save-btn')
-        .addEventListener('click', saveConfiguration);
-      document
-        .getElementById('reset-btn')
-        .addEventListener('click', resetConfiguration);
-      document
-        .getElementById('refresh-now')
-        .addEventListener('click', checkAllServices);
+      const saveBtn = document.getElementById('save-btn');
+      const resetBtn = document.getElementById('reset-btn');
+      const refreshBtn = document.getElementById('refresh-now');
 
-      // Iniciar monitoreo automático
+      if (saveBtn) saveBtn.addEventListener('click', saveConfiguration);
+      if (resetBtn) resetBtn.addEventListener('click', resetConfiguration);
+      if (refreshBtn) refreshBtn.addEventListener('click', checkAllServices);
+
       startMonitoring();
     });
 
-    // Limpiar intervalo cuando se cierre la página
     window.addEventListener('beforeunload', stopMonitoring);
   </script>
 </body>

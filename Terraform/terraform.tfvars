@@ -38,3 +38,6 @@ repositories = [
   "enutritrack-microservices-alertas",
   "enutritrack-microservices-citas"
 ]
+
+# Gemini API Key
+gemini_api_key = ""

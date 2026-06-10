@@ -1,1093 +1,867 @@
 <!doctype html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gestión de Doctores</title>
-    <style>
-      /* Mantener todos los estilos anteriores igual */
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
 
-      body {
-        font-family:
-          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-          'Helvetica Neue', Arial, sans-serif;
-        background: #f3f4f6;
-        min-height: 100vh;
-        padding: 0;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestión de Doctores</title>
+  <style>
+    /* Mantener todos los estilos anteriores igual */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-      .container {
-        padding: 1.5rem;
-      }
+    body {
+      font-family:
+        -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+        'Helvetica Neue', Arial, sans-serif;
+      background: #f3f4f6;
+      min-height: 100vh;
+      padding: 0;
+    }
 
-      .table-container {
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        overflow: hidden;
-        margin-bottom: 2rem;
+    .container {
+      padding: 1.5rem;
+    }
+
+    .table-container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+
+    .table-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .table-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: #1f2937;
+    }
+
+    .table-actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      position: relative;
+      width: 280px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 0.625rem 2.5rem 0.625rem 1rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+
+    .search-box input:focus {
+      outline: none;
+      border-color: #10b981;
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    }
+
+    .search-box svg {
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      color: #9ca3af;
+    }
+
+    .btn {
+      padding: 0.625rem 1.25rem;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #6b7280;
+      border: 2px solid #e5e7eb;
+    }
+
+    .btn-secondary:hover {
+      border-color: #10b981;
+      color: #10b981;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    .btn-sm {
+      padding: 0.5rem 0.875rem;
+      font-size: 0.8125rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: #f9fafb;
+    }
+
+    th {
+      padding: 1rem 1.5rem;
+      text-align: left;
+      font-size: 0.8125rem;
+      font-weight: 700;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+    }
+
+    td {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid #e5e7eb;
+      color: #4b5563;
+      font-size: 0.875rem;
+    }
+
+    tbody tr {
+      transition: background 0.2s;
+    }
+
+    tbody tr:hover {
+      background: #f9fafb;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.375rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      gap: 0.375rem;
+    }
+
+    .badge-success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .badge-danger {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .patient-card {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .patient-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 0.875rem;
+    }
+
+    .patient-info h4 {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    .patient-info p {
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .loading,
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: #6b7280;
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 16px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h3 {
+      font-size: 1.25rem;
+      color: #1f2937;
+      font-weight: 700;
+    }
+
+    .modal-close {
+      background: #f3f4f6;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .modal-close:hover {
+      background: #e5e7eb;
+    }
+
+    .modal-close svg {
+      width: 20px;
+      height: 20px;
+      color: #6b7280;
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    .modal-footer {
+      padding: 1.5rem;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #374151;
+      font-size: 0.875rem;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #10b981;
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .form-row {
+        grid-template-columns: 1fr;
       }
 
       .table-header {
-        padding: 1.5rem;
-        border-bottom: 1px solid #e5e7eb;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 1rem;
-      }
-
-      .table-title {
-        font-size: 1.125rem;
-        font-weight: 700;
-        color: #1f2937;
+        flex-direction: column;
+        align-items: flex-start;
       }
 
       .table-actions {
-        display: flex;
-        gap: 0.75rem;
-        flex-wrap: wrap;
+        width: 100%;
       }
 
       .search-box {
-        position: relative;
-        width: 280px;
-      }
-
-      .search-box input {
         width: 100%;
-        padding: 0.625rem 2.5rem 0.625rem 1rem;
-        border: 2px solid #e5e7eb;
-        border-radius: 12px;
-        font-size: 0.875rem;
-        transition: all 0.2s;
       }
+    }
+  </style>
+</head>
 
-      .search-box input:focus {
-        outline: none;
-        border-color: #10b981;
-        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
-      }
-
-      .search-box svg {
-        position: absolute;
-        right: 0.75rem;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 18px;
-        height: 18px;
-        color: #9ca3af;
-      }
-
-      .btn {
-        padding: 0.625rem 1.25rem;
-        border: none;
-        border-radius: 12px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s;
-        font-size: 0.875rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .btn svg {
-        width: 18px;
-        height: 18px;
-      }
-
-      .btn-primary {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        color: white;
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-      }
-
-      .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
-      }
-
-      .btn-secondary {
-        background: white;
-        color: #6b7280;
-        border: 2px solid #e5e7eb;
-      }
-
-      .btn-secondary:hover {
-        border-color: #10b981;
-        color: #10b981;
-      }
-
-      .btn-danger {
-        background: #ef4444;
-        color: white;
-      }
-
-      .btn-danger:hover {
-        background: #dc2626;
-      }
-
-      .btn-sm {
-        padding: 0.5rem 0.875rem;
-        font-size: 0.8125rem;
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-
-      thead {
-        background: #f9fafb;
-      }
-
-      th {
-        padding: 1rem 1.5rem;
-        text-align: left;
-        font-size: 0.8125rem;
-        font-weight: 700;
-        color: #6b7280;
-        text-transform: uppercase;
-        letter-spacing: 0.025em;
-      }
-
-      td {
-        padding: 1rem 1.5rem;
-        border-top: 1px solid #e5e7eb;
-        color: #4b5563;
-        font-size: 0.875rem;
-      }
-
-      tbody tr {
-        transition: background 0.2s;
-      }
-
-      tbody tr:hover {
-        background: #f9fafb;
-      }
-
-      .badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.375rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        gap: 0.375rem;
-      }
-
-      .badge-success {
-        background: #d1fae5;
-        color: #065f46;
-      }
-
-      .badge-danger {
-        background: #fee2e2;
-        color: #991b1b;
-      }
-
-      .patient-card {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-      }
-
-      .patient-avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: 700;
-        font-size: 0.875rem;
-      }
-
-      .patient-info h4 {
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: #1f2937;
-      }
-
-      .patient-info p {
-        font-size: 0.75rem;
-        color: #6b7280;
-      }
-
-      .action-buttons {
-        display: flex;
-        gap: 0.5rem;
-      }
-
-      .loading,
-      .empty-state {
-        text-align: center;
-        padding: 3rem;
-        color: #6b7280;
-      }
-
-      /* Modal Styles */
-      .modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 1000;
-        align-items: center;
-        justify-content: center;
-        padding: 1rem;
-      }
-
-      .modal.active {
-        display: flex;
-      }
-
-      .modal-content {
-        background: white;
-        border-radius: 16px;
-        max-width: 600px;
-        width: 100%;
-        max-height: 90vh;
-        overflow-y: auto;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      }
-
-      .modal-header {
-        padding: 1.5rem;
-        border-bottom: 1px solid #e5e7eb;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      .modal-header h3 {
-        font-size: 1.25rem;
-        color: #1f2937;
-        font-weight: 700;
-      }
-
-      .modal-close {
-        background: #f3f4f6;
-        border: none;
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s;
-      }
-
-      .modal-close:hover {
-        background: #e5e7eb;
-      }
-
-      .modal-close svg {
-        width: 20px;
-        height: 20px;
-        color: #6b7280;
-      }
-
-      .modal-body {
-        padding: 1.5rem;
-      }
-
-      .modal-footer {
-        padding: 1.5rem;
-        border-top: 1px solid #e5e7eb;
-        display: flex;
-        justify-content: flex-end;
-        gap: 0.75rem;
-      }
-
-      .form-group {
-        margin-bottom: 1.25rem;
-      }
-
-      .form-label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-weight: 600;
-        color: #374151;
-        font-size: 0.875rem;
-      }
-
-      .form-control {
-        width: 100%;
-        padding: 0.75rem;
-        border: 2px solid #e5e7eb;
-        border-radius: 12px;
-        font-size: 0.875rem;
-        transition: all 0.2s;
-      }
-
-      .form-control:focus {
-        outline: none;
-        border-color: #10b981;
-        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
-      }
-
-      .form-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-      }
-
-      @media (max-width: 768px) {
-        .form-row {
-          grid-template-columns: 1fr;
-        }
-
-        .table-header {
-          flex-direction: column;
-          align-items: flex-start;
-        }
-
-        .table-actions {
-          width: 100%;
-        }
-
-        .search-box {
-          width: 100%;
-        }
-      }
-    </style>
-  </head>
-
-  <body>
-    <div class="container">
-      <div class="table-container">
-        <div class="table-header">
-          <h3 class="table-title">Gestión de Doctores</h3>
-          <div class="table-actions">
-            <div class="search-box">
-              <input
-                type="text"
-                id="doctor-search"
-                placeholder="Buscar doctor..."
-              />
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </div>
-            <button
-              class="btn btn-primary btn-sm"
-              onclick="showCreateDoctorModal()"
-            >
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-              Nuevo Doctor
-            </button>
-          </div>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Doctor</th>
-              <th>Especialidad</th>
-              <th>Email</th>
-              <th>Cédula</th>
-              <th>Pacientes</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="doctors-table">
-            <tr>
-              <td colspan="7" class="loading">Cargando doctores...</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Modal para Crear/Editar Doctor -->
-    <div id="doctor-modal" class="modal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3 id="doctor-modal-title">Crear Nuevo Doctor</h3>
-          <button class="modal-close" onclick="closeModal('doctor-modal')">
+<body>
+  <div class="container">
+    <div class="table-container">
+      <div class="table-header">
+        <h3 class="table-title">Gestión de Doctores</h3>
+        <div class="table-actions">
+          <div class="search-box">
+            <input type="text" id="doctor-search" placeholder="Buscar doctor..." />
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="showCreateDoctorModal()">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Nuevo Doctor
           </button>
         </div>
-        <div class="modal-body">
-          <form id="doctor-form">
-            <input type="hidden" id="doctor-id" />
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Nombre Completo *</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="doctor-nombre"
-                  name="doctor-nombre"
-                  required
-                />
-              </div>
-              <div class="form-group">
-                <label class="form-label">Cédula Profesional *</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="doctor-cedula"
-                  name="doctor-cedula"
-                  required
-                />
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Especialidad *</label>
-                <select
-                  class="form-control"
-                  id="doctor-especialidad-id"
-                  name="doctor-especialidad-id"
-                  required
-                >
-                  <option value="">Seleccionar...</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Teléfono</label>
-                <input
-                  type="tel"
-                  class="form-control"
-                  id="doctor-telefono"
-                  name="doctor-telefono"
-                />
-              </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Doctor</th>
+            <th>Especialidad</th>
+            <th>Email</th>
+            <th>Cédula</th>
+            <th>Pacientes</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="doctors-table">
+          <tr>
+            <td colspan="7" class="loading">Cargando doctores...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal para Crear/Editar Doctor -->
+  <div id="doctor-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="doctor-modal-title">Crear Nuevo Doctor</h3>
+        <button class="modal-close" onclick="closeModal('doctor-modal')">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="doctor-form">
+          <input type="hidden" id="doctor-id" />
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Nombre Completo *</label>
+              <input type="text" class="form-control" id="doctor-nombre" name="doctor-nombre" required />
             </div>
             <div class="form-group">
-              <label class="form-label">Información Adicional</label>
-              <textarea
-                class="form-control"
-                id="doctor-informacion"
-                rows="3"
-                placeholder="Información adicional sobre el doctor"
-              ></textarea>
+              <label class="form-label">Cédula Profesional *</label>
+              <input type="text" class="form-control" id="doctor-cedula" name="doctor-cedula" required />
             </div>
-            <!-- Campos para crear la cuenta -->
-            <div class="form-group" id="doctor-account-fields">
-              <h4 style="margin-bottom: 1rem; color: #374151">
-                Información de Cuenta
-              </h4>
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label">Email *</label>
-                  <input
-                    type="email"
-                    class="form-control"
-                    id="doctor-email"
-                    name="doctor-email"
-                    required
-                  />
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Contraseña *</label>
-                  <input
-                    type="password"
-                    class="form-control"
-                    id="doctor-password"
-                    name="doctor-password"
-                    required
-                  />
-                </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Especialidad *</label>
+              <select class="form-control" id="doctor-especialidad-id" name="doctor-especialidad-id" required>
+                <option value="">Seleccionar...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Teléfono</label>
+              <input type="tel" class="form-control" id="doctor-telefono" name="doctor-telefono" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Información Adicional</label>
+            <textarea class="form-control" id="doctor-informacion" rows="3"
+              placeholder="Información adicional sobre el doctor"></textarea>
+          </div>
+          <!-- Campos para crear la cuenta -->
+          <div class="form-group" id="doctor-account-fields">
+            <h4 style="margin-bottom: 1rem; color: #374151">
+              Información de Cuenta
+            </h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Email *</label>
+                <input type="email" class="form-control" id="doctor-email" name="doctor-email" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Contraseña *</label>
+                <input type="password" class="form-control" id="doctor-password" name="doctor-password" required />
               </div>
             </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button
-            class="btn btn-secondary"
-            onclick="closeModal('doctor-modal')"
-          >
-            Cancelar
-          </button>
-          <button class="btn btn-primary" onclick="saveDoctor()">
-            Guardar Doctor
-          </button>
-        </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('doctor-modal')">
+          Cancelar
+        </button>
+        <button class="btn btn-primary" onclick="saveDoctor()">
+          Guardar Doctor
+        </button>
       </div>
     </div>
+  </div>
 
-    <script>
-      // Variables globales
-      let allDoctors = [];
-      let allSpecialties = [];
-      let currentDoctorId = null;
-      let currentAdminId = null;
+  <script>
+    // Variables globales
+    let allDoctors = [];
+    let allSpecialties = [];
+    let currentDoctorId = null;
+    let currentAdminId = null;
 
-      // Inicializar cuando el documento esté listo
-      document.addEventListener('DOMContentLoaded', async function () {
-        await loadCurrentAdmin();
-        loadDoctors();
-        loadSpecialties();
-        setupEventListeners();
-      });
+    // Función para obtener la URL base del backend dinámicamente
+    function getBackendBaseUrl() {
+      const hostname = window.location.hostname;
+      const protocol = window.location.protocol;
+      const port = '4000';
 
-      // Configurar event listeners
-      function setupEventListeners() {
-        // Búsqueda en tiempo real
-        const searchInput = document.getElementById('doctor-search');
-        if (searchInput) {
-          searchInput.addEventListener('input', function (e) {
-            filterDoctors(e.target.value);
-          });
-        }
+      if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '') {
+        return 'http://localhost:4000';
       }
+      return `${protocol}//${hostname}`;
+    }
 
-      // Cargar información del admin actual
-      async function loadCurrentAdmin() {
-        try {
-          const token = localStorage.getItem('access_token');
-          const payload = JSON.parse(atob(token.split('.')[1]));
-          const email = payload.email;
+    // ✅ NUEVA FUNCIÓN FETCH unificada
+    async function fetchCall(endpoint, options = {}) {
+      const token = localStorage.getItem('access_token');
+      if (!token) throw new Error('No autenticado');
 
-          const admin = await apiCall(
-            `/dashboard/admins/me/${encodeURIComponent(email)}`,
-          );
+      const baseUrl = getBackendBaseUrl();
+      const url = `${baseUrl}${endpoint}`;
 
-          if (admin && admin.id) {
-            currentAdminId = admin.id;
-            console.log('Admin actual cargado:', admin);
-          } else {
-            throw new Error('No se pudo obtener información del admin');
-          }
-        } catch (error) {
-          console.error('Error loading current admin:', error);
-          alert('Error al obtener información del administrador actual');
-        }
-      }
-
-      // Cargar lista de especialidades
-      async function loadSpecialties() {
-        try {
-          const specialties = await apiCall('/specialties');
-          allSpecialties = specialties;
-
-          console.log('🔄 Especialidades cargadas:', specialties);
-          console.log('📊 Total de especialidades:', specialties.length);
-
-          // Llenar el selector de especialidades
-          const specialtySelect = document.getElementById(
-            'doctor-especialidad-id',
-          );
-          specialtySelect.innerHTML =
-            '<option value="">Seleccionar...</option>';
-
-          specialties.forEach((specialty) => {
-            const option = document.createElement('option');
-            option.value = specialty.id;
-            option.textContent = specialty.nombre;
-            specialtySelect.appendChild(option);
-          });
-        } catch (error) {
-          console.error('❌ Error loading specialties:', error);
-        }
-      }
-
-      // Cargar lista de doctores
-      async function loadDoctors() {
-        try {
-          const doctors = await apiCall('/dashboard/doctors');
-          console.log('Doctors data from stored procedure:', doctors);
-          allDoctors = doctors;
-          renderDoctors(doctors);
-        } catch (error) {
-          console.error('Error loading doctors:', error);
-          document.getElementById('doctors-table').innerHTML =
-            '<tr><td colspan="7" class="empty-state">Error al cargar doctores</td></tr>';
-        }
-      }
-
-      // Renderizar tabla de doctores
-      function renderDoctors(doctors) {
-        const tbody = document.getElementById('doctors-table');
-
-        if (!doctors || doctors.length === 0) {
-          tbody.innerHTML =
-            '<tr><td colspan="7" class="empty-state">No hay doctores registrados</td></tr>';
-          return;
-        }
-
-        console.log('🎯 Renderizando doctores:', doctors.length);
-
-        tbody.innerHTML = doctors
-          .map((doctor) => {
-            const specialtyLabel = getSpecialtyLabel(doctor.especialidad);
-            console.log(
-              `📋 Doctor: ${doctor.nombre}, Especialidad: ${specialtyLabel}`,
-            );
-
-            return `
-            <tr>
-                <td>
-                    <div class="patient-card">
-                        <div class="patient-avatar">${getInitials(doctor.nombre)}</div>
-                        <div class="patient-info">
-                            <h4>${doctor.nombre}</h4>
-                            <p>${specialtyLabel}</p>
-                        </div>
-                    </div>
-                </td>
-                <td>${specialtyLabel}</td>
-                <td>${doctor.email || 'N/A'}</td>
-                <td>${doctor.cedula_profesional || 'N/A'}</td>
-                <td>
-                    <div style="font-weight: 600; color: #1f2937;">${doctor.total_pacientes ? parseInt(doctor.total_pacientes) : 0}</div>
-                    <div style="font-size: 0.75rem; color: #6b7280;">pacientes</div>
-                </td>
-                <td>
-                    <span class="badge ${doctor.cuenta_activa === true || doctor.cuenta_activa === 'true' ? 'badge-success' : 'badge-danger'}">
-                        ${doctor.cuenta_activa === true || doctor.cuenta_activa === 'true' ? 'Activo' : 'Inactivo'}
-                    </span>
-                </td>
-                <td>
-                    <div class="action-buttons">
-                        <button class="btn btn-primary btn-sm" onclick="editDoctor('${doctor.id}')">
-                            Editar
-                        </button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteDoctor('${doctor.id}')">
-                            Eliminar
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `;
-          })
-          .join('');
-      }
-
-      // Filtrar doctores
-      function filterDoctors(searchTerm) {
-        const filtered = allDoctors.filter(
-          (doctor) =>
-            doctor.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (doctor.email &&
-              doctor.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (doctor.especialidad &&
-              doctor.especialidad
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase())) ||
-            (doctor.cedula_profesional &&
-              doctor.cedula_profesional
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase())),
-        );
-        renderDoctors(filtered);
-      }
-
-      // Mostrar modal para crear doctor
-      async function showCreateDoctorModal() {
-        try {
-          // Asegurar que las especialidades estén cargadas
-          if (allSpecialties.length === 0) {
-            await loadSpecialties();
-          }
-
-          currentDoctorId = null;
-          document.getElementById('doctor-modal-title').textContent =
-            'Crear Nuevo Doctor';
-          document.getElementById('doctor-form').reset();
-          document.getElementById('doctor-account-fields').style.display =
-            'block';
-          openModal('doctor-modal');
-        } catch (error) {
-          console.error('Error al preparar modal de doctor:', error);
-          alert('Error al cargar las especialidades');
-        }
-      }
-
-      // Editar doctor
-      async function editDoctor(doctorId) {
-        try {
-          const doctor = await apiCall(`/doctors/${doctorId}`);
-          currentDoctorId = doctorId;
-
-          document.getElementById('doctor-modal-title').textContent =
-            'Editar Doctor';
-          document.getElementById('doctor-id').value = doctor.id;
-          document.getElementById('doctor-nombre').value = doctor.nombre;
-          document.getElementById('doctor-cedula').value =
-            doctor.cedula_profesional || '';
-
-          // Asegurar que las especialidades estén cargadas
-          if (allSpecialties.length === 0) {
-            await loadSpecialties();
-          }
-
-          // Manejar la especialidad - varias formas posibles
-          let specialtyId = '';
-          if (doctor.especialidad_id) {
-            specialtyId = doctor.especialidad_id;
-          } else if (doctor.especialidad && doctor.especialidad.id) {
-            specialtyId = doctor.especialidad.id;
-          } else if (
-            doctor.especialidad &&
-            typeof doctor.especialidad === 'string'
-          ) {
-            // Si especialidad es un string (ID), usarlo directamente
-            specialtyId = doctor.especialidad;
-          }
-
-          document.getElementById('doctor-especialidad-id').value =
-            specialtyId || '';
-          document.getElementById('doctor-telefono').value =
-            doctor.telefono || '';
-
-          // Ocultar campos de cuenta en edición
-          document.getElementById('doctor-account-fields').style.display =
-            'none';
-
-          openModal('doctor-modal');
-        } catch (error) {
-          console.error('Error loading doctor:', error);
-          alert('Error al cargar los datos del doctor');
-        }
-      }
-
-      // Guardar doctor (crear o actualizar)
-      async function saveDoctor() {
-        // Validar campos requeridos manualmente
-        const nombre = document.getElementById('doctor-nombre').value.trim();
-        const cedula = document.getElementById('doctor-cedula').value.trim();
-        const especialidadId = document.getElementById(
-          'doctor-especialidad-id',
-        ).value;
-
-        if (!nombre) {
-          alert('El nombre del doctor es requerido.');
-          document.getElementById('doctor-nombre').focus();
-          return;
-        }
-
-        if (!cedula) {
-          alert('La cédula profesional es requerida.');
-          document.getElementById('doctor-cedula').focus();
-          return;
-        }
-
-        // Validar que la especialidad seleccionada existe
-        if (especialidadId) {
-          const specialtyExists = allSpecialties.some(
-            (s) => s.id === especialidadId,
-          );
-          if (!specialtyExists) {
-            alert('La especialidad seleccionada no es válida.');
-            return;
-          }
-        }
-
-        // Solo validar email, password y especialidad para creación de nuevo doctor
-        if (!currentDoctorId) {
-          if (!especialidadId) {
-            alert('La especialidad es requerida para nuevos doctores.');
-            document.getElementById('doctor-especialidad-id').focus();
-            return;
-          }
-          const email = document.getElementById('doctor-email').value.trim();
-          const password = document.getElementById('doctor-password').value;
-
-          if (!email) {
-            alert('El email es requerido.');
-            document.getElementById('doctor-email').focus();
-            return;
-          }
-
-          if (!password) {
-            alert('La contraseña es requerida.');
-            document.getElementById('doctor-password').focus();
-            return;
-          }
-        }
-
-        try {
-          if (currentDoctorId) {
-            // Actualizar doctor existente
-            const telefono = document.getElementById('doctor-telefono').value;
-            // Procesar especialidad_id - si está vacío, usar null explícitamente
-            const finalEspecialidadId =
-              especialidadId && especialidadId.trim() !== ''
-                ? especialidadId
-                : null;
-
-            const doctorData = {
-              nombre: nombre,
-              cedula_profesional: cedula,
-              especialidad_id: finalEspecialidadId,
-              telefono: telefono,
-            };
-
-            console.log('Actualizando doctor con datos:', doctorData);
-
-            const updateResult = await apiCall(
-              `/dashboard/doctors/${currentDoctorId}`,
-              {
-                method: 'PATCH',
-                body: JSON.stringify(doctorData),
-              },
-            );
-
-            console.log('Resultado de actualización:', updateResult);
-
-            // Verificar que la actualización fue exitosa obteniendo el doctor actualizado
-            const updatedDoctor = await apiCall(`/dashboard/doctors`, {
-              method: 'GET',
-            });
-
-            const currentDoctor = updatedDoctor.find(
-              (d) => d.id === currentDoctorId,
-            );
-            console.log('Doctor después de actualización:', currentDoctor);
-
-            if (currentDoctor && currentDoctor.especialidad !== undefined) {
-              alert('Doctor actualizado exitosamente');
-            } else {
-              console.warn(
-                'La especialidad del doctor no se reflejó correctamente en la respuesta',
-              );
-              alert(
-                'Doctor actualizado, pero verificar que los cambios se reflejen correctamente',
-              );
-            }
-          } else {
-            // Crear nuevo doctor usando el endpoint de dashboard
-            // Validar que el admin ID esté disponible antes de crear un doctor
-            if (!currentAdminId) {
-              alert(
-                'Error: No se pudo obtener la información del administrador. Por favor, recarga la página.',
-              );
-              return;
-            }
-
-            const email = document.getElementById('doctor-email').value;
-            const password = document.getElementById('doctor-password').value;
-            const telefono = document.getElementById('doctor-telefono').value;
-
-            const doctorData = {
-              nombre: nombre,
-              email: email,
-              password: password,
-              especialidad_id: especialidadId || null,
-              cedula_profesional: cedula,
-              telefono: telefono,
-              admin_id: getCurrentAdminId(),
-            };
-
-            await apiCall('/dashboard/doctors', {
-              method: 'POST',
-              body: JSON.stringify(doctorData),
-            });
-            alert('Doctor creado exitosamente');
-          }
-
-          closeModal('doctor-modal');
-
-          // Forzar recarga de doctores después de un breve delay para asegurar que la DB se actualice
-          setTimeout(() => {
-            loadDoctors();
-          }, 500);
-        } catch (error) {
-          console.error('Error saving doctor:', error);
-          alert(
-            'Error al guardar el doctor: ' +
-              (error.message || 'Error desconocido'),
-          );
-        }
-      }
-
-      // Eliminar doctor
-      async function deleteDoctor(doctorId) {
-        if (
-          !confirm(
-            '¿Estás seguro de que deseas eliminar este doctor? Esta acción no se puede deshacer.',
-          )
-        ) {
-          return;
-        }
-
-        try {
-          await apiCall(`/doctors/${doctorId}`, {
-            method: 'DELETE',
-          });
-          alert('Doctor eliminado exitosamente');
-          loadDoctors(); // Recargar la lista
-        } catch (error) {
-          console.error('Error deleting doctor:', error);
-          alert(
-            'Error al eliminar el doctor: ' +
-              (error.message || 'Error desconocido'),
-          );
-        }
-      }
-
-      // Funciones auxiliares
-      function getInitials(name) {
-        return name
-          .split(' ')
-          .map((n) => n[0])
-          .join('')
-          .toUpperCase()
-          .substring(0, 2);
-      }
-
-      function getSpecialtyLabel(specialty) {
-        console.log('🔍 getSpecialtyLabel input:', specialty);
-
-        // Si es null o undefined
-        if (!specialty) {
-          console.log('❌ Specialty es null/undefined');
-          return 'No especificado';
-        }
-
-        // Si ya es un objeto con nombre
-        if (typeof specialty === 'object' && specialty !== null) {
-          console.log('✅ Specialty es objeto:', specialty);
-          return specialty.nombre || 'No especificado';
-        }
-
-        // Si es un string (podría ser ID o nombre)
-        if (typeof specialty === 'string') {
-          console.log('📝 Specialty es string:', specialty);
-
-          // Buscar en allSpecialties por ID
-          const foundById = allSpecialties.find((s) => s.id === specialty);
-          if (foundById) {
-            console.log('✅ Encontrado por ID:', foundById.nombre);
-            return foundById.nombre;
-          }
-
-          // Buscar por nombre (por si acaso)
-          const foundByName = allSpecialties.find(
-            (s) => s.nombre.toLowerCase() === specialty.toLowerCase(),
-          );
-          if (foundByName) {
-            console.log('✅ Encontrado por nombre:', foundByName.nombre);
-            return foundByName.nombre;
-          }
-
-          console.log('❌ No encontrado en allSpecialties');
-          return specialty; // Devolver el string tal cual
-        }
-
-        console.log('❌ Tipo no manejado:', typeof specialty);
-        return 'No especificado';
-      }
-
-      function openModal(modalId) {
-        document.getElementById(modalId).classList.add('active');
-      }
-
-      function closeModal(modalId) {
-        document.getElementById(modalId).classList.remove('active');
-      }
-
-      // Función para obtener el ID del admin actual
-      function getCurrentAdminId() {
-        if (!currentAdminId) {
-          throw new Error(
-            'Admin ID no disponible. Asegúrate de que la página se ha cargado completamente.',
-          );
-        }
-        return currentAdminId;
-      }
-
-      // API Call function
-      async function apiCall(endpoint, options = {}) {
-        const token = localStorage.getItem('access_token');
-        if (!token) {
-          console.error('No access token found');
-          throw new Error('No autenticado');
-        }
-
-      const defaultOptions = {
+      const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-      };
+        ...options,
+      });
 
-      // Función para obtener la URL base del backend dinámicamente
-      function getBackendBaseUrl() {
-        const hostname = window.location.hostname;
-        const protocol = window.location.protocol;
-        const port = '4000';
-        
-        // Si es localhost, usar localhost
-        if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '') {
-          return 'http://localhost:4000';
+      if (response.status === 401) {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        window.parent.location.href = '/auth/login';
+        return null;
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || `Error ${response.status}`);
+      }
+
+      if (options.method === 'DELETE') {
+        return { success: true };
+      }
+
+      return await response.json();
+    }
+
+    // Inicializar cuando el documento esté listo
+    document.addEventListener('DOMContentLoaded', async function () {
+      await loadCurrentAdmin();
+      loadDoctors();
+      loadSpecialties();
+      setupEventListeners();
+    });
+
+    // Configurar event listeners
+    function setupEventListeners() {
+      const searchInput = document.getElementById('doctor-search');
+      if (searchInput) {
+        searchInput.addEventListener('input', function (e) {
+          filterDoctors(e.target.value);
+        });
+      }
+    }
+
+    // Cargar información del admin actual
+    async function loadCurrentAdmin() {
+      try {
+        const token = localStorage.getItem('access_token');
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const email = payload.email;
+
+        const admin = await fetchCall(`/dashboard/admins/me/${encodeURIComponent(email)}`);
+
+        if (admin && admin.id) {
+          currentAdminId = admin.id;
+          console.log('Admin actual cargado:', admin);
+        } else {
+          throw new Error('No se pudo obtener información del admin');
         }
-        
-        // Para cualquier otra IP (GCP u otra), usar esa IP
-        return `${protocol}//${hostname}:${port}`;
+      } catch (error) {
+        console.error('Error loading current admin:', error);
+        alert('Error al obtener información del administrador actual');
+      }
+    }
+
+    // Cargar lista de especialidades
+    async function loadSpecialties() {
+      try {
+        const specialties = await fetchCall('/specialties');
+        allSpecialties = specialties;
+
+        console.log('🔄 Especialidades cargadas:', specialties);
+        console.log('📊 Total de especialidades:', specialties.length);
+
+        const specialtySelect = document.getElementById('doctor-especialidad-id');
+        specialtySelect.innerHTML = '<option value="">Seleccionar...</option>';
+
+        specialties.forEach((specialty) => {
+          const option = document.createElement('option');
+          option.value = specialty.id;
+          option.textContent = specialty.nombre;
+          specialtySelect.appendChild(option);
+        });
+      } catch (error) {
+        console.error('❌ Error loading specialties:', error);
+      }
+    }
+
+    // Cargar lista de doctores
+    async function loadDoctors() {
+      try {
+        const doctors = await fetchCall('/dashboard/doctors');
+        console.log('Doctors data:', doctors);
+        allDoctors = doctors;
+        renderDoctors(doctors);
+      } catch (error) {
+        console.error('Error loading doctors:', error);
+        document.getElementById('doctors-table').innerHTML =
+          '<tr><td colspan="7" class="empty-state">Error al cargar doctores</td></tr>';
+      }
+    }
+
+    // Renderizar tabla de doctores
+    function renderDoctors(doctors) {
+      const tbody = document.getElementById('doctors-table');
+
+      if (!doctors || doctors.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No hay doctores registrados</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = doctors.map(doctor => {
+        const specialtyLabel = getSpecialtyLabel(doctor.especialidad);
+
+        return `
+                <tr>
+                    <td>
+                        <div class="patient-card">
+                            <div class="patient-avatar">${getInitials(doctor.nombre)}</div>
+                            <div class="patient-info">
+                                <h4>${doctor.nombre}</h4>
+                                <p>${specialtyLabel}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${specialtyLabel}</td>
+                    <td>${doctor.email || 'N/A'}</td>
+                    <td>${doctor.cedula_profesional || 'N/A'}</td>
+                    <td>
+                        <div style="font-weight: 600; color: #1f2937;">${doctor.total_pacientes ? parseInt(doctor.total_pacientes) : 0}</div>
+                        <div style="font-size: 0.75rem; color: #6b7280;">pacientes</div>
+                    </td>
+                    <td>
+                        <span class="badge ${doctor.cuenta_activa === true || doctor.cuenta_activa === 'true' ? 'badge-success' : 'badge-danger'}">
+                            ${doctor.cuenta_activa === true || doctor.cuenta_activa === 'true' ? 'Activo' : 'Inactivo'}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary btn-sm" onclick="editDoctor('${doctor.id}')">Editar</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteDoctor('${doctor.id}')">Eliminar</button>
+                        </div>
+                    </td>
+                </table>
+            `;
+      }).join('');
+    }
+
+    // Filtrar doctores
+    function filterDoctors(searchTerm) {
+      const filtered = allDoctors.filter(doctor =>
+        doctor.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (doctor.email && doctor.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (doctor.especialidad && doctor.especialidad.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (doctor.cedula_profesional && doctor.cedula_profesional.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+      renderDoctors(filtered);
+    }
+
+    // Mostrar modal para crear doctor
+    async function showCreateDoctorModal() {
+      try {
+        if (allSpecialties.length === 0) {
+          await loadSpecialties();
+        }
+        currentDoctorId = null;
+        document.getElementById('doctor-modal-title').textContent = 'Crear Nuevo Doctor';
+        document.getElementById('doctor-form').reset();
+        document.getElementById('doctor-account-fields').style.display = 'block';
+        openModal('doctor-modal');
+      } catch (error) {
+        console.error('Error al preparar modal de doctor:', error);
+        alert('Error al cargar las especialidades');
+      }
+    }
+
+    // Editar doctor
+    async function editDoctor(doctorId) {
+      try {
+        const doctor = await fetchCall(`/doctors/${doctorId}`);
+        currentDoctorId = doctorId;
+
+        document.getElementById('doctor-modal-title').textContent = 'Editar Doctor';
+        document.getElementById('doctor-id').value = doctor.id;
+        document.getElementById('doctor-nombre').value = doctor.nombre;
+        document.getElementById('doctor-cedula').value = doctor.cedula_profesional || '';
+
+        if (allSpecialties.length === 0) {
+          await loadSpecialties();
+        }
+
+        let specialtyId = '';
+        if (doctor.especialidad_id) {
+          specialtyId = doctor.especialidad_id;
+        } else if (doctor.especialidad && doctor.especialidad.id) {
+          specialtyId = doctor.especialidad.id;
+        } else if (doctor.especialidad && typeof doctor.especialidad === 'string') {
+          specialtyId = doctor.especialidad;
+        }
+
+        document.getElementById('doctor-especialidad-id').value = specialtyId || '';
+        document.getElementById('doctor-telefono').value = doctor.telefono || '';
+        document.getElementById('doctor-account-fields').style.display = 'none';
+
+        openModal('doctor-modal');
+      } catch (error) {
+        console.error('Error loading doctor:', error);
+        alert('Error al cargar los datos del doctor');
+      }
+    }
+
+    // Guardar doctor
+    async function saveDoctor() {
+      const nombre = document.getElementById('doctor-nombre').value.trim();
+      const cedula = document.getElementById('doctor-cedula').value.trim();
+      const especialidadId = document.getElementById('doctor-especialidad-id').value;
+
+      if (!nombre) {
+        alert('El nombre del doctor es requerido.');
+        document.getElementById('doctor-nombre').focus();
+        return;
+      }
+
+      if (!cedula) {
+        alert('La cédula profesional es requerida.');
+        document.getElementById('doctor-cedula').focus();
+        return;
+      }
+
+      if (especialidadId) {
+        const specialtyExists = allSpecialties.some(s => s.id === especialidadId);
+        if (!specialtyExists) {
+          alert('La especialidad seleccionada no es válida.');
+          return;
+        }
+      }
+
+      if (!currentDoctorId) {
+        if (!especialidadId) {
+          alert('La especialidad es requerida para nuevos doctores.');
+          document.getElementById('doctor-especialidad-id').focus();
+          return;
+        }
+        const email = document.getElementById('doctor-email').value.trim();
+        const password = document.getElementById('doctor-password').value;
+
+        if (!email) {
+          alert('El email es requerido.');
+          document.getElementById('doctor-email').focus();
+          return;
+        }
+
+        if (!password) {
+          alert('La contraseña es requerida.');
+          document.getElementById('doctor-password').focus();
+          return;
+        }
       }
 
       try {
-        const baseUrl = window.parent.getBackendBaseUrl
-          ? window.parent.getBackendBaseUrl()
-          : getBackendBaseUrl();
-        const response = await fetch(`${baseUrl}${endpoint}`, {
-          ...defaultOptions,
-          ...options,
-        });
+        if (currentDoctorId) {
+          const telefono = document.getElementById('doctor-telefono').value;
+          const finalEspecialidadId = especialidadId && especialidadId.trim() !== '' ? especialidadId : null;
 
-          if (response.status === 401) {
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token');
-            window.parent.location.href = '/auth/login';
-            return null;
+          const doctorData = {
+            nombre: nombre,
+            cedula_profesional: cedula,
+            especialidad_id: finalEspecialidadId,
+            telefono: telefono,
+          };
+
+          await fetchCall(`/dashboard/doctors/${currentDoctorId}`, {
+            method: 'PATCH',
+            body: JSON.stringify(doctorData),
+          });
+
+          alert('Doctor actualizado exitosamente');
+        } else {
+          if (!currentAdminId) {
+            alert('Error: No se pudo obtener la información del administrador. Por favor, recarga la página.');
+            return;
           }
 
-          if (!response.ok) {
-            const error = await response.text();
-            throw new Error(error || 'Error en la solicitud');
-          }
+          const email = document.getElementById('doctor-email').value;
+          const password = document.getElementById('doctor-password').value;
+          const telefono = document.getElementById('doctor-telefono').value;
 
-          return await response.json();
-        } catch (error) {
-          console.error('API Error:', error);
-          alert(error.message || 'Error al conectar con el servidor');
-          throw error;
+          const doctorData = {
+            nombre: nombre,
+            email: email,
+            password: password,
+            especialidad_id: especialidadId || null,
+            cedula_profesional: cedula,
+            telefono: telefono,
+            admin_id: currentAdminId,
+          };
+
+          await fetchCall('/dashboard/doctors', {
+            method: 'POST',
+            body: JSON.stringify(doctorData),
+          });
+          alert('Doctor creado exitosamente');
         }
+
+        closeModal('doctor-modal');
+        setTimeout(() => loadDoctors(), 500);
+      } catch (error) {
+        console.error('Error saving doctor:', error);
+        alert('Error al guardar el doctor: ' + (error.message || 'Error desconocido'));
       }
+    }
 
-      // Close modal when clicking outside
-      document.addEventListener('click', function (e) {
-        if (e.target.classList.contains('modal')) {
-          e.target.classList.remove('active');
-        }
-      });
-    </script>
-  </body>
+    // Eliminar doctor
+    async function deleteDoctor(doctorId) {
+      if (!confirm('¿Estás seguro de que deseas eliminar este doctor?')) return;
+
+      try {
+        await fetchCall(`/doctors/${doctorId}`, { method: 'DELETE' });
+        alert('Doctor eliminado exitosamente');
+        loadDoctors();
+      } catch (error) {
+        console.error('Error deleting doctor:', error);
+        alert('Error al eliminar el doctor: ' + (error.message || 'Error desconocido'));
+      }
+    }
+
+    // Funciones auxiliares
+    function getInitials(name) {
+      return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+    }
+
+    function getSpecialtyLabel(specialty) {
+      if (!specialty) return 'No especificado';
+      if (typeof specialty === 'object' && specialty !== null) return specialty.nombre || 'No especificado';
+      if (typeof specialty === 'string') {
+        const foundById = allSpecialties.find(s => s.id === specialty);
+        if (foundById) return foundById.nombre;
+        const foundByName = allSpecialties.find(s => s.nombre.toLowerCase() === specialty.toLowerCase());
+        if (foundByName) return foundByName.nombre;
+        return specialty;
+      }
+      return 'No especificado';
+    }
+
+    function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
+    function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
+
+    // Close modal when clicking outside
+    document.addEventListener('click', function (e) {
+      if (e.target.classList.contains('modal')) {
+        e.target.classList.remove('active');
+      }
+    });
+  </script>
+</body>
+
 </html>

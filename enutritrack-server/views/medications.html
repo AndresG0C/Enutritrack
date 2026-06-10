@@ -818,71 +818,71 @@
         let allPatients = [];
         let currentMedicamentoId = null;
 
+        // Función para obtener la URL base del backend dinámicamente
+        function getBackendBaseUrl() {
+            const hostname = window.location.hostname;
+            const protocol = window.location.protocol;
+
+            if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '') {
+                return 'http://localhost:4000';
+            }
+            return `${protocol}//${hostname}`;
+        }
+
+        // Función fetch unificada
+        async function fetchCall(endpoint, options = {}) {
+            const token = localStorage.getItem('access_token');
+            if (!token) throw new Error('No autenticado');
+
+            const baseUrl = getBackendBaseUrl();
+            const url = `${baseUrl}${endpoint}`;
+
+            const response = await fetch(url, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                ...options
+            });
+
+            if (response.status === 401) {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+                window.parent.location.href = '/auth/login';
+                return null;
+            }
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || `Error ${response.status}`);
+            }
+
+            if (options.method === 'DELETE') {
+                return { success: true };
+            }
+
+            return await response.json();
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', function () {
-            console.log('Medicamentos page loaded - CSS corregido');
+            console.log('Medicamentos page loaded');
             loadMedicamentos();
             loadPatients();
-
-            // Forzar scroll al inicio y resetear posición
             window.scrollTo(0, 0);
-            document.body.scrollTop = 0;
-            document.documentElement.scrollTop = 0;
-
-            // Asegurar que el body ocupe el espacio completo
             document.body.style.minHeight = '100vh';
             document.body.style.width = '100%';
         });
 
-        // API calls
-        async function apiCall(endpoint, options = {}) {
-            const token = localStorage.getItem('access_token');
-            if (!token) {
-                window.location.href = '/auth/login';
-                return;
-            }
-
-            const defaultOptions = {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-            };
-
-            try {
-                const response = await fetch(endpoint, {
-                    ...defaultOptions,
-                    ...options,
-                });
-
-                if (response.status === 401) {
-                    localStorage.removeItem('access_token');
-                    localStorage.removeItem('refresh_token');
-                    window.location.href = '/auth/login';
-                    return null;
-                }
-
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.message || 'Error en la solicitud');
-                }
-
-                return await response.json();
-            } catch (error) {
-                console.error('API Error:', error);
-                alert(error.message || 'Error al conectar con el servidor');
-                throw error;
-            }
-        }
-
         // Load medicamentos
         async function loadMedicamentos() {
             try {
-                const medicamentos = await apiCall('/medicamentos');
+                const medicamentos = await fetchCall('/medicamentos');
                 allMedicamentos = medicamentos;
                 renderMedicamentos(medicamentos);
                 updateStats(medicamentos);
             } catch (error) {
+                console.error('Error:', error);
                 document.getElementById('medicamentos-table').innerHTML =
                     '<tr><td colspan="8" class="empty-state">Error al cargar medicamentos</td></tr>';
             }
@@ -891,7 +891,7 @@
         // Load patients for dropdown
         async function loadPatients() {
             try {
-                const patients = await apiCall('/dashboard/patients');
+                const patients = await fetchCall('/dashboard/patients');
                 allPatients = patients;
 
                 const select = document.getElementById('medicamento-usuario');
@@ -909,8 +909,7 @@
             const tbody = document.getElementById('medicamentos-table');
 
             if (!medicamentos || medicamentos.length === 0) {
-                tbody.innerHTML =
-                    '<tr><td colspan="8" class="empty-state">No hay medicamentos registrados</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No hay medicamentos registrados</td></tr>';
                 return;
             }
 
@@ -924,11 +923,11 @@
                             <p>${medicamento.usuario?.email || 'N/A'}</p>
                         </div>
                     </div>
-                </td>
+                 </td>
                 <td>
                     <strong>${medicamento.nombre}</strong>
                     ${medicamento.notas ? `<br><small style="color: #6b7280;">${medicamento.notas}</small>` : ''}
-                </td>
+                 </td>
                 <td>${medicamento.dosis || 'N/A'}</td>
                 <td>${medicamento.frecuencia || 'N/A'}</td>
                 <td>${new Date(medicamento.fecha_inicio).toLocaleDateString('es-MX')}</td>
@@ -937,23 +936,13 @@
                     <span class="badge ${medicamento.activo ? 'badge-success' : 'badge-danger'}">
                         ${medicamento.activo ? 'Activo' : 'Inactivo'}
                     </span>
-                </td>
+                 </td>
                 <td>
                     <div class="action-buttons">
-                        <button class="btn btn-primary btn-sm" onclick="editMedicamento('${medicamento.id}')">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="14" height="14">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                            </svg>
-                            Editar
-                        </button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteMedicamento('${medicamento.id}')">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="14" height="14">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                            </svg>
-                            Eliminar
-                        </button>
+                        <button class="btn btn-primary btn-sm" onclick="editMedicamento('${medicamento.id}')">Editar</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteMedicamento('${medicamento.id}')">Eliminar</button>
                     </div>
-                </td>
+                 </td>
             </tr>
         `).join('');
         }
@@ -1010,10 +999,10 @@
             openModal('medicamento-modal');
         }
 
-        // Edit medicamento - VERSIÓN CORREGIDA
+        // Edit medicamento
         async function editMedicamento(medicamentoId) {
             try {
-                const medicamento = await apiCall(`/medicamentos/${medicamentoId}`);
+                const medicamento = await fetchCall(`/medicamentos/${medicamentoId}`);
                 currentMedicamentoId = medicamentoId;
 
                 document.getElementById('medicamento-modal-title').textContent = 'Editar Medicamento';
@@ -1022,13 +1011,10 @@
                 document.getElementById('medicamento-nombre').value = medicamento.nombre;
                 document.getElementById('medicamento-dosis').value = medicamento.dosis || '';
                 document.getElementById('medicamento-frecuencia').value = medicamento.frecuencia || '';
-
-                // Formatear fechas para el input type="date" (YYYY-MM-DD)
                 document.getElementById('medicamento-fecha-inicio').value =
                     medicamento.fecha_inicio ? medicamento.fecha_inicio.split('T')[0] : '';
                 document.getElementById('medicamento-fecha-fin').value =
                     medicamento.fecha_fin ? medicamento.fecha_fin.split('T')[0] : '';
-
                 document.getElementById('medicamento-notas').value = medicamento.notas || '';
                 document.getElementById('medicamento-activo').checked = medicamento.activo;
 
@@ -1039,7 +1025,7 @@
             }
         }
 
-        // Save medicamento - SOLUCIÓN CORRECTA
+        // Save medicamento
         async function saveMedicamento() {
             const form = document.getElementById('medicamento-form');
             if (!form.checkValidity()) {
@@ -1056,60 +1042,39 @@
                     return;
                 }
 
-                // Convertir strings a objetos Date
-                const fechaInicioDate = new Date(fechaInicio);
-                const fechaFinDate = fechaFin ? new Date(fechaFin) : null;
-
                 const medicamentoData = {
                     usuario_id: document.getElementById('medicamento-usuario').value,
                     nombre: document.getElementById('medicamento-nombre').value,
                     dosis: document.getElementById('medicamento-dosis').value || null,
                     frecuencia: document.getElementById('medicamento-frecuencia').value || null,
-                    // Enviar como objetos Date
-                    fecha_inicio: fechaInicioDate,
-                    fecha_fin: fechaFinDate,
+                    fecha_inicio: new Date(fechaInicio),
+                    fecha_fin: fechaFin ? new Date(fechaFin) : null,
                     notas: document.getElementById('medicamento-notas').value || null,
                     activo: document.getElementById('medicamento-activo').checked
                 };
 
-                console.log('📤 Datos a enviar:', medicamentoData);
-                console.log('📅 Tipo de fecha_inicio:', typeof medicamentoData.fecha_inicio);
-                console.log('📅 Tipo de fecha_fin:', typeof medicamentoData.fecha_fin);
-
-                const endpoint = currentMedicamentoId
-                    ? `/medicamentos/${currentMedicamentoId}`
-                    : '/medicamentos';
-
+                const endpoint = currentMedicamentoId ? `/medicamentos/${currentMedicamentoId}` : '/medicamentos';
                 const method = currentMedicamentoId ? 'PATCH' : 'POST';
 
-                const response = await apiCall(endpoint, {
-                    method: method,
-                    body: JSON.stringify(medicamentoData)
-                });
+                await fetchCall(endpoint, { method: method, body: JSON.stringify(medicamentoData) });
 
                 alert(`Medicamento ${currentMedicamentoId ? 'actualizado' : 'creado'} exitosamente`);
                 closeModal('medicamento-modal');
                 loadMedicamentos();
-
             } catch (error) {
                 console.error('Error saving medicamento:', error);
                 alert('Error al guardar el medicamento: ' + (error.message || 'Error desconocido'));
             }
         }
 
-        // Delete medicamento function (versión simple)
+        // Delete medicamento
         async function deleteMedicamento(medicamentoId) {
-            if (!confirm('¿Estás seguro de que deseas eliminar este medicamento? Esta acción no se puede deshacer.')) {
-                return;
-            }
+            if (!confirm('¿Estás seguro de que deseas eliminar este medicamento?')) return;
 
             try {
-                const response = await apiCall(`/medicamentos/${medicamentoId}`, {
-                    method: 'DELETE'
-                });
-
+                await fetchCall(`/medicamentos/${medicamentoId}`, { method: 'DELETE' });
                 alert('Medicamento eliminado exitosamente');
-                loadMedicamentos(); // Recargar la lista
+                loadMedicamentos();
             } catch (error) {
                 console.error('Error deleting medicamento:', error);
                 alert('Error al eliminar el medicamento: ' + (error.message || 'Error desconocido'));
@@ -1118,38 +1083,20 @@
 
         // Utility functions
         function getInitials(name) {
-            return name
-                .split(' ')
-                .map(n => n[0])
-                .join('')
-                .toUpperCase()
-                .substring(0, 2);
+            return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
         }
 
-        function openModal(modalId) {
-            document.getElementById(modalId).classList.add('active');
-        }
+        function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
+        function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
 
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
-
-        // Close modal when clicking outside
         document.getElementById('medicamento-modal').addEventListener('click', (e) => {
             if (e.target === document.getElementById('medicamento-modal')) {
                 closeModal('medicamento-modal');
             }
         });
 
-        // Forzar scroll al top cuando se carga la página
-        window.onload = function () {
-            window.scrollTo(0, 0);
-        };
-
-        // También intentar inmediatamente
-        setTimeout(() => {
-            window.scrollTo(0, 0);
-        }, 10);
+        window.onload = function () { window.scrollTo(0, 0); };
+        setTimeout(() => { window.scrollTo(0, 0); }, 10);
     </script>
 </body>
 
