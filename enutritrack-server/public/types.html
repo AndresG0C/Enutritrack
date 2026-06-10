@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -299,7 +300,8 @@
             gap: 0.5rem;
         }
 
-        .loading, .empty-state {
+        .loading,
+        .empty-state {
             text-align: center;
             padding: 3rem;
             color: #6b7280;
@@ -470,13 +472,14 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
             <h1>Gestión de Tipos</h1>
             <button class="btn btn-primary" id="new-type-btn">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
                 Nuevo Tipo
             </button>
@@ -517,9 +520,11 @@
                     <div class="filter-group">
                         <div class="search-box">
                             <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
-                            <input type="text" id="search-actividades" placeholder="Buscar actividades..." onkeyup="filterTable('actividades')">
+                            <input type="text" id="search-actividades" placeholder="Buscar actividades..."
+                                onkeyup="filterTable('actividades')">
                         </div>
                         <select class="filter-select" id="categoria-actividades" onchange="filterTable('actividades')">
                             <option value="">Todas las categorías</option>
@@ -541,7 +546,8 @@
                         <tr>
                             <td colspan="6" class="loading">
                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="24" height="24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                 </svg>
                                 <p>Cargando actividades...</p>
                             </td>
@@ -558,11 +564,14 @@
                     <div class="filter-group">
                         <div class="search-box">
                             <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
-                            <input type="text" id="search-recomendaciones" placeholder="Buscar recomendaciones..." onkeyup="filterTable('recomendaciones')">
+                            <input type="text" id="search-recomendaciones" placeholder="Buscar recomendaciones..."
+                                onkeyup="filterTable('recomendaciones')">
                         </div>
-                        <select class="filter-select" id="categoria-recomendaciones" onchange="filterTable('recomendaciones')">
+                        <select class="filter-select" id="categoria-recomendaciones"
+                            onchange="filterTable('recomendaciones')">
                             <option value="">Todas las categorías</option>
                         </select>
                     </div>
@@ -594,9 +603,11 @@
                     <div class="filter-group">
                         <div class="search-box">
                             <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
-                            <input type="text" id="search-alertas" placeholder="Buscar alertas..." onkeyup="filterTable('alertas')">
+                            <input type="text" id="search-alertas" placeholder="Buscar alertas..."
+                                onkeyup="filterTable('alertas')">
                         </div>
                         <select class="filter-select" id="tipo-alertas" onchange="filterTable('alertas')">
                             <option value="">Todos los tipos</option>
@@ -633,9 +644,11 @@
                     <div class="filter-group">
                         <div class="search-box">
                             <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
-                            <input type="text" id="search-consultas" placeholder="Buscar consultas..." onkeyup="filterTable('consultas')">
+                            <input type="text" id="search-consultas" placeholder="Buscar consultas..."
+                                onkeyup="filterTable('consultas')">
                         </div>
                     </div>
                 </div>
@@ -667,7 +680,8 @@
                 <h3 id="type-modal-title">Nuevo Tipo</h3>
                 <button class="modal-close" onclick="closeModal()">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
@@ -675,7 +689,7 @@
                 <form id="type-form">
                     <input type="hidden" id="type-id">
                     <input type="hidden" id="type-category">
-                    
+
                     <!-- Form content will be dynamically loaded based on type -->
                     <div id="form-content"></div>
                 </form>
@@ -686,7 +700,7 @@
                 </button>
                 <button class="btn btn-primary" onclick="saveType()">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
                     Guardar
                 </button>
@@ -706,8 +720,58 @@
             consultas: []
         };
 
+        // Función para obtener la URL base del backend dinámicamente
+        function getBackendBaseUrl() {
+            const hostname = window.location.hostname;
+            const protocol = window.location.protocol;
+
+            if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '') {
+                return 'http://localhost:4000';
+            }
+            return `${protocol}//${hostname}`;
+        }
+
+        // Función fetch unificada
+        async function fetchCall(endpoint, options = {}) {
+            const token = localStorage.getItem('access_token');
+
+            const defaultHeaders = {
+                'Content-Type': 'application/json'
+            };
+
+            if (token && (endpoint.includes('tipos-actividad') || endpoint.includes('tipos-recomendacion'))) {
+                defaultHeaders['Authorization'] = `Bearer ${token}`;
+            }
+
+            const baseUrl = getBackendBaseUrl();
+            const url = `${baseUrl}${endpoint}`;
+
+            const response = await fetch(url, {
+                headers: defaultHeaders,
+                ...options
+            });
+
+            if (response.status === 401) {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+                window.parent.location.href = '/auth/login';
+                return null;
+            }
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || `Error ${response.status}`);
+            }
+
+            if (options.method === 'DELETE') {
+                return { success: true };
+            }
+
+            return await response.json();
+        }
+
         // Inicializar
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             initializeTabs();
             loadAllData();
         });
@@ -715,27 +779,28 @@
         // Inicializar pestañas
         function initializeTabs() {
             document.querySelectorAll('.tab').forEach(tab => {
-                tab.addEventListener('click', function() {
+                tab.addEventListener('click', function () {
                     switchTab(this.getAttribute('data-tab'));
                 });
             });
 
-            document.getElementById('new-type-btn').addEventListener('click', function() {
-                showCreateModal(currentTab);
-            });
+            const newTypeBtn = document.getElementById('new-type-btn');
+            if (newTypeBtn) {
+                newTypeBtn.addEventListener('click', function () {
+                    showCreateModal(currentTab);
+                });
+            }
         }
 
         // Cambiar pestaña
         function switchTab(tabName) {
             currentTab = tabName;
-            
-            // Actualizar pestañas activas
+
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.classList.remove('active');
             });
             document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-            
-            // Mostrar contenido de la pestaña seleccionada
+
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.remove('active');
             });
@@ -753,98 +818,52 @@
             updateStats();
         }
 
-        // Cargar actividades - CORREGIDO
+        // Cargar actividades
         async function loadActividades() {
             try {
-                const token = localStorage.getItem('access_token');
-                const headers = {
-                    'Content-Type': 'application/json'
-                };
-                
-                if (token) {
-                    headers['Authorization'] = `Bearer ${token}`;
-                }
-
-                const response = await fetch('/tipos-actividad', {
-                    headers: headers
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Error ${response.status}: ${response.statusText}`);
-                }
-
-                allData.actividades = await response.json();
+                allData.actividades = await fetchCall('/tipos-actividad');
                 renderActividades(allData.actividades);
                 populateCategoriaFilter('actividades', allData.actividades);
             } catch (error) {
                 console.error('Error cargando actividades:', error);
-                document.getElementById('actividades-table').innerHTML = 
+                document.getElementById('actividades-table').innerHTML =
                     '<tr><td colspan="6" class="empty-state">Error al cargar actividades: ' + error.message + '</td></tr>';
             }
         }
 
-        // Cargar recomendaciones - CORREGIDO
+        // Cargar recomendaciones
         async function loadRecomendaciones() {
             try {
-                const token = localStorage.getItem('access_token');
-                const headers = {
-                    'Content-Type': 'application/json'
-                };
-                
-                if (token) {
-                    headers['Authorization'] = `Bearer ${token}`;
-                }
-
-                const response = await fetch('/tipos-recomendacion', {
-                    headers: headers
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Error ${response.status}: ${response.statusText}`);
-                }
-
-                allData.recomendaciones = await response.json();
+                allData.recomendaciones = await fetchCall('/tipos-recomendacion');
                 renderRecomendaciones(allData.recomendaciones);
                 populateCategoriaFilter('recomendaciones', allData.recomendaciones);
             } catch (error) {
                 console.error('Error cargando recomendaciones:', error);
-                document.getElementById('recomendaciones-table').innerHTML = 
+                document.getElementById('recomendaciones-table').innerHTML =
                     '<tr><td colspan="4" class="empty-state">Error al cargar recomendaciones: ' + error.message + '</td></tr>';
             }
         }
 
-        // Cargar alertas - SIN CAMBIOS (ya funciona)
+        // Cargar alertas
         async function loadAlertas() {
             try {
-                const response = await fetch('/tipos-alerta');
-                
-                if (!response.ok) {
-                    throw new Error(`Error ${response.status}: ${response.statusText}`);
-                }
-                
-                allData.alertas = await response.json();
+                allData.alertas = await fetchCall('/tipos-alerta');
                 renderAlertas(allData.alertas);
             } catch (error) {
                 console.error('Error cargando alertas:', error);
-                document.getElementById('alertas-table').innerHTML = 
-                    '<tr><td colspan="5" class="empty-state">Error al cargar alertas</td></tr>';
+                document.getElementById('alertas-table').innerHTML =
+                    '<td><td colspan="5" class="empty-state">Error al cargar alertas</td></tr>';
             }
         }
 
-        // Cargar consultas - SIN CAMBIOS (ya funciona)
+        // Cargar consultas
         async function loadConsultas() {
             try {
-                const response = await fetch('/tipos-consulta');
-                
-                if (!response.ok) {
-                    throw new Error(`Error ${response.status}: ${response.statusText}`);
-                }
-                
-                allData.consultas = await response.json();
+                allData.consultas = await fetchCall('/tipos-consulta');
                 renderConsultas(allData.consultas);
             } catch (error) {
                 console.error('Error cargando consultas:', error);
-                document.getElementById('consultas-table').innerHTML = 
+                document.getElementById('consultas-table').innerHTML =
                     '<tr><td colspan="4" class="empty-state">Error al cargar consultas</td></tr>';
             }
         }
@@ -852,100 +871,100 @@
         // Renderizar actividades
         function renderActividades(actividades) {
             const tbody = document.getElementById('actividades-table');
-            
+
             if (!actividades || actividades.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No hay actividades registradas</td></tr>';
                 return;
             }
 
             tbody.innerHTML = actividades.map(actividad => `
-                <tr>
-                    <td><strong>${actividad.nombre}</strong></td>
-                    <td>${actividad.categoria ? `<span class="categoria-tag">${actividad.categoria}</span>` : '<span style="color: #9ca3af;">Sin categoría</span>'}</td>
-                    <td><span class="badge met-badge">${actividad.met_value} MET</span></td>
-                    <td><span class="badge ${getIntensityBadgeClass(actividad.met_value)}">${getIntensityLabel(actividad.met_value)}</span></td>
-                    <td><small style="color: #6b7280;">${actividad.descripcion || 'Sin descripción'}</small></td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="btn btn-primary btn-sm" onclick="editItem('actividades', '${actividad.id}')">Editar</button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteItem('actividades', '${actividad.id}')">Eliminar</button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
+            <tr>
+                <td><strong>${actividad.nombre}</strong></td>
+                <td>${actividad.categoria ? `<span class="categoria-tag">${actividad.categoria}</span>` : '<span style="color: #9ca3af;">Sin categoría</span>'}</td>
+                <td><span class="badge met-badge">${actividad.met_value} MET</span></td>
+                <td><span class="badge ${getIntensityBadgeClass(actividad.met_value)}">${getIntensityLabel(actividad.met_value)}</span></td>
+                <td><small style="color: #6b7280;">${actividad.descripcion || 'Sin descripción'}</small></td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary btn-sm" onclick="editItem('actividades', '${actividad.id}')">Editar</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteItem('actividades', '${actividad.id}')">Eliminar</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
         }
 
         // Renderizar recomendaciones
         function renderRecomendaciones(recomendaciones) {
             const tbody = document.getElementById('recomendaciones-table');
-            
+
             if (!recomendaciones || recomendaciones.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No hay recomendaciones registradas</td></tr>';
                 return;
             }
 
             tbody.innerHTML = recomendaciones.map(recomendacion => `
-                <tr>
-                    <td><strong>${recomendacion.nombre}</strong></td>
-                    <td>${recomendacion.categoria ? `<span class="categoria-tag">${recomendacion.categoria}</span>` : '<span style="color: #9ca3af;">Sin categoría</span>'}</td>
-                    <td><small style="color: #6b7280;">${recomendacion.descripcion || 'Sin descripción'}</small></td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="btn btn-primary btn-sm" onclick="editItem('recomendaciones', '${recomendacion.id}')">Editar</button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteItem('recomendaciones', '${recomendacion.id}')">Eliminar</button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
+            <tr>
+                <td><strong>${recomendacion.nombre}</strong></td>
+                <td>${recomendacion.categoria ? `<span class="categoria-tag">${recomendacion.categoria}</span>` : '<span style="color: #9ca3af;">Sin categoría</span>'}</td>
+                <td><small style="color: #6b7280;">${recomendacion.descripcion || 'Sin descripción'}</small></td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary btn-sm" onclick="editItem('recomendaciones', '${recomendacion.id}')">Editar</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteItem('recomendaciones', '${recomendacion.id}')">Eliminar</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
         }
 
-        // Renderizar alertas - SIN CAMBIOS
+        // Renderizar alertas
         function renderAlertas(alertas) {
             const tbody = document.getElementById('alertas-table');
-            
+
             if (!alertas || alertas.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No hay alertas registradas</td></tr>';
+                tbody.innerHTML = '<td><td colspan="5" class="empty-state">No hay alertas registradas</td></tr>';
                 return;
             }
 
             tbody.innerHTML = alertas.map(alerta => `
-                <tr>
-                    <td><strong>${alerta.nombre}</strong></td>
-                    <td>${alerta.categoria ? `<span class="categoria-tag">${alerta.categoria.nombre}</span>` : '<span style="color: #9ca3af;">Sin categoría</span>'}</td>
-                    <td><span class="badge ${alerta.es_automatica ? 'badge-success' : 'badge-warning'}">${alerta.es_automatica ? 'Automática' : 'Manual'}</span></td>
-                    <td><small style="color: #6b7280;">${alerta.descripcion || 'Sin descripción'}</small></td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="btn btn-primary btn-sm" onclick="editItem('alertas', '${alerta.id}')">Editar</button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteItem('alertas', '${alerta.id}')">Eliminar</button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
+            <tr>
+                <td><strong>${alerta.nombre}</strong></td>
+                <td>${alerta.categoria ? `<span class="categoria-tag">${alerta.categoria.nombre}</span>` : '<span style="color: #9ca3af;">Sin categoría</span>'}</td>
+                <td><span class="badge ${alerta.es_automatica ? 'badge-success' : 'badge-warning'}">${alerta.es_automatica ? 'Automática' : 'Manual'}</span></td>
+                <td><small style="color: #6b7280;">${alerta.descripcion || 'Sin descripción'}</small></td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary btn-sm" onclick="editItem('alertas', '${alerta.id}')">Editar</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteItem('alertas', '${alerta.id}')">Eliminar</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
         }
 
-        // Renderizar consultas - SIN CAMBIOS
+        // Renderizar consultas
         function renderConsultas(consultas) {
             const tbody = document.getElementById('consultas-table');
-            
+
             if (!consultas || consultas.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No hay consultas registradas</td></tr>';
                 return;
             }
 
             tbody.innerHTML = consultas.map(consulta => `
-                <tr>
-                    <td><strong>${consulta.nombre}</strong></td>
-                    <td><span class="badge badge-info">${consulta.duracion_minutos || 30} min</span></td>
-                    <td><small style="color: #6b7280;">${consulta.descripcion || 'Sin descripción'}</small></td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="btn btn-primary btn-sm" onclick="editItem('consultas', '${consulta.id}')">Editar</button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteItem('consultas', '${consulta.id}')">Eliminar</button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
+            <tr>
+                <td><strong>${consulta.nombre}</strong></td>
+                <td><span class="badge badge-info">${consulta.duracion_minutos || 30} min</span></td>
+                <td><small style="color: #6b7280;">${consulta.descripcion || 'Sin descripción'}</small></td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary btn-sm" onclick="editItem('consultas', '${consulta.id}')">Editar</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteItem('consultas', '${consulta.id}')">Eliminar</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
         }
 
         // Actualizar estadísticas
@@ -959,13 +978,14 @@
         // Poblar filtros de categoría
         function populateCategoriaFilter(type, data) {
             const select = document.getElementById(`categoria-${type}`);
+            if (!select) return;
+
             const categorias = [...new Set(data.map(item => item.categoria).filter(Boolean))];
-            
-            // Limpiar opciones existentes (excepto la primera)
+
             while (select.children.length > 1) {
                 select.removeChild(select.lastChild);
             }
-            
+
             categorias.forEach(categoria => {
                 const option = document.createElement('option');
                 option.value = categoria;
@@ -977,27 +997,24 @@
         // Filtrar tablas
         function filterTable(type) {
             const searchTerm = document.getElementById(`search-${type}`).value.toLowerCase();
-            let filtered = allData[type].filter(item => 
+            let filtered = allData[type].filter(item =>
                 item.nombre.toLowerCase().includes(searchTerm) ||
                 (item.descripcion && item.descripcion.toLowerCase().includes(searchTerm))
             );
 
-            // Aplicar filtro de categoría si existe
             const categoriaFilter = document.getElementById(`categoria-${type}`);
             if (categoriaFilter && categoriaFilter.value) {
                 filtered = filtered.filter(item => item.categoria === categoriaFilter.value);
             }
 
-            // Aplicar filtro de tipo para alertas
             if (type === 'alertas') {
                 const tipoFilter = document.getElementById('tipo-alertas');
-                if (tipoFilter.value) {
+                if (tipoFilter && tipoFilter.value) {
                     filtered = filtered.filter(item => item.es_automatica === (tipoFilter.value === 'true'));
                 }
             }
 
-            // Renderizar la tabla filtrada
-            switch(type) {
+            switch (type) {
                 case 'actividades': renderActividades(filtered); break;
                 case 'recomendaciones': renderRecomendaciones(filtered); break;
                 case 'alertas': renderAlertas(filtered); break;
@@ -1017,41 +1034,26 @@
             openModal();
         }
 
-        // Editar ítem - CORREGIDO para actividades y recomendaciones
-        // También necesitamos corregir la función de edición para alertas
+        // Editar ítem
         async function editItem(type, itemId) {
             try {
                 let endpoint;
-                let headers = {
-                    'Content-Type': 'application/json'
-                };
-
-                const token = localStorage.getItem('access_token');
-                if (token && (type === 'actividades' || type === 'recomendaciones')) {
-                    headers['Authorization'] = `Bearer ${token}`;
-                }
-
-                switch(type) {
+                switch (type) {
                     case 'actividades': endpoint = `/tipos-actividad/${itemId}`; break;
                     case 'recomendaciones': endpoint = `/tipos-recomendacion/${itemId}`; break;
                     case 'alertas': endpoint = `/tipos-alerta/${itemId}`; break;
                     case 'consultas': endpoint = `/tipos-consulta/${itemId}`; break;
+                    default: throw new Error('Tipo no válido');
                 }
 
-                const response = await fetch(endpoint, { headers: headers });
+                const item = await fetchCall(endpoint);
 
-                if (!response.ok) {
-                    throw new Error(`Error ${response.status}: ${response.statusText}`);
-                }
-
-                const item = await response.json();
-                
                 currentType = type;
                 editingItem = itemId;
                 document.getElementById('type-modal-title').textContent = `Editar ${getTypeName(type)}`;
                 document.getElementById('type-category').value = type;
                 document.getElementById('type-id').value = itemId;
-                
+
                 loadFormContent(type, item);
                 openModal();
             } catch (error) {
@@ -1060,10 +1062,10 @@
             }
         }
 
-        // Cargar contenido del formulario
+        // Cargar contenido del formulario (mantener igual, solo cambiar fetch)
         function loadFormContent(type, item = null) {
             const formContent = document.getElementById('form-content');
-            
+
             const forms = {
                 actividades: getActividadForm(item),
                 recomendaciones: getRecomendacionForm(item),
@@ -1072,8 +1074,7 @@
             };
 
             formContent.innerHTML = forms[type] || '<p>Formulario no disponible</p>';
-            
-            // Si hay datos del ítem, llenar el formulario
+
             if (item) {
                 setTimeout(() => {
                     Object.keys(item).forEach(key => {
@@ -1095,380 +1096,138 @@
             }
         }
 
-        // Obtener formulario para actividades
-        function getActividadForm(item) {
-            return `
-                <div class="form-group">
-                    <label class="form-label">Nombre de la Actividad *</label>
-                    <input type="text" class="form-control" id="nombre" placeholder="Ej: Caminata rápida, Natación, Ciclismo" required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Categoría</label>
-                    <input type="text" class="form-control" id="categoria" placeholder="Ej: Cardio, Fuerza, Deportes">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Valor MET (Equivalente Metabólico) *</label>
-                    <input type="number" class="form-control" id="met_value" 
-                           placeholder="3.5" step="0.1" min="1" max="20" required
-                           oninput="updateIntensityIndicator()">
-                    
-                    <div class="info-box">
-                        <h4>¿Qué es el valor MET?</h4>
-                        <p>El MET (Metabolic Equivalent of Task) mide la intensidad de una actividad física. 
-                            Un MET es la energía que consumes en reposo.</p>
-                        
-                        <div class="intensity-indicator">
-                            <div class="intensity-dot active" id="intensity-low"></div>
-                            <div class="intensity-dot" id="intensity-moderate"></div>
-                            <div class="intensity-dot" id="intensity-high"></div>
-                            <div style="font-size: 0.75rem; color: #6b7280;">
-                                Intensidad: <span id="intensity-label">Baja</span>
-                            </div>
-                        </div>
-                        
-                        <div class="example-text" id="calorie-example">
-                            Ejemplo: Una persona de 70kg quemaría aproximadamente 0 calorías en 30 minutos.
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Descripción</label>
-                    <textarea class="form-control form-textarea" id="descripcion" 
-                              placeholder="Describe la actividad, técnica, beneficios..."></textarea>
-                </div>
-            `;
-        }
-
-        // Obtener formulario para recomendaciones
-        function getRecomendacionForm(item) {
-            return `
-                <div class="form-group">
-                    <label class="form-label">Nombre de la Recomendación *</label>
-                    <input type="text" class="form-control" id="nombre" placeholder="Ej: Hidratación adecuada, Dieta balanceada" required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Categoría</label>
-                    <input type="text" class="form-control" id="categoria" placeholder="Ej: Nutrición, Ejercicio, Descanso">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Descripción</label>
-                    <textarea class="form-control form-textarea" id="descripcion" 
-                              placeholder="Describe la recomendación, beneficios, aplicación..."></textarea>
-                </div>
-            `;
-        }
-
-    // Y también corregir el formulario de alertas para mostrar mejor el campo categoria_id
-        function getAlertaForm(item) {
-            return `
-                <div class="form-group">
-                    <label class="form-label">Nombre de la Alerta *</label>
-                    <input type="text" class="form-control" id="nombre" maxlength="100" placeholder="Ej: Alerta de hidratación" required>
-                    <small class="form-text text-muted">Máximo 100 caracteres</small>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Descripción</label>
-                    <textarea class="form-control form-textarea" id="descripcion" 
-                            placeholder="Describe el propósito de la alerta..."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">ID de Categoría *</label>
-                    <input type="text" class="form-control" id="categoria_id" 
-                        placeholder="Ej: 123e4567-e89b-12d3-a456-426614174000" 
-                        pattern="[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}" 
-                        required>
-                    <small class="form-text text-muted">Debe ser un UUID válido</small>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Es Automática</label>
-                    <select class="form-control" id="es_automatica">
-                        <option value="false">No</option>
-                        <option value="true">Sí</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Configuración de Validación (JSON)</label>
-                    <textarea class="form-control form-textarea" id="config_validacion" 
-                            placeholder='{"parametro": "valor"}'></textarea>
-                    <small class="form-text text-muted">Opcional - Debe ser un objeto JSON válido</small>
-                </div>
-            `;
-        }
-
-        // Obtener formulario para consultas
-        function getConsultaForm(item) {
-            return `
-                <div class="form-group">
-                    <label class="form-label">Nombre de la Consulta *</label>
-                    <input type="text" class="form-control" id="nombre" maxlength="100" placeholder="Ej: Consulta general, Seguimiento" required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Descripción</label>
-                    <textarea class="form-control form-textarea" id="descripcion" 
-                              placeholder="Describe el tipo de consulta..."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Duración (minutos)</label>
-                    <input type="number" class="form-control" id="duracion_minutos" min="1" value="30">
-                </div>
-            `;
-        }
-
-        // Guardar tipo - CORREGIDO según los DTOs
-            async function saveType() {
-                const form = document.getElementById('type-form');
-                if (!form.checkValidity()) {
-                    form.reportValidity();
-                    return;
-                }
-
-                const type = document.getElementById('type-category').value;
-                const itemId = document.getElementById('type-id').value;
-
-                // Construir datos según el tipo con validación específica
-                let data = {};
-                let isValid = true;
-                let errorMessage = '';
-
-                try {
-                    switch(type) {
-                        case 'actividades':
-                            const nombreActividad = document.getElementById('nombre').value.trim();
-                            const metValue = parseFloat(document.getElementById('met_value').value);
-                            
-                            if (!nombreActividad) {
-                                isValid = false;
-                                errorMessage = 'El nombre de la actividad es requerido';
-                                break;
-                            }
-                            if (isNaN(metValue) || metValue <= 0) {
-                                isValid = false;
-                                errorMessage = 'El valor MET debe ser un número mayor a 0';
-                                break;
-                            }
-
-                            data = {
-                                nombre: nombreActividad,
-                                met_value: metValue
-                            };
-
-                            // Campos opcionales
-                            const categoriaActividad = document.getElementById('categoria').value.trim();
-                            const descripcionActividad = document.getElementById('descripcion').value.trim();
-                            
-                            if (categoriaActividad) data.categoria = categoriaActividad;
-                            if (descripcionActividad) data.descripcion = descripcionActividad;
-                            break;
-
-                        case 'recomendaciones':
-                            const nombreRecomendacion = document.getElementById('nombre').value.trim();
-                            
-                            if (!nombreRecomendacion) {
-                                isValid = false;
-                                errorMessage = 'El nombre de la recomendación es requerido';
-                                break;
-                            }
-
-                            data = {
-                                nombre: nombreRecomendacion
-                            };
-
-                            // Campos opcionales
-                            const categoriaRecomendacion = document.getElementById('categoria').value.trim();
-                            const descripcionRecomendacion = document.getElementById('descripcion').value.trim();
-                            
-                            if (categoriaRecomendacion) data.categoria = categoriaRecomendacion;
-                            if (descripcionRecomendacion) data.descripcion = descripcionRecomendacion;
-                            break;
-
-                        case 'alertas':
-                            const nombreAlerta = document.getElementById('nombre').value.trim();
-                            const categoriaIdAlerta = document.getElementById('categoria_id').value.trim();
-                            
-                            if (!nombreAlerta) {
-                                isValid = false;
-                                errorMessage = 'El nombre de la alerta es requerido';
-                                break;
-                            }
-                            if (nombreAlerta.length > 100) {
-                                isValid = false;
-                                errorMessage = 'El nombre de la alerta no puede tener más de 100 caracteres';
-                                break;
-                            }
-                            if (!categoriaIdAlerta) {
-                                isValid = false;
-                                errorMessage = 'El ID de categoría es requerido';
-                                break;
-                            }
-                            // Validación básica de UUID
-                            if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(categoriaIdAlerta)) {
-                                isValid = false;
-                                errorMessage = 'El ID de categoría debe ser un UUID válido';
-                                break;
-                            }
-
-                            data = {
-                                nombre: nombreAlerta,
-                                categoria_id: categoriaIdAlerta
-                            };
-
-                            // Campos opcionales
-                            const descripcionAlerta = document.getElementById('descripcion').value.trim();
-                            const esAutomatica = document.getElementById('es_automatica').value === 'true';
-                            const configValidacion = document.getElementById('config_validacion').value.trim();
-                            
-                            if (descripcionAlerta) data.descripcion = descripcionAlerta;
-                            data.es_automatica = esAutomatica;
-                            
-                            if (configValidacion) {
-                                try {
-                                    data.config_validacion = JSON.parse(configValidacion);
-                                } catch (e) {
-                                    isValid = false;
-                                    errorMessage = 'La configuración de validación debe ser un JSON válido';
-                                    break;
-                                }
-                            }
-                            break;
-
-                        case 'consultas':
-                            const nombreConsulta = document.getElementById('nombre').value.trim();
-                            
-                            if (!nombreConsulta) {
-                                isValid = false;
-                                errorMessage = 'El nombre de la consulta es requerido';
-                                break;
-                            }
-                            if (nombreConsulta.length > 100) {
-                                isValid = false;
-                                errorMessage = 'El nombre de la consulta no puede tener más de 100 caracteres';
-                                break;
-                            }
-
-                            data = {
-                                nombre: nombreConsulta
-                            };
-
-                            // Campos opcionales
-                            const descripcionConsulta = document.getElementById('descripcion').value.trim();
-                            const duracionMinutos = parseInt(document.getElementById('duracion_minutos').value);
-                            
-                            if (descripcionConsulta) data.descripcion = descripcionConsulta;
-                            if (!isNaN(duracionMinutos) && duracionMinutos >= 1) {
-                                data.duracion_minutos = duracionMinutos;
-                            }
-                            break;
-
-                        default:
-                            isValid = false;
-                            errorMessage = 'Tipo no válido';
-                    }
-
-                    if (!isValid) {
-                        alert('Error de validación: ' + errorMessage);
-                        return;
-                    }
-
-                    // Determinar endpoint y método
-                    let endpoint;
-                    let method = itemId ? 'PATCH' : 'POST';
-                    let headers = {
-                        'Content-Type': 'application/json',
-                    };
-
-                    const token = localStorage.getItem('access_token');
-                    if (token && (type === 'actividades' || type === 'recomendaciones')) {
-                        headers['Authorization'] = `Bearer ${token}`;
-                    }
-
-                    switch(type) {
-                        case 'actividades': 
-                            endpoint = itemId ? `/tipos-actividad/${itemId}` : '/tipos-actividad';
-                            break;
-                        case 'recomendaciones': 
-                            endpoint = itemId ? `/tipos-recomendacion/${itemId}` : '/tipos-recomendacion';
-                            break;
-                        case 'alertas': 
-                            endpoint = itemId ? `/tipos-alerta/${itemId}` : '/tipos-alerta';
-                            break;
-                        case 'consultas': 
-                            endpoint = itemId ? `/tipos-consulta/${itemId}` : '/tipos-consulta';
-                            break;
-                    }
-
-                    console.log('Enviando datos:', data); // Para debugging
-                    console.log('Endpoint:', endpoint); // Para debugging
-                    console.log('Método:', method); // Para debugging
-
-                    const response = await fetch(endpoint, {
-                        method: method,
-                        headers: headers,
-                        body: JSON.stringify(data)
-                    });
-
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        console.error('Error response:', errorText);
-                        throw new Error(`Error ${response.status}: ${response.statusText}. ${errorText}`);
-                    }
-
-                    const result = await response.json();
-                    console.log('Respuesta del servidor:', result);
-
-                    alert(itemId ? 'Tipo actualizado exitosamente' : 'Tipo creado exitosamente');
-                    closeModal();
-                    loadAllData();
-
-                } catch (error) {
-                    console.error('Error guardando tipo:', error);
-                    alert('Error al guardar: ' + error.message);
-                }
-            }
-
-        // Eliminar ítem - CORREGIDO para actividades y recomendaciones
-        async function deleteItem(type, itemId) {
-            if (!confirm('¿Está seguro de que desea eliminar este tipo? Esta acción no se puede deshacer.')) {
+        // Guardar tipo
+        async function saveType() {
+            const form = document.getElementById('type-form');
+            if (!form.checkValidity()) {
+                form.reportValidity();
                 return;
             }
 
-            try {
-                let endpoint;
-                let headers = {
-                    'Content-Type': 'application/json'
-                };
+            const type = document.getElementById('type-category').value;
+            const itemId = document.getElementById('type-id').value;
 
-                const token = localStorage.getItem('access_token');
-                if (token && (type === 'actividades' || type === 'recomendaciones')) {
-                    headers['Authorization'] = `Bearer ${token}`;
+            let data = {};
+            let isValid = true;
+            let errorMessage = '';
+
+            try {
+                switch (type) {
+                    case 'actividades':
+                        const nombreActividad = document.getElementById('nombre').value.trim();
+                        const metValue = parseFloat(document.getElementById('met_value').value);
+
+                        if (!nombreActividad) {
+                            isValid = false;
+                            errorMessage = 'El nombre de la actividad es requerido';
+                            break;
+                        }
+                        if (isNaN(metValue) || metValue <= 0) {
+                            isValid = false;
+                            errorMessage = 'El valor MET debe ser un número mayor a 0';
+                            break;
+                        }
+
+                        data = { nombre: nombreActividad, met_value: metValue };
+                        const categoriaActividad = document.getElementById('categoria').value.trim();
+                        const descripcionActividad = document.getElementById('descripcion').value.trim();
+                        if (categoriaActividad) data.categoria = categoriaActividad;
+                        if (descripcionActividad) data.descripcion = descripcionActividad;
+                        break;
+
+                    case 'recomendaciones':
+                        const nombreRecomendacion = document.getElementById('nombre').value.trim();
+                        if (!nombreRecomendacion) {
+                            isValid = false;
+                            errorMessage = 'El nombre de la recomendación es requerido';
+                            break;
+                        }
+                        data = { nombre: nombreRecomendacion };
+                        const categoriaRecomendacion = document.getElementById('categoria').value.trim();
+                        const descripcionRecomendacion = document.getElementById('descripcion').value.trim();
+                        if (categoriaRecomendacion) data.categoria = categoriaRecomendacion;
+                        if (descripcionRecomendacion) data.descripcion = descripcionRecomendacion;
+                        break;
+
+                    case 'alertas':
+                        const nombreAlerta = document.getElementById('nombre').value.trim();
+                        const categoriaIdAlerta = document.getElementById('categoria_id').value.trim();
+                        if (!nombreAlerta) {
+                            isValid = false;
+                            errorMessage = 'El nombre de la alerta es requerido';
+                            break;
+                        }
+                        if (!categoriaIdAlerta) {
+                            isValid = false;
+                            errorMessage = 'El ID de categoría es requerido';
+                            break;
+                        }
+                        data = { nombre: nombreAlerta, categoria_id: categoriaIdAlerta };
+                        const descripcionAlerta = document.getElementById('descripcion').value.trim();
+                        const esAutomatica = document.getElementById('es_automatica').value === 'true';
+                        if (descripcionAlerta) data.descripcion = descripcionAlerta;
+                        data.es_automatica = esAutomatica;
+                        break;
+
+                    case 'consultas':
+                        const nombreConsulta = document.getElementById('nombre').value.trim();
+                        if (!nombreConsulta) {
+                            isValid = false;
+                            errorMessage = 'El nombre de la consulta es requerido';
+                            break;
+                        }
+                        data = { nombre: nombreConsulta };
+                        const descripcionConsulta = document.getElementById('descripcion').value.trim();
+                        const duracionMinutos = parseInt(document.getElementById('duracion_minutos').value);
+                        if (descripcionConsulta) data.descripcion = descripcionConsulta;
+                        if (!isNaN(duracionMinutos) && duracionMinutos >= 1) {
+                            data.duracion_minutos = duracionMinutos;
+                        }
+                        break;
                 }
 
-                switch(type) {
+                if (!isValid) {
+                    alert('Error de validación: ' + errorMessage);
+                    return;
+                }
+
+                let endpoint;
+                const method = itemId ? 'PATCH' : 'POST';
+
+                switch (type) {
+                    case 'actividades': endpoint = itemId ? `/tipos-actividad/${itemId}` : '/tipos-actividad'; break;
+                    case 'recomendaciones': endpoint = itemId ? `/tipos-recomendacion/${itemId}` : '/tipos-recomendacion'; break;
+                    case 'alertas': endpoint = itemId ? `/tipos-alerta/${itemId}` : '/tipos-alerta'; break;
+                    case 'consultas': endpoint = itemId ? `/tipos-consulta/${itemId}` : '/tipos-consulta'; break;
+                    default: throw new Error('Tipo no válido');
+                }
+
+                await fetchCall(endpoint, { method: method, body: JSON.stringify(data) });
+
+                alert(itemId ? 'Tipo actualizado exitosamente' : 'Tipo creado exitosamente');
+                closeModal();
+                loadAllData();
+            } catch (error) {
+                console.error('Error guardando tipo:', error);
+                alert('Error al guardar: ' + error.message);
+            }
+        }
+
+        // Eliminar ítem
+        async function deleteItem(type, itemId) {
+            if (!confirm('¿Está seguro de que desea eliminar este tipo?')) return;
+
+            try {
+                let endpoint;
+                switch (type) {
                     case 'actividades': endpoint = `/tipos-actividad/${itemId}`; break;
                     case 'recomendaciones': endpoint = `/tipos-recomendacion/${itemId}`; break;
                     case 'alertas': endpoint = `/tipos-alerta/${itemId}`; break;
                     case 'consultas': endpoint = `/tipos-consulta/${itemId}`; break;
+                    default: throw new Error('Tipo no válido');
                 }
 
-                const response = await fetch(endpoint, {
-                    method: 'DELETE',
-                    headers: headers
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Error ${response.status}: ${response.statusText}`);
-                }
-
+                await fetchCall(endpoint, { method: 'DELETE' });
                 alert('Tipo eliminado exitosamente');
                 loadAllData();
             } catch (error) {
@@ -1477,7 +1236,7 @@
             }
         }
 
-        // Funciones de utilidad
+        // Funciones de utilidad (mantener igual)
         function getTypeName(type) {
             const names = {
                 actividades: 'Tipo de Actividad',
@@ -1501,22 +1260,24 @@
         }
 
         function updateIntensityIndicator() {
-            const metValue = parseFloat(document.getElementById('met_value')?.value) || 1;
-            
+            const metValueInput = document.getElementById('met_value');
+            if (!metValueInput) return;
+
+            const metValue = parseFloat(metValueInput.value) || 1;
+
             const lowDot = document.getElementById('intensity-low');
             const moderateDot = document.getElementById('intensity-moderate');
             const highDot = document.getElementById('intensity-high');
-            
+
             if (!lowDot) return;
-            
-            // Reset all dots
+
             lowDot.className = 'intensity-dot';
             moderateDot.className = 'intensity-dot';
             highDot.className = 'intensity-dot';
-            
+
             let intensityLabel = '';
             let intensityColor = '';
-            
+
             if (metValue < 3) {
                 lowDot.className = 'intensity-dot active';
                 intensityLabel = 'Baja';
@@ -1530,14 +1291,18 @@
                 intensityLabel = 'Alta';
                 intensityColor = '#ef4444';
             }
-            
-            document.getElementById('intensity-label').textContent = intensityLabel;
-            document.getElementById('intensity-label').style.color = intensityColor;
-            
-            // Calcular ejemplo de calorías quemadas
+
+            const intensityLabelSpan = document.getElementById('intensity-label');
+            if (intensityLabelSpan) {
+                intensityLabelSpan.textContent = intensityLabel;
+                intensityLabelSpan.style.color = intensityColor;
+            }
+
             const calories = calculateCaloriesBurned(metValue, 70, 30);
-            document.getElementById('calorie-example').innerHTML = 
-                `Ejemplo: Una persona de 70kg quemaría aproximadamente <strong>${calories} calorías</strong> en 30 minutos.`;
+            const calorieExample = document.getElementById('calorie-example');
+            if (calorieExample) {
+                calorieExample.innerHTML = `Ejemplo: Una persona de 70kg quemaría aproximadamente <strong>${calories} calorías</strong> en 30 minutos.`;
+            }
         }
 
         function calculateCaloriesBurned(met, weightKg, minutes) {
@@ -1545,20 +1310,13 @@
             return Math.round(calories);
         }
 
-        function openModal() {
-            document.getElementById('type-modal').classList.add('active');
-        }
+        function openModal() { document.getElementById('type-modal').classList.add('active'); }
+        function closeModal() { document.getElementById('type-modal').classList.remove('active'); }
 
-        function closeModal() {
-            document.getElementById('type-modal').classList.remove('active');
-        }
-
-        // Cerrar modal al hacer clic fuera
         document.getElementById('type-modal').addEventListener('click', (e) => {
-            if (e.target === document.getElementById('type-modal')) {
-                closeModal();
-            }
+            if (e.target === document.getElementById('type-modal')) closeModal();
         });
     </script>
 </body>
+
 </html>

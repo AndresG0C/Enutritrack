@@ -3,28 +3,28 @@ import { nutritionAPI } from "../axios";
 
 // Registros de comida
 export const createFoodRecordRequest = (foodRecordData) =>
-  nutritionAPI.post("/nutrition/records", foodRecordData);
+  nutritionAPI.post("/records", foodRecordData);
 export const addFoodItemRequest = (recordId, foodItemData) =>
-  nutritionAPI.post(`/nutrition/records/${recordId}/items`, foodItemData);
+  nutritionAPI.post(`/records/${recordId}/items`, foodItemData);
 export const getFoodRecordsByUserRequest = (userId) =>
-  nutritionAPI.get(`/nutrition/records/user/${userId}`);
+  nutritionAPI.get(`/records/user/${userId}`);
 export const getDailySummaryRequest = (userId, date) =>
   nutritionAPI.get(
-    `/nutrition/daily-summary/${userId}?date=${date.toISOString()}`
+    `/daily-summary/${userId}?date=${date.toISOString()}`
   );
 export const getFoodRecordByIdRequest = (id) =>
-  nutritionAPI.get(`/nutrition/records/${id}`);
+  nutritionAPI.get(`/records/${id}`);
 export const updateFoodRecordRequest = (id, foodRecordData) =>
-  nutritionAPI.patch(`/nutrition/records/${id}`, foodRecordData);
+  nutritionAPI.patch(`/records/${id}`, foodRecordData);
 export const deleteFoodRecordItemRequest = (itemId) =>
-  nutritionAPI.delete(`/nutrition/records/items/${itemId}`);
+  nutritionAPI.delete(`/records/items/${itemId}`);
 export const deleteFoodRecordRequest = (id) =>
-  nutritionAPI.delete(`/nutrition/records/${id}`);
+  nutritionAPI.delete(`/records/${id}`);
 
 // Alimentos
 export const searchFoodsRequest = (query) =>
-  nutritionAPI.get(`/nutrition/foods/search?q=${encodeURIComponent(query)}`);
+  nutritionAPI.get(`/foods/search?q=${encodeURIComponent(query)}`);
 export const getFoodsByCategoryRequest = (category) =>
-  nutritionAPI.get(`/nutrition/foods/category/${encodeURIComponent(category)}`);
+  nutritionAPI.get(`/foods/category/${encodeURIComponent(category)}`);
 export const createFoodRequest = (foodData) =>
-  nutritionAPI.post("/nutrition/foods", foodData);
+  nutritionAPI.post("/foods", foodData);

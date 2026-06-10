@@ -676,6 +676,52 @@
         let editingAlergias = [];
         let editingMedicamentos = [];
 
+        // Función para obtener la URL base del backend dinámicamente
+        function getBackendBaseUrl() {
+            const hostname = window.location.hostname;
+            const protocol = window.location.protocol;
+
+            if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '') {
+                return 'http://localhost:4000';
+            }
+            return `${protocol}//${hostname}`;
+        }
+
+        // Función fetch unificada
+        async function fetchCall(endpoint, options = {}) {
+            const token = localStorage.getItem('access_token');
+            if (!token) throw new Error('No autenticado');
+
+            const baseUrl = getBackendBaseUrl();
+            const url = `${baseUrl}${endpoint}`;
+
+            const response = await fetch(url, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                ...options
+            });
+
+            if (response.status === 401) {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+                window.parent.location.href = '/auth/login';
+                return null;
+            }
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || `Error ${response.status}`);
+            }
+
+            if (options.method === 'DELETE') {
+                return { success: true };
+            }
+
+            return await response.json();
+        }
+
         // Inicializar
         document.addEventListener('DOMContentLoaded', function () {
             loadPatients();
@@ -684,20 +730,8 @@
         // Cargar lista de pacientes
         async function loadPatients() {
             try {
-                const token = localStorage.getItem('access_token');
-                const response = await fetch('/dashboard/patients', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (response.ok) {
-                    allPatients = await response.json();
-                    populatePatientSelect();
-                } else {
-                    showNotification('Error al cargar pacientes', 'error');
-                }
+                allPatients = await fetchCall('/dashboard/patients');
+                populatePatientSelect();
             } catch (error) {
                 console.error('Error al cargar pacientes:', error);
                 showNotification('Error al cargar pacientes', 'error');
@@ -738,36 +772,11 @@
             }
 
             try {
-                const token = localStorage.getItem('access_token');
-                const response = await fetch(`/medical-history/${patientId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (response.ok) {
-                    currentMedicalHistory = await response.json();
-                    displayMedicalHistory(currentMedicalHistory);
-                } else if (response.status === 404) {
-                    // Si no existe historial, mostrar vacío
-                    currentMedicalHistory = {
-                        condiciones: [],
-                        alergias: [],
-                        medicamentos: []
-                    };
-                    displayMedicalHistory(currentMedicalHistory);
-                } else {
-                    throw new Error('Error al cargar historial médico');
-                }
+                currentMedicalHistory = await fetchCall(`/medical-history/${patientId}`);
+                displayMedicalHistory(currentMedicalHistory);
             } catch (error) {
                 console.error('Error:', error);
-                // Mostrar historial vacío en caso de error
-                currentMedicalHistory = {
-                    condiciones: [],
-                    alergias: [],
-                    medicamentos: []
-                };
+                currentMedicalHistory = { condiciones: [], alergias: [], medicamentos: [] };
                 displayMedicalHistory(currentMedicalHistory);
                 showNotification('Error al cargar historial médico', 'error');
             }
@@ -788,48 +797,34 @@
 
             if (items.length === 0) {
                 listElement.innerHTML = `
-            <div class="empty-state">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                <p>No hay ${getTypeLabel(type)} registradas</p>
-            </div>
-        `;
+                <div class="empty-state">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <p>No hay ${getTypeLabel(type)} registradas</p>
+                </div>
+            `;
                 return;
             }
 
-            listElement.innerHTML = items.map(item => `
-        <div class="history-item" data-item="${item}" data-type="${type}">
-            <div class="item-content">
-                <div class="item-name">${item}</div>
-                <div class="item-meta">${getTypeLabel(type)}</div>
+            listElement.innerHTML = items.map((item, index) => `
+            <div class="history-item" data-item="${item}" data-type="${type}" data-index="${index}">
+                <div class="item-content">
+                    <div class="item-name">${item}</div>
+                    <div class="item-meta">${getTypeLabel(type)}</div>
+                </div>
+                <button class="btn btn-danger btn-sm remove-item-btn" data-type="${type}" data-item="${item}">Eliminar</button>
             </div>
-            
-        </div>
-    `).join('');
-
-            // Agregar event listeners a los botones de eliminar
-            listElement.querySelectorAll('.remove-item-btn').forEach(button => {
-                button.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    const historyItem = this.closest('.history-item');
-                    const itemType = historyItem.dataset.type;
-                    const itemName = historyItem.dataset.item;
-
-                    removeItemFromHistory(itemType, itemName);
-                });
-            });
+        `).join('');
         }
 
         function clearHistoryDisplay() {
             ['condiciones', 'alergias', 'medicamentos'].forEach(type => {
                 document.getElementById(`${type}-list`).innerHTML = `
-                    <div class="empty-state">
-                        <p>Seleccione un paciente para ver el historial</p>
-                    </div>
-                `;
+                <div class="empty-state">
+                    <p>Seleccione un paciente para ver el historial</p>
+                </div>
+            `;
                 document.getElementById(`${type}-count`).textContent = '0';
             });
         }
@@ -854,7 +849,6 @@
                 return;
             }
 
-            // Inicializar arrays de edición con los datos actuales
             editingCondiciones = [...(currentMedicalHistory.condiciones || [])];
             editingAlergias = [...(currentMedicalHistory.alergias || [])];
             editingMedicamentos = [...(currentMedicalHistory.medicamentos || [])];
@@ -887,31 +881,10 @@
 
         // Remover item durante edición
         function removeEditingItem(type, index) {
-            console.log(`Eliminando item de ${type} en índice ${index}`);
-
-            let editingArray;
-
-            switch (type) {
-                case 'condiciones':
-                    editingArray = editingCondiciones;
-                    break;
-                case 'alergias':
-                    editingArray = editingAlergias;
-                    break;
-                case 'medicamentos':
-                    editingArray = editingMedicamentos;
-                    break;
-                default:
-                    console.error('Tipo no válido:', type);
-                    return;
-            }
-
+            const editingArray = getEditingArray(type);
             if (index > -1 && index < editingArray.length) {
-                const removedItem = editingArray.splice(index, 1)[0];
+                editingArray.splice(index, 1);
                 updatePreviewLists();
-                console.log(`Item "${removedItem}" eliminado de ${type}. Array actual:`, editingArray);
-            } else {
-                console.error('Índice fuera de rango:', index);
             }
         }
 
@@ -922,31 +895,18 @@
             }
 
             try {
-                const token = localStorage.getItem('access_token');
-
-                // Crear una copia del array actual sin el item a eliminar
                 const updatedItems = (currentMedicalHistory[type] || []).filter(i => i !== item);
-
                 const updateData = {};
                 updateData[type] = updatedItems;
 
-                const response = await fetch(`/medical-history/${currentPatientId}`, {
+                await fetchCall(`/medical-history/${currentPatientId}`, {
                     method: 'PATCH',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
                     body: JSON.stringify(updateData)
                 });
 
-                if (response.ok) {
-                    showNotification('Item eliminado exitosamente', 'success');
-                    // Actualizar el historial localmente
-                    currentMedicalHistory[type] = updatedItems;
-                    displayItems(type, updatedItems);
-                } else {
-                    throw new Error('Error al eliminar item');
-                }
+                showNotification('Item eliminado exitosamente', 'success');
+                currentMedicalHistory[type] = updatedItems;
+                displayItems(type, updatedItems);
             } catch (error) {
                 console.error('Error:', error);
                 showNotification('Error al eliminar el item: ' + error.message, 'error');
@@ -969,29 +929,15 @@
             }
 
             previewElement.innerHTML = items.map((item, index) => `
-        <div class="preview-item" data-item="${item}" data-index="${index}" data-type="${type}">
-            <span>${item}</span>
-            <button type="button" class="modal-close remove-preview-item" title="Eliminar ${item}">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
-    `).join('');
-
-            // Agregar event listeners a los botones de eliminar en el preview
-            previewElement.querySelectorAll('.remove-preview-item').forEach(button => {
-                button.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    const previewItem = this.closest('.preview-item');
-                    const itemType = previewItem.dataset.type;
-                    const itemIndex = parseInt(previewItem.dataset.index);
-
-                    removeEditingItem(itemType, itemIndex);
-                });
-            });
+            <div class="preview-item" data-item="${item}" data-index="${index}" data-type="${type}">
+                <span>${item}</span>
+                <button type="button" class="modal-close remove-preview-item" title="Eliminar ${item}">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        `).join('');
         }
 
         // Guardar historial médico
@@ -1009,23 +955,10 @@
             };
 
             try {
-                const token = localStorage.getItem('access_token');
-                const response = await fetch('/medical-history', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(historyData)
-                });
-
-                if (response.ok) {
-                    showNotification('Historial médico guardado exitosamente', 'success');
-                    closeModal('edit-history-modal');
-                    loadPatientHistory(); // Recargar el historial
-                } else {
-                    throw new Error('Error al guardar historial médico');
-                }
+                await fetchCall('/medical-history', { method: 'POST', body: JSON.stringify(historyData) });
+                showNotification('Historial médico guardado exitosamente', 'success');
+                closeModal('edit-history-modal');
+                loadPatientHistory();
             } catch (error) {
                 console.error('Error:', error);
                 showNotification('Error al guardar el historial médico: ' + error.message, 'error');
@@ -1035,17 +968,10 @@
         // Funciones de utilidad
         function getEditingArray(type) {
             switch (type) {
-                case 'condicion':
-                case 'condiciones':
-                    return editingCondiciones;
-                case 'alergia':
-                case 'alergias':
-                    return editingAlergias;
-                case 'medicamento':
-                case 'medicamentos':
-                    return editingMedicamentos;
-                default:
-                    return [];
+                case 'condicion': case 'condiciones': return editingCondiciones;
+                case 'alergia': case 'alergias': return editingAlergias;
+                case 'medicamento': case 'medicamentos': return editingMedicamentos;
+                default: return [];
             }
         }
 
@@ -1053,10 +979,7 @@
             const labels = {
                 'condiciones': 'condiciones médicas',
                 'alergias': 'alergias',
-                'medicamentos': 'medicamentos',
-                'condicion': 'condición médica',
-                'alergia': 'alergia',
-                'medicamento': 'medicamento'
+                'medicamentos': 'medicamentos'
             };
             return labels[type] || type;
         }
@@ -1065,15 +988,9 @@
             return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
         }
 
-        function openModal(modalId) {
-            document.getElementById(modalId).classList.add('active');
-        }
+        function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
+        function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
 
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
-
-        // Mostrar notificaciones
         function showNotification(message, type) {
             const notification = document.getElementById('notification');
             notification.textContent = message;
@@ -1085,32 +1002,26 @@
             }, 3000);
         }
 
-        // Cerrar modal al hacer clic fuera
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.classList.remove('active');
-                }
+                if (e.target === modal) modal.classList.remove('active');
             });
         });
 
-        // Agregar esta función al final de tu script para manejar eventos delegados
+        // Eventos delegados
         document.addEventListener('click', function (e) {
-            // Para items del historial principal
-            if (e.target.closest('.history-item .remove-item-btn')) {
+            const removeBtn = e.target.closest('.remove-item-btn');
+            if (removeBtn) {
                 e.preventDefault();
-                const button = e.target.closest('.remove-item-btn');
-                const historyItem = button.closest('.history-item');
-                const itemType = historyItem.dataset.type;
-                const itemName = historyItem.dataset.item;
+                const itemType = removeBtn.dataset.type;
+                const itemName = removeBtn.dataset.item;
                 removeItemFromHistory(itemType, itemName);
             }
 
-            // Para items del preview en el modal
-            if (e.target.closest('.preview-item .remove-preview-item')) {
+            const removePreviewBtn = e.target.closest('.remove-preview-item');
+            if (removePreviewBtn) {
                 e.preventDefault();
-                const button = e.target.closest('.remove-preview-item');
-                const previewItem = button.closest('.preview-item');
+                const previewItem = removePreviewBtn.closest('.preview-item');
                 const itemType = previewItem.dataset.type;
                 const itemIndex = parseInt(previewItem.dataset.index);
                 removeEditingItem(itemType, itemIndex);

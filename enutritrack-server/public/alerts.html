@@ -757,7 +757,13 @@
                 </thead>
                 <tbody id="alertas-table">
                     <tr>
-                        <td colspan="7" class="loading">Cargando alertas...</td>
+                        <td colspan="7" class="loading">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="24" height="24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            <p>Cargando alertas...</p>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -871,9 +877,9 @@
             </div>
             <div class="modal-body">
                 <div class="tabs">
-                    <button class="tab active" onclick="switchAlertaTab('info', event)">Información</button>
-                    <button class="tab" onclick="switchAlertaTab('acciones', event)">Acciones</button>
-                    <button class="tab" onclick="switchAlertaTab('resolver', event)" id="resolver-tab">Resolver</button>
+                    <button class="tab active" onclick="switchAlertaTab('info')">Información</button>
+                    <button class="tab" onclick="switchAlertaTab('acciones')">Acciones</button>
+                    <button class="tab" onclick="switchAlertaTab('resolver')" id="resolver-tab">Resolver</button>
                 </div>
 
                 <div id="alerta-info-tab" class="tab-content active">
@@ -922,98 +928,48 @@
         </div>
     </div>
 
-<script>
-    // ============================================
-    // CONFIGURACIÓN - HEREDAR URL DEL DASHBOARD
-    // ============================================
-    
-    function getBackendBaseUrl() {
-        try {
-            if (window.parent && window.parent.getBackendBaseUrl) {
-                const url = window.parent.getBackendBaseUrl();
-                console.log('📍 Usando backend URL del dashboard padre:', url);
-                return url;
+    <script>
+        let allAlertas = [];
+        let allPatients = [];
+        let allDoctors = [];
+        let allTiposAlerta = [];
+        let allNivelesPrioridad = [];
+        let allEstadosAlerta = [];
+        let allRecomendaciones = [];
+        let currentAlertaId = null;
+        let currentAlertaDetails = null;
+
+        // Función para obtener la URL base del backend dinámicamente
+        function getBackendBaseUrl() {
+            const hostname = window.location.hostname;
+            const protocol = window.location.protocol;
+            const port = '4000';
+
+            if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '') {
+                return 'http://localhost:4000';
             }
-        } catch(e) {
-            console.log('No se pudo acceder al padre:', e.message);
+            return `${protocol}//${hostname}`;
         }
-        console.log('📍 Usando localhost por defecto');
-        return 'http://localhost:4000';
-    }
 
-    // ============================================
-    // DEFINIR API_BASE_URL PRIMERO
-    // ============================================
-    const API_BASE_URL = getBackendBaseUrl();
-    
-    // ============================================
-    // LOGS DE VERIFICACIÓN (DESPUÉS de definir API_BASE_URL)
-    // ============================================
-    console.log('🚀🚀🚀 [ALERTS.HTML] ARCHIVO CARGADO');
-    console.log('[ALERTS.HTML] URL actual:', window.location.href);
-    console.log('[ALERTS.HTML] ¿Está en iframe?', window !== window.parent);
-    if (window !== window.parent) {
-        console.log('[ALERTS.HTML] URL del padre:', window.parent.location.href);
-    }
-    console.log('[ALERTS.HTML] API_BASE_URL:', API_BASE_URL);
-    console.log('🔥 API_BASE_URL configurada:', API_BASE_URL);
-
-    // ============================================
-    // DECLARAR VARIABLES GLOBALES
-    // ============================================
-    let allAlertas = [];
-    let allPatients = [];
-    let allDoctors = [];
-    let allTiposAlerta = [];
-    let allNivelesPrioridad = [];
-    let allEstadosAlerta = [];
-    let allRecomendaciones = [];
-    let currentAlertaId = null;
-    let currentAlertaDetails = null;
-
-    // ============================================
-    // INICIALIZACIÓN
-    // ============================================
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('🎯 [ALERTS.HTML] DOMContentLoaded disparado');
-        console.log('[ALERTS.HTML] Token existe?', !!localStorage.getItem('access_token'));
-        console.log('[ALERTS.HTML] Iniciando carga de datos...');
-        
-        loadAlertas();
-        loadPatients();
-        loadDoctors();
-        loadTiposAlerta();
-        loadNivelesPrioridad();
-        loadEstadosAlerta();
-        loadRecomendaciones();
-    });
-
-        // ============================================
-        // FUNCIONES DE CARGA DE DATOS
-        // ============================================
-
-        async function fetchAPI(endpoint, options = {}) {
+        // ✅ FUNCIÓN FETCH unificada
+        async function fetchCall(endpoint, options = {}) {
             const token = localStorage.getItem('access_token');
-            if (!token) {
-                console.error('❌ No hay token de autenticación');
-                throw new Error('No autenticado');
-            }
+            if (!token) throw new Error('No autenticado');
 
-            const url = `${API_BASE_URL}${endpoint}`;
-            console.log('🌐 Fetching:', url);
+            const baseUrl = getBackendBaseUrl();
+            const url = `${baseUrl}${endpoint}`;
 
             const response = await fetch(url, {
                 headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
                 ...options
             });
 
-            console.log('📡 Status:', response.status);
-
             if (response.status === 401) {
                 localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
                 window.parent.location.href = '/auth/login';
                 return null;
             }
@@ -1023,184 +979,176 @@
                 throw new Error(errorText || `Error ${response.status}`);
             }
 
-            return response.json();
+            if (options.method === 'DELETE') {
+                return { success: true };
+            }
+
+            return await response.json();
         }
 
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function () {
+            loadAlertas();
+            loadPatients();
+            loadDoctors();
+            loadTiposAlerta();
+            loadNivelesPrioridad();
+            loadEstadosAlerta();
+            loadRecomendaciones();
+        });
+
+        // Cargar alertas desde la API
         async function loadAlertas() {
-            console.log('🔄 Cargando alertas...');
             try {
-                const data = await fetchAPI('/alertas');
-                console.log('✅ Alertas recibidas:', data.length);
-                allAlertas = data;
+                allAlertas = await fetchCall('/alertas');
                 renderAlertas(allAlertas);
                 updateStats(allAlertas);
                 populateFilters();
             } catch (error) {
-                console.error('❌ Error cargando alertas:', error);
+                console.error('Error:', error);
                 document.getElementById('alertas-table').innerHTML =
-                    '<tr><td colspan="7" class="empty-state">Error al cargar alertas: ' + error.message + '</td></tr>';
+                    '<tr><td colspan="7" class="empty-state">Error al cargar alertas</td></tr>';
             }
         }
 
+        // Cargar datos auxiliares
         async function loadPatients() {
             try {
-                const data = await fetchAPI('/dashboard/patients');
-                allPatients = data;
-                console.log('✅ Pacientes cargados:', allPatients.length);
+                allPatients = await fetchCall('/dashboard/patients');
                 populatePatientSelect();
             } catch (error) {
-                console.error('Error cargando pacientes:', error);
+                console.error('Error al cargar pacientes:', error);
             }
         }
 
         async function loadDoctors() {
             try {
-                const data = await fetchAPI('/dashboard/doctors');
-                allDoctors = data;
-                console.log('✅ Doctores cargados:', allDoctors.length);
+                allDoctors = await fetchCall('/dashboard/doctors');
                 populateDoctorSelect();
             } catch (error) {
-                console.error('Error cargando doctores:', error);
+                console.error('Error al cargar doctores:', error);
             }
         }
 
         async function loadTiposAlerta() {
             try {
-                const data = await fetchAPI('/tipos-alerta');
-                allTiposAlerta = data;
-                console.log('✅ Tipos de alerta cargados:', allTiposAlerta.length);
+                allTiposAlerta = await fetchCall('/tipos-alerta');
                 populateTipoAlertaSelect();
             } catch (error) {
-                console.error('Error cargando tipos de alerta:', error);
+                console.error('Error al cargar tipos de alerta:', error);
             }
         }
 
         async function loadNivelesPrioridad() {
             try {
-                const data = await fetchAPI('/niveles-prioridad-alerta');
-                allNivelesPrioridad = data;
-                console.log('✅ Niveles de prioridad cargados:', allNivelesPrioridad.length);
+                allNivelesPrioridad = await fetchCall('/niveles-prioridad-alerta');
                 populatePrioridadSelect();
             } catch (error) {
-                console.error('Error cargando niveles de prioridad:', error);
+                console.error('Error al cargar niveles de prioridad:', error);
             }
         }
 
         async function loadEstadosAlerta() {
             try {
-                const data = await fetchAPI('/estados-alerta');
-                allEstadosAlerta = data;
-                console.log('✅ Estados de alerta cargados:', allEstadosAlerta.length);
+                allEstadosAlerta = await fetchCall('/estados-alerta');
                 populateEstadoSelect();
             } catch (error) {
-                console.error('Error cargando estados de alerta:', error);
+                console.error('Error al cargar estados de alerta:', error);
             }
         }
 
         async function loadRecomendaciones() {
             try {
-                const data = await fetchAPI('/recomendaciones');
-                allRecomendaciones = data;
-                console.log('✅ Recomendaciones cargadas:', allRecomendaciones.length);
+                allRecomendaciones = await fetchCall('/recomendaciones');
                 populateRecomendacionSelect();
             } catch (error) {
-                console.error('Error cargando recomendaciones:', error);
+                console.error('Error al cargar recomendaciones:', error);
             }
         }
 
-        // ============================================
-        // FUNCIONES DE POBLADO DE SELECTS
-        // ============================================
-
+        // Poblar selects
         function populatePatientSelect() {
             const select = document.getElementById('alerta-usuario-id');
             const filterSelect = document.getElementById('paciente-filter');
-            if (!select) return;
 
             select.innerHTML = '<option value="">Seleccionar paciente...</option>';
-            if (filterSelect) filterSelect.innerHTML = '<option value="">Todos los pacientes</option>';
+            filterSelect.innerHTML = '<option value="">Todos los pacientes</option>';
 
             allPatients.forEach(patient => {
                 const option = document.createElement('option');
                 option.value = patient.id;
                 option.textContent = `${patient.nombre} (${patient.email})`;
                 select.appendChild(option.cloneNode(true));
-                if (filterSelect) filterSelect.appendChild(option);
+                filterSelect.appendChild(option);
             });
         }
 
         function populateDoctorSelect() {
             const select = document.getElementById('alerta-doctor-id');
             const resolverSelect = document.getElementById('alerta-resuelta-por');
-            if (!select) return;
 
             select.innerHTML = '<option value="">Seleccionar doctor...</option>';
-            if (resolverSelect) resolverSelect.innerHTML = '<option value="">Seleccionar doctor...</option>';
+            resolverSelect.innerHTML = '<option value="">Seleccionar doctor...</option>';
 
             allDoctors.forEach(doctor => {
                 const option = document.createElement('option');
                 option.value = doctor.id;
-                option.textContent = `${doctor.nombre} (${doctor.especialidad || 'Sin especialidad'})`;
+                option.textContent = `${doctor.nombre} (${doctor.especialidad})`;
                 select.appendChild(option.cloneNode(true));
-                if (resolverSelect) resolverSelect.appendChild(option.cloneNode(true));
+                resolverSelect.appendChild(option.cloneNode(true));
             });
         }
 
         function populateTipoAlertaSelect() {
             const select = document.getElementById('alerta-tipo-id');
             const filterSelect = document.getElementById('tipo-filter');
-            if (!select) return;
 
             select.innerHTML = '<option value="">Seleccionar tipo...</option>';
-            if (filterSelect) filterSelect.innerHTML = '<option value="">Todos los tipos</option>';
+            filterSelect.innerHTML = '<option value="">Todos los tipos</option>';
 
             allTiposAlerta.forEach(tipo => {
                 const option = document.createElement('option');
                 option.value = tipo.id;
                 option.textContent = tipo.nombre;
                 select.appendChild(option.cloneNode(true));
-                if (filterSelect) filterSelect.appendChild(option);
+                filterSelect.appendChild(option);
             });
         }
 
         function populatePrioridadSelect() {
             const select = document.getElementById('alerta-prioridad-id');
             const filterSelect = document.getElementById('prioridad-filter');
-            if (!select) return;
 
             select.innerHTML = '<option value="">Seleccionar prioridad...</option>';
-            if (filterSelect) filterSelect.innerHTML = '<option value="">Todas las prioridades</option>';
+            filterSelect.innerHTML = '<option value="">Todas las prioridades</option>';
 
             allNivelesPrioridad.forEach(prioridad => {
                 const option = document.createElement('option');
                 option.value = prioridad.id;
                 option.textContent = prioridad.nombre;
                 select.appendChild(option.cloneNode(true));
-                if (filterSelect) filterSelect.appendChild(option);
+                filterSelect.appendChild(option);
             });
         }
 
         function populateEstadoSelect() {
             const select = document.getElementById('alerta-estado-id');
             const filterSelect = document.getElementById('estado-filter');
-            if (!select) return;
 
             select.innerHTML = '<option value="">Seleccionar estado...</option>';
-            if (filterSelect) filterSelect.innerHTML = '<option value="">Todos los estados</option>';
+            filterSelect.innerHTML = '<option value="">Todos los estados</option>';
 
             allEstadosAlerta.forEach(estado => {
                 const option = document.createElement('option');
                 option.value = estado.id;
                 option.textContent = estado.nombre;
                 select.appendChild(option.cloneNode(true));
-                if (filterSelect) filterSelect.appendChild(option);
+                filterSelect.appendChild(option);
             });
         }
 
         function populateRecomendacionSelect() {
             const select = document.getElementById('alerta-recomendacion-id');
-            if (!select) return;
-
             select.innerHTML = '<option value="">Seleccionar recomendación...</option>';
 
             allRecomendaciones.forEach(recomendacion => {
@@ -1211,17 +1159,11 @@
             });
         }
 
-        function populateFilters() {
-            // Los filtros ya se poblaron en las funciones anteriores
-        }
+        function populateFilters() { }
 
-        // ============================================
-        // RENDERIZADO DE TABLA
-        // ============================================
-
+        // Renderizar tabla de alertas
         function renderAlertas(alertas) {
             const tbody = document.getElementById('alertas-table');
-            if (!tbody) return;
 
             if (!alertas || alertas.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No hay alertas registradas</td></tr>';
@@ -1229,103 +1171,237 @@
             }
 
             tbody.innerHTML = alertas.map(alerta => `
-                <tr>
-                    <td>
-                        <div class="patient-card">
-                            <div class="patient-avatar">${getInitials(alerta.usuario?.nombre || 'NN')}</div>
-                            <div class="patient-info">
-                                <h4>${alerta.usuario?.nombre || 'N/A'}</h4>
-                                <p>${alerta.usuario?.email || 'N/A'}</p>
-                            </div>
+            <tr class="priority-${getPriorityClass(alerta.nivel_prioridad?.nombre)}">
+                <td>
+                    <div class="patient-card">
+                        <div class="patient-avatar">${getInitials(alerta.usuario?.nombre || 'NN')}</div>
+                        <div class="patient-info">
+                            <h4>${alerta.usuario?.nombre || 'N/A'}</h4>
+                            <p>${alerta.usuario?.email || 'N/A'}</p>
                         </div>
-                    </td>
-                    <td>
-                        <strong>${escapeHtml(alerta.titulo)}</strong>
-                        <div class="alert-message" title="${escapeHtml(alerta.mensaje)}">${escapeHtml(alerta.mensaje)}</div>
-                    </td>
-                    <td>${alerta.tipo_alerta?.nombre || 'N/A'}</td>
-                    <td>
-                        <span class="badge priority-${getPriorityClass(alerta.nivel_prioridad?.nombre)}">
-                            ${alerta.nivel_prioridad?.nombre || 'N/A'}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="badge ${getEstadoBadgeClass(alerta.estado_alerta?.nombre)}">
-                            ${alerta.estado_alerta?.nombre || 'N/A'}
-                        </span>
-                    </td>
-                    <td class="datetime-cell">
-                        <div class="datetime-value">${formatDate(alerta.fecha_deteccion)}</div>
-                        <div class="datetime-label">${formatTime(alerta.fecha_deteccion)}</div>
-                    </td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="btn btn-primary btn-sm" onclick="viewAlertaDetails('${alerta.id}')">
-                                Ver
-                            </button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteAlerta('${alerta.id}')">
-                                Eliminar
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
+                    </div>
+                </td>
+                <td>
+                    <strong>${alerta.titulo}</strong>
+                    <div class="alert-message" title="${alerta.mensaje}">${alerta.mensaje}</div>
+                </td>
+                <td>${alerta.tipo_alerta?.nombre || 'N/A'}</td>
+                <td>
+                    <span class="badge priority-${getPriorityClass(alerta.nivel_prioridad?.nombre)}">
+                        ${alerta.nivel_prioridad?.nombre || 'N/A'}
+                    </span>
+                </td>
+                <td>
+                    <span class="badge ${getEstadoBadgeClass(alerta.estado_alerta?.nombre)}">
+                        ${alerta.estado_alerta?.nombre || 'N/A'}
+                    </span>
+                </td>
+                <td class="datetime-cell">
+                    <div class="datetime-value">${formatDate(alerta.fecha_deteccion)}</div>
+                    <div class="datetime-label">${formatTime(alerta.fecha_deteccion)}</div>
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary btn-sm" onclick="viewAlertaDetails('${alerta.id}')">Ver</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteAlerta('${alerta.id}')">Eliminar</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
         }
 
+        // Actualizar estadísticas
         function updateStats(alertas) {
-            const criticas = alertas.filter(a => a.nivel_prioridad?.nombre?.toLowerCase().includes('crítico') || a.nivel_prioridad?.nombre?.toLowerCase().includes('critico')).length;
-            const altas = alertas.filter(a => a.nivel_prioridad?.nombre?.toLowerCase().includes('alta')).length;
-            const pendientes = alertas.filter(a => a.estado_alerta?.nombre?.toLowerCase().includes('pendiente') || a.estado_alerta?.nombre?.toLowerCase().includes('activa')).length;
-            const resueltas = alertas.filter(a => a.estado_alerta?.nombre?.toLowerCase().includes('resuelta') || a.estado_alerta?.nombre?.toLowerCase().includes('cerrada')).length;
+            const alertasCriticas = alertas.filter(a =>
+                a.nivel_prioridad?.nombre?.toLowerCase().includes('crítico') ||
+                a.nivel_prioridad?.nombre?.toLowerCase().includes('critico')
+            ).length;
 
-            document.getElementById('alertas-criticas').textContent = criticas;
-            document.getElementById('alertas-altas').textContent = altas;
-            document.getElementById('alertas-pendientes').textContent = pendientes;
-            document.getElementById('alertas-resueltas').textContent = resueltas;
+            const alertasAltas = alertas.filter(a =>
+                a.nivel_prioridad?.nombre?.toLowerCase().includes('alta')
+            ).length;
+
+            const alertasPendientes = alertas.filter(a =>
+                a.estado_alerta?.nombre?.toLowerCase().includes('pendiente') ||
+                a.estado_alerta?.nombre?.toLowerCase().includes('activa')
+            ).length;
+
+            const alertasResueltas = alertas.filter(a =>
+                a.estado_alerta?.nombre?.toLowerCase().includes('resuelta') ||
+                a.estado_alerta?.nombre?.toLowerCase().includes('cerrada')
+            ).length;
+
+            document.getElementById('alertas-criticas').textContent = alertasCriticas;
+            document.getElementById('alertas-altas').textContent = alertasAltas;
+            document.getElementById('alertas-pendientes').textContent = alertasPendientes;
+            document.getElementById('alertas-resueltas').textContent = alertasResueltas;
         }
 
-        // ============================================
-        // FILTRADO
-        // ============================================
-
+        // Filtrar alertas
         function filterAlertas() {
-            const searchTerm = document.getElementById('search-alertas')?.value.toLowerCase() || '';
-            const estado = document.getElementById('estado-filter')?.value || '';
-            const prioridad = document.getElementById('prioridad-filter')?.value || '';
-            const tipo = document.getElementById('tipo-filter')?.value || '';
-            const paciente = document.getElementById('paciente-filter')?.value || '';
-            const fechaDesde = document.getElementById('fecha-desde')?.value || '';
+            const searchTerm = document.getElementById('search-alertas').value.toLowerCase();
+            const estado = document.getElementById('estado-filter').value;
+            const prioridad = document.getElementById('prioridad-filter').value;
+            const tipo = document.getElementById('tipo-filter').value;
+            const paciente = document.getElementById('paciente-filter').value;
+            const fechaDesde = document.getElementById('fecha-desde').value;
 
-            const filtered = allAlertas.filter(alerta => {
-                const matchesSearch = alerta.titulo?.toLowerCase().includes(searchTerm) ||
-                    alerta.mensaje?.toLowerCase().includes(searchTerm) ||
+            let filtered = allAlertas.filter(alerta => {
+                const matchesSearch = alerta.titulo.toLowerCase().includes(searchTerm) ||
+                    alerta.mensaje.toLowerCase().includes(searchTerm) ||
                     alerta.usuario?.nombre?.toLowerCase().includes(searchTerm);
+
                 const matchesEstado = !estado || alerta.estado_alerta_id === estado;
                 const matchesPrioridad = !prioridad || alerta.nivel_prioridad_id === prioridad;
                 const matchesTipo = !tipo || alerta.tipo_alerta_id === tipo;
                 const matchesPaciente = !paciente || alerta.usuario_id === paciente;
+
                 const alertaDate = new Date(alerta.fecha_deteccion).toISOString().split('T')[0];
                 const matchesFechaDesde = !fechaDesde || alertaDate >= fechaDesde;
+
                 return matchesSearch && matchesEstado && matchesPrioridad && matchesTipo && matchesPaciente && matchesFechaDesde;
             });
 
             renderAlertas(filtered);
         }
 
-        // ============================================
-        // CRUD OPERACIONES
-        // ============================================
-
+        // Mostrar modal para crear alerta
         function showCreateAlertaModal() {
             currentAlertaId = null;
             document.getElementById('alerta-modal-title').textContent = 'Nueva Alerta';
             document.getElementById('alerta-form').reset();
             document.getElementById('alerta-id').value = '';
+
             const now = new Date();
             document.getElementById('alerta-fecha-deteccion').value = now.toISOString().slice(0, 16);
+
             openModal('alerta-modal');
         }
 
+        // Ver detalles de alerta
+        async function viewAlertaDetails(alertaId) {
+            currentAlertaId = alertaId;
+
+            try {
+                currentAlertaDetails = await fetchCall(`/alertas/${alertaId}`);
+                displayAlertaDetails(currentAlertaDetails);
+                openModal('alerta-details-modal');
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al cargar los detalles de la alerta');
+            }
+        }
+
+        // Mostrar detalles de alerta en el modal
+        function displayAlertaDetails(alerta) {
+            const detailsContent = document.getElementById('alerta-details-content');
+
+            detailsContent.innerHTML = `
+            <div class="detail-grid">
+                <div class="detail-item"><div class="detail-label">Paciente</div><div class="detail-value">${alerta.usuario?.nombre || 'N/A'}</div></div>
+                <div class="detail-item"><div class="detail-label">Doctor Asignado</div><div class="detail-value">${alerta.doctor?.nombre || 'No asignado'}</div></div>
+                <div class="detail-item"><div class="detail-label">Tipo</div><div class="detail-value">${alerta.tipo_alerta?.nombre || 'N/A'}</div></div>
+                <div class="detail-item"><div class="detail-label">Prioridad</div><div class="detail-value"><span class="badge priority-${getPriorityClass(alerta.nivel_prioridad?.nombre)}">${alerta.nivel_prioridad?.nombre || 'N/A'}</span></div></div>
+                <div class="detail-item"><div class="detail-label">Estado</div><div class="detail-value"><span class="badge ${getEstadoBadgeClass(alerta.estado_alerta?.nombre)}">${alerta.estado_alerta?.nombre || 'N/A'}</span></div></div>
+                <div class="detail-item"><div class="detail-label">Fecha Detección</div><div class="detail-value">${formatDateTime(alerta.fecha_deteccion)}</div></div>
+                ${alerta.fecha_resolucion ? `<div class="detail-item"><div class="detail-label">Fecha Resolución</div><div class="detail-value">${formatDateTime(alerta.fecha_resolucion)}</div></div>
+                <div class="detail-item"><div class="detail-label">Resuelta Por</div><div class="detail-value">${alerta.resuelta_por_doctor?.nombre || 'N/A'}</div></div>` : ''}
+            </div>
+            <div class="form-group"><label class="form-label">Título</label><div style="padding: 0.75rem; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">${alerta.titulo}</div></div>
+            <div class="form-group"><label class="form-label">Mensaje</label><div style="padding: 0.75rem; background: white; border-radius: 8px; border: 1px solid #e5e7eb; white-space: pre-wrap;">${alerta.mensaje}</div></div>
+            ${alerta.notas_resolucion ? `<div class="form-group"><label class="form-label">Notas de Resolución</label><div style="padding: 0.75rem; background: white; border-radius: 8px; border: 1px solid #e5e7eb; white-space: pre-wrap;">${alerta.notas_resolucion}</div></div>` : ''}
+        `;
+
+            const isResuelta = alerta.estado_alerta?.nombre?.toLowerCase().includes('resuelta') ||
+                alerta.estado_alerta?.nombre?.toLowerCase().includes('cerrada');
+
+            document.getElementById('resolver-btn').style.display = isResuelta ? 'none' : 'flex';
+            document.getElementById('resolver-tab').style.display = isResuelta ? 'none' : 'block';
+            document.querySelector('.btn-info').style.display = isResuelta ? 'none' : 'flex';
+
+            loadAlertaAcciones(alerta.id);
+        }
+
+        // Cargar acciones de la alerta
+        async function loadAlertaAcciones(alertaId) {
+            try {
+                const alerta = await fetchCall(`/alertas/${alertaId}`);
+                displayAlertaAcciones(alerta.acciones || []);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('alerta-acciones-content').innerHTML = '<div class="empty-state">Error al cargar acciones</div>';
+            }
+        }
+
+        function displayAlertaAcciones(acciones) {
+            const accionesContent = document.getElementById('alerta-acciones-content');
+
+            if (!acciones || acciones.length === 0) {
+                accionesContent.innerHTML = '<div class="empty-state">No hay acciones registradas</div>';
+                return;
+            }
+
+            accionesContent.innerHTML = acciones.map(accion => `
+            <div class="accion-item">
+                <div class="accion-header"><div class="accion-doctor">${accion.doctor?.nombre || 'Doctor'}</div><div class="accion-fecha">${formatDateTime(accion.fecha_accion)}</div></div>
+                <div class="accion-tipo">${accion.accion_tomada}</div>
+                <div class="accion-descripcion">${accion.descripcion || 'Sin descripción adicional'}</div>
+            </div>
+        `).join('');
+        }
+
+        // Resolver alerta
+        async function resolverAlerta() {
+            const notasResolucion = document.getElementById('alerta-notas-resolucion').value;
+            const doctorId = document.getElementById('alerta-resuelta-por').value;
+
+            if (!notasResolucion) {
+                alert('Por favor, ingrese las notas de resolución');
+                return;
+            }
+
+            try {
+                await fetchCall(`/alertas/${currentAlertaId}/resolver/${doctorId || 'default'}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ notas_resolucion: notasResolucion })
+                });
+
+                alert('Alerta resuelta exitosamente');
+                closeModal('alerta-details-modal');
+                loadAlertas();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al resolver la alerta: ' + error.message);
+            }
+        }
+
+        // Agregar acción a alerta
+        async function addAccionAlerta() {
+            const accion = prompt('Ingrese la acción tomada:');
+            const descripcion = prompt('Ingrese una descripción (opcional):');
+
+            if (!accion) {
+                alert('Por favor, ingrese la acción tomada');
+                return;
+            }
+
+            try {
+                const doctorId = allDoctors[0]?.id || 'default';
+
+                await fetchCall(`/alertas/${currentAlertaId}/accion/${doctorId}`, {
+                    method: 'POST',
+                    body: JSON.stringify({ accion_tomada: accion, descripcion: descripcion || null })
+                });
+
+                alert('Acción agregada exitosamente');
+                loadAlertaAcciones(currentAlertaId);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al agregar acción: ' + error.message);
+            }
+        }
+
+        // Guardar alerta
         async function saveAlerta() {
             const form = document.getElementById('alerta-form');
             if (!form.checkValidity()) {
@@ -1348,226 +1424,48 @@
             try {
                 const url = currentAlertaId ? `/alertas/${currentAlertaId}` : '/alertas';
                 const method = currentAlertaId ? 'PATCH' : 'POST';
-                
-                await fetchAPI(url, { method, body: JSON.stringify(alertaData) });
-                alert(currentAlertaId ? 'Alerta actualizada' : 'Alerta creada');
+
+                await fetchCall(url, { method: method, body: JSON.stringify(alertaData) });
+
+                alert(currentAlertaId ? 'Alerta actualizada exitosamente' : 'Alerta creada exitosamente');
                 closeModal('alerta-modal');
                 loadAlertas();
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error al guardar: ' + error.message);
+                alert('Error al guardar la alerta: ' + error.message);
             }
         }
 
+        // Eliminar alerta
         async function deleteAlerta(alertaId) {
-            if (!confirm('¿Estás seguro de eliminar esta alerta?')) return;
-            try {
-                await fetchAPI(`/alertas/${alertaId}`, { method: 'DELETE' });
-                alert('Alerta eliminada');
-                loadAlertas();
-            } catch (error) {
-                alert('Error al eliminar: ' + error.message);
-            }
-        }
-
-        // ============================================
-        // DETALLES Y ACCIONES
-        // ============================================
-
-        async function viewAlertaDetails(alertaId) {
-            currentAlertaId = alertaId;
-            try {
-                const alerta = await fetchAPI(`/alertas/${alertaId}`);
-                currentAlertaDetails = alerta;
-                displayAlertaDetails(alerta);
-                openModal('alerta-details-modal');
-                loadAlertaAcciones(alertaId);
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error al cargar detalles: ' + error.message);
-            }
-        }
-
-        function displayAlertaDetails(alerta) {
-            const detailsContent = document.getElementById('alerta-details-content');
-            if (!detailsContent) return;
-
-            const isResuelta = alerta.estado_alerta?.nombre?.toLowerCase().includes('resuelta') ||
-                alerta.estado_alerta?.nombre?.toLowerCase().includes('cerrada');
-
-            detailsContent.innerHTML = `
-                <div class="detail-grid">
-                    <div class="detail-item">
-                        <div class="detail-label">Paciente</div>
-                        <div class="detail-value">${alerta.usuario?.nombre || 'N/A'}</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Doctor Asignado</div>
-                        <div class="detail-value">${alerta.doctor?.nombre || 'No asignado'}</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Tipo</div>
-                        <div class="detail-value">${alerta.tipo_alerta?.nombre || 'N/A'}</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Prioridad</div>
-                        <div class="detail-value">
-                            <span class="badge priority-${getPriorityClass(alerta.nivel_prioridad?.nombre)}">
-                                ${alerta.nivel_prioridad?.nombre || 'N/A'}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Estado</div>
-                        <div class="detail-value">
-                            <span class="badge ${getEstadoBadgeClass(alerta.estado_alerta?.nombre)}">
-                                ${alerta.estado_alerta?.nombre || 'N/A'}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Fecha Detección</div>
-                        <div class="detail-value">${formatDateTime(alerta.fecha_deteccion)}</div>
-                    </div>
-                    ${alerta.fecha_resolucion ? `
-                    <div class="detail-item">
-                        <div class="detail-label">Fecha Resolución</div>
-                        <div class="detail-value">${formatDateTime(alerta.fecha_resolucion)}</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Resuelta Por</div>
-                        <div class="detail-value">${alerta.resuelta_por_doctor?.nombre || 'N/A'}</div>
-                    </div>
-                    ` : ''}
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Título</label>
-                    <div style="padding: 0.5rem; background: #f9fafb; border-radius: 8px;">${escapeHtml(alerta.titulo)}</div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Mensaje</label>
-                    <div style="padding: 0.5rem; background: #f9fafb; border-radius: 8px; white-space: pre-wrap;">${escapeHtml(alerta.mensaje)}</div>
-                </div>
-                ${alerta.notas_resolucion ? `
-                <div class="form-group">
-                    <label class="form-label">Notas de Resolución</label>
-                    <div style="padding: 0.5rem; background: #f9fafb; border-radius: 8px; white-space: pre-wrap;">${escapeHtml(alerta.notas_resolucion)}</div>
-                </div>
-                ` : ''}
-            `;
-
-            const resolverBtn = document.getElementById('resolver-btn');
-            const resolverTab = document.getElementById('resolver-tab');
-            const addActionBtn = document.querySelector('.btn-info');
-            
-            if (resolverBtn) resolverBtn.style.display = isResuelta ? 'none' : 'inline-flex';
-            if (resolverTab) resolverTab.style.display = isResuelta ? 'none' : 'block';
-            if (addActionBtn) addActionBtn.style.display = isResuelta ? 'none' : 'inline-flex';
-        }
-
-        async function loadAlertaAcciones(alertaId) {
-            try {
-                const alerta = await fetchAPI(`/alertas/${alertaId}`);
-                displayAlertaAcciones(alerta.acciones || []);
-            } catch (error) {
-                console.error('Error:', error);
-                const accionesContent = document.getElementById('alerta-acciones-content');
-                if (accionesContent) accionesContent.innerHTML = '<div class="empty-state">Error al cargar acciones</div>';
-            }
-        }
-
-        function displayAlertaAcciones(acciones) {
-            const accionesContent = document.getElementById('alerta-acciones-content');
-            if (!accionesContent) return;
-
-            if (!acciones || acciones.length === 0) {
-                accionesContent.innerHTML = '<div class="empty-state">No hay acciones registradas</div>';
-                return;
-            }
-
-            accionesContent.innerHTML = acciones.map(accion => `
-                <div class="accion-item">
-                    <div class="accion-header">
-                        <div class="accion-doctor">${accion.doctor?.nombre || 'Doctor'}</div>
-                        <div class="accion-fecha">${formatDateTime(accion.fecha_accion)}</div>
-                    </div>
-                    <div class="accion-tipo">${escapeHtml(accion.accion_tomada)}</div>
-                    <div class="accion-descripcion">${accion.descripcion ? escapeHtml(accion.descripcion) : 'Sin descripción adicional'}</div>
-                </div>
-            `).join('');
-        }
-
-        async function resolverAlerta() {
-            const notasResolucion = document.getElementById('alerta-notas-resolucion')?.value;
-            const doctorId = document.getElementById('alerta-resuelta-por')?.value;
-
-            if (!notasResolucion) {
-                alert('Por favor, ingrese las notas de resolución');
-                return;
-            }
+            if (!confirm('¿Está seguro de que desea eliminar esta alerta?')) return;
 
             try {
-                await fetchAPI(`/alertas/${currentAlertaId}/resolver/${doctorId || 'default'}`, {
-                    method: 'PATCH',
-                    body: JSON.stringify({ notas_resolucion: notasResolucion })
-                });
-                alert('Alerta resuelta exitosamente');
-                closeModal('alerta-details-modal');
+                await fetchCall(`/alertas/${alertaId}`, { method: 'DELETE' });
+                alert('Alerta eliminada exitosamente');
                 loadAlertas();
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error al resolver: ' + error.message);
+                alert('Error al eliminar la alerta: ' + error.message);
             }
         }
 
-        async function addAccionAlerta() {
-            const accion = prompt('Ingrese la acción tomada:');
-            const descripcion = prompt('Ingrese una descripción (opcional):');
-
-            if (!accion) {
-                alert('Por favor, ingrese la acción tomada');
-                return;
-            }
-
-            try {
-                const doctorId = allDoctors[0]?.id || 'default';
-                await fetchAPI(`/alertas/${currentAlertaId}/accion/${doctorId}`, {
-                    method: 'POST',
-                    body: JSON.stringify({ accion_tomada: accion, descripcion: descripcion || null })
-                });
-                alert('Acción agregada exitosamente');
-                loadAlertaAcciones(currentAlertaId);
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error al agregar acción: ' + error.message);
-            }
-        }
-
-        // ============================================
-        // FUNCIONES DE UTILIDAD
-        // ============================================
-
+        // Funciones de utilidad
         function getInitials(name) {
-            if (!name) return '?';
             return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
         }
 
         function formatDateTime(dateString) {
-            if (!dateString) return 'N/A';
             const date = new Date(dateString);
             return date.toLocaleDateString('es-MX') + ' ' + date.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
         }
 
         function formatDate(dateString) {
-            if (!dateString) return 'N/A';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('es-MX');
+            return new Date(dateString).toLocaleDateString('es-MX');
         }
 
         function formatTime(dateString) {
-            if (!dateString) return 'N/A';
-            const date = new Date(dateString);
-            return date.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+            return new Date(dateString).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
         }
 
         function getPriorityClass(prioridad) {
@@ -1589,46 +1487,20 @@
             return 'badge-info';
         }
 
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/[&<>]/g, function(m) {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                return m;
-            });
+        function switchAlertaTab(tabName) {
+            document.querySelectorAll('#alerta-details-modal .tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            document.querySelectorAll('#alerta-details-modal .tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`alerta-${tabName}-tab`).classList.add('active');
         }
 
-        function switchAlertaTab(tabName, event) {
-            const container = document.getElementById('alerta-details-modal');
-            if (!container) return;
-            
-            container.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            if (event?.target) event.target.classList.add('active');
-            
-            container.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            const tabContent = document.getElementById(`alerta-${tabName}-tab`);
-            if (tabContent) tabContent.classList.add('active');
-        }
+        function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
+        function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
 
-        function openModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) modal.classList.add('active');
-        }
-
-        function closeModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) modal.classList.remove('active');
-        }
-
-        // Cerrar modal al hacer clic fuera
         document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.classList.remove('active');
-                }
-            });
+            modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('active'); });
         });
     </script>
 </body>
+
 </html>

@@ -31,14 +31,15 @@ import { FoodsService } from './alimentos.service';
 @ApiTags('Nutrition')
 @ApiBearerAuth()
 @Controller('nutrition')
-@UseGuards(JwtAuthGuard)
+
 export class NutritionController {
   constructor(
     private readonly nutritionService: NutritionService,
     private readonly foodsService: FoodsService,
-  ) {}
+  ) { }
 
   @Post('records')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Crear registro de comida',
     description: 'Crea un nuevo registro de comida para un usuario',
@@ -91,6 +92,7 @@ export class NutritionController {
   }
 
   @Post('records/:recordId/items')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Agregar alimento a registro',
     description:
@@ -157,6 +159,7 @@ export class NutritionController {
   }
 
   @Get('records/user/:userId')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Obtener registros por usuario',
     description:
@@ -202,6 +205,7 @@ export class NutritionController {
   }
 
   @Get('records/:id')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Obtener registro específico',
     description: 'Retorna un registro de comida específico con todos sus items',
@@ -258,6 +262,7 @@ export class NutritionController {
   }
 
   @Get('daily-summary/:userId')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Resumen nutricional diario',
     description:
@@ -304,6 +309,7 @@ export class NutritionController {
   }
 
   @Get('foods/search')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Buscar alimentos',
     description: 'Busca alimentos por nombre o categoría',
@@ -347,6 +353,7 @@ export class NutritionController {
   }
 
   @Get('foods/category/:category')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Obtener alimentos por categoría',
     description: 'Retorna alimentos filtrados por categoría específica',
@@ -366,6 +373,7 @@ export class NutritionController {
   }
 
   @Patch('records/:id')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Actualizar registro de comida',
     description: 'Actualiza la información de un registro de comida existente',
@@ -393,6 +401,7 @@ export class NutritionController {
   }
 
   @Delete('records/items/:itemId')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Eliminar item de comida',
     description: 'Elimina un alimento específico de un registro de comida',
@@ -416,6 +425,7 @@ export class NutritionController {
   }
 
   @Delete('records/:id')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Eliminar registro de comida',
     description: 'Elimina un registro de comida completo y todos sus items',
@@ -439,6 +449,7 @@ export class NutritionController {
   }
 
   @Get('foods/categories')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Obtener categorías de alimentos',
     description:
@@ -463,6 +474,7 @@ export class NutritionController {
   }
 
   @Get('foods')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Obtener todos los alimentos',
     description:
@@ -477,6 +489,7 @@ export class NutritionController {
   }
 
   @Post('foods')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Crear nuevo alimento',
     description: 'Agrega un nuevo alimento a la base de datos del sistema',
@@ -522,6 +535,7 @@ export class NutritionController {
   }
 
   @Get('foods/:id')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Obtener alimento específico',
     description: 'Retorna la información detallada de un alimento específico',
@@ -545,6 +559,7 @@ export class NutritionController {
   }
 
   @Patch('foods/:id')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Actualizar alimento',
     description: 'Actualiza la información de un alimento existente',
@@ -569,6 +584,7 @@ export class NutritionController {
   }
 
   @Delete('foods/:id')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Eliminar alimento',
     description: 'Elimina un alimento de la base de datos del sistema',

@@ -41,7 +41,9 @@ async function bootstrap() {
       tryItOutEnabled: true,
     },
   });
-  await app.listen(3006);
+
+  const port = process.env.PORT || 3006;
+  await app.listen(port, '0.0.0.0');
   console.log('User Service running on port 3006 (HTTP) and 3106 (TCP)');
 }
 bootstrap();

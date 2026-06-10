@@ -14,7 +14,7 @@ interface MedicalHistoryApiService {
      * Crea un nuevo historial médico
      * El userId se obtiene del token JWT
      */
-    @POST("medical-history")
+    @POST("/")
     suspend fun createMedicalHistory(
         @Body request: CreateMedicalHistoryDto
     ): Response<MedicalHistoryResponse>
@@ -22,7 +22,7 @@ interface MedicalHistoryApiService {
     /**
      * Obtiene el historial médico de un usuario
      */
-    @GET("medical-history/{userId}")
+    @GET("/{userId}")
     suspend fun getMedicalHistory(
         @Path("userId") userId: String
     ): Response<List<MedicalHistoryResponse>>
@@ -30,7 +30,7 @@ interface MedicalHistoryApiService {
     /**
      * Actualiza el historial médico de un usuario
      */
-    @PATCH("medical-history/{userId}")
+    @PATCH("/{userId}")
     suspend fun updateMedicalHistory(
         @Path("userId") userId: String,
         @Body request: CreateMedicalHistoryDto

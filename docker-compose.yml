@@ -28,8 +28,8 @@ services:
       - '11210:11210'
       - '11207:11207'
     environment:
-      - COUCHBASE_ADMINISTRATOR_USERNAME=Alfredo
-      - COUCHBASE_ADMINISTRATOR_PASSWORD=alfredo124
+      - COUCHBASE_ADMINISTRATOR_USERNAME=Admin
+      - COUCHBASE_ADMINISTRATOR_PASSWORD=admin123
     volumes:
       - couchbase_data:/opt/couchbase/var
     networks:

@@ -14,6 +14,8 @@ async function bootstrap() {
     credentials: true,
   });
 
+  // app.setGlobalPrefix('admin');
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

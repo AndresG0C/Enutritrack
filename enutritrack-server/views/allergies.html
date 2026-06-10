@@ -552,6 +552,52 @@
         let allPatients = [];
         let currentAlergiaId = null;
 
+        // Función para obtener la URL base del backend dinámicamente
+        function getBackendBaseUrl() {
+            const hostname = window.location.hostname;
+            const protocol = window.location.protocol;
+
+            if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '') {
+                return 'http://localhost:4000';
+            }
+            return `${protocol}//${hostname}`;
+        }
+
+        // Función fetch unificada
+        async function fetchCall(endpoint, options = {}) {
+            const token = localStorage.getItem('access_token');
+            if (!token) throw new Error('No autenticado');
+
+            const baseUrl = getBackendBaseUrl();
+            const url = `${baseUrl}${endpoint}`;
+
+            const response = await fetch(url, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                ...options
+            });
+
+            if (response.status === 401) {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+                window.parent.location.href = '/auth/login';
+                return null;
+            }
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || `Error ${response.status}`);
+            }
+
+            if (options.method === 'DELETE') {
+                return { success: true };
+            }
+
+            return await response.json();
+        }
+
         // Inicializar
         document.addEventListener('DOMContentLoaded', function () {
             loadAlergias();
@@ -561,19 +607,7 @@
         // Cargar alergias desde la API
         async function loadAlergias() {
             try {
-                const token = localStorage.getItem('access_token');
-                const response = await fetch('/alergias', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error('Error al cargar alergias');
-                }
-
-                allAlergias = await response.json();
+                allAlergias = await fetchCall('/alergias');
                 renderAlergias(allAlergias);
             } catch (error) {
                 console.error('Error:', error);
@@ -585,18 +619,8 @@
         // Cargar pacientes para el selector
         async function loadPatients() {
             try {
-                const token = localStorage.getItem('access_token');
-                const response = await fetch('/dashboard/patients', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (response.ok) {
-                    allPatients = await response.json();
-                    populatePatientSelect();
-                }
+                allPatients = await fetchCall('/dashboard/patients');
+                populatePatientSelect();
             } catch (error) {
                 console.error('Error al cargar pacientes:', error);
             }
@@ -624,49 +648,39 @@
             }
 
             tbody.innerHTML = alergias.map(alergia => `
-                <tr>
-                    <td>
-                        <div class="patient-selector" style="padding: 0; background: none;">
-                            <div class="patient-avatar">${getInitials(alergia.usuario?.nombre || 'NN')}</div>
-                            <div class="patient-info">
-                                <h4>${alergia.usuario?.nombre || 'N/A'}</h4>
-                            </div>
+            <tr>
+                <td>
+                    <div class="patient-selector" style="padding: 0; background: none;">
+                        <div class="patient-avatar">${getInitials(alergia.usuario?.nombre || 'NN')}</div>
+                        <div class="patient-info">
+                            <h4>${alergia.usuario?.nombre || 'N/A'}</h4>
                         </div>
-                    </td>
-                    <td>
-                        <strong>${alergia.nombre}</strong>
-                        ${alergia.notas ? `<br><small style="color: #6b7280;">${alergia.notas}</small>` : ''}
-                    </td>
-                    <td>${alergia.tipo || 'N/A'}</td>
-                    <td>
-                        <span class="badge ${getSeveridadBadgeClass(alergia.severidad)}">
-                            ${getSeveridadText(alergia.severidad)}
-                        </span>
-                    </td>
-                    <td>${alergia.reaccion || 'N/A'}</td>
-                    <td>
-                        <span class="badge ${alergia.activa ? 'badge-success' : 'badge-danger'}">
-                            ${alergia.activa ? 'Activa' : 'Inactiva'}
-                        </span>
-                    </td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="btn btn-primary btn-sm" onclick="editAlergia('${alergia.id}')">
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="14" height="14">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                </svg>
-                                Editar
-                            </button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteAlergia('${alergia.id}')">
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="14" height="14">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                </svg>
-                                Eliminar
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
+                    </div>
+                </td>
+                <td>
+                    <strong>${alergia.nombre}</strong>
+                    ${alergia.notas ? `<br><small style="color: #6b7280;">${alergia.notas}</small>` : ''}
+                </td>
+                <td>${alergia.tipo || 'N/A'}</td>
+                <td>
+                    <span class="badge ${getSeveridadBadgeClass(alergia.severidad)}">
+                        ${getSeveridadText(alergia.severidad)}
+                    </span>
+                </td>
+                <td>${alergia.reaccion || 'N/A'}</td>
+                <td>
+                    <span class="badge ${alergia.activa ? 'badge-success' : 'badge-danger'}">
+                        ${alergia.activa ? 'Activa' : 'Inactiva'}
+                    </span>
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary btn-sm" onclick="editAlergia('${alergia.id}')">Editar</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteAlergia('${alergia.id}')">Eliminar</button>
+                    </div>
+                 </td>
+            </tr>
+        `).join('');
         }
 
         // Filtrar alergias
@@ -694,19 +708,7 @@
         // Editar alergia
         async function editAlergia(alergiaId) {
             try {
-                const token = localStorage.getItem('access_token');
-                const response = await fetch(`/alergias/${alergiaId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error('Error al cargar alergia');
-                }
-
-                const alergia = await response.json();
+                const alergia = await fetchCall(`/alergias/${alergiaId}`);
                 currentAlergiaId = alergiaId;
 
                 document.getElementById('alergia-modal-title').textContent = 'Editar Alergia';
@@ -746,22 +748,10 @@
             };
 
             try {
-                const token = localStorage.getItem('access_token');
                 const url = currentAlergiaId ? `/alergias/${currentAlergiaId}` : '/alergias';
                 const method = currentAlergiaId ? 'PATCH' : 'POST';
 
-                const response = await fetch(url, {
-                    method: method,
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(alergiaData)
-                });
-
-                if (!response.ok) {
-                    throw new Error('Error al guardar alergia');
-                }
+                await fetchCall(url, { method: method, body: JSON.stringify(alergiaData) });
 
                 alert(currentAlergiaId ? 'Alergia actualizada exitosamente' : 'Alergia creada exitosamente');
                 closeModal('alergia-modal');
@@ -774,24 +764,10 @@
 
         // Eliminar alergia
         async function deleteAlergia(alergiaId) {
-            if (!confirm('¿Está seguro de que desea eliminar esta alergia? Esta acción no se puede deshacer.')) {
-                return;
-            }
+            if (!confirm('¿Está seguro de que desea eliminar esta alergia?')) return;
 
             try {
-                const token = localStorage.getItem('access_token');
-                const response = await fetch(`/alergias/${alergiaId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error('Error al eliminar alergia');
-                }
-
+                await fetchCall(`/alergias/${alergiaId}`, { method: 'DELETE' });
                 alert('Alergia eliminada exitosamente');
                 loadAlergias();
             } catch (error) {
@@ -816,20 +792,12 @@
         }
 
         function getSeveridadText(severidad) {
-            const textos = {
-                'leve': 'Leve',
-                'moderada': 'Moderada',
-                'severa': 'Severa'
-            };
+            const textos = { 'leve': 'Leve', 'moderada': 'Moderada', 'severa': 'Severa' };
             return textos[severidad] || severidad;
         }
 
         function getSeveridadBadgeClass(severidad) {
-            const clases = {
-                'leve': 'badge-success',
-                'moderada': 'badge-warning',
-                'severa': 'badge-danger'
-            };
+            const clases = { 'leve': 'badge-success', 'moderada': 'badge-warning', 'severa': 'badge-danger' };
             return clases[severidad] || 'badge-info';
         }
 
@@ -837,20 +805,12 @@
             return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
         }
 
-        function openModal(modalId) {
-            document.getElementById(modalId).classList.add('active');
-        }
+        function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
+        function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
 
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
-
-        // Cerrar modal al hacer clic fuera
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.classList.remove('active');
-                }
+                if (e.target === modal) modal.classList.remove('active');
             });
         });
     </script>

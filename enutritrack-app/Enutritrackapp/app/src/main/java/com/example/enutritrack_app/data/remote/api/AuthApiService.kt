@@ -7,18 +7,18 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 
 interface AuthApiService {
-    @POST("auth/login")
+    @POST("login")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
 
-    @POST("auth/refresh")
+    @POST("refresh")
     suspend fun refreshToken(@Body request: RefreshTokenRequest): Response<LoginResponse>
 
-    @POST("auth/validate")
+    @POST("validate")
     suspend fun validateToken(@Body request: ValidateTokenRequest): Response<TokenValidationResponse>
 
-    @GET("auth/me")
+    @GET("me")
     suspend fun getCurrentUser(): Response<UserResponse>
 
-    @POST("auth/logout")
+    @POST("logout")
     suspend fun logout(): Response<Map<String, String>>
 }

@@ -29,11 +29,12 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 @ApiTags('Medical Appointments')
 @ApiBearerAuth()
 @Controller('citas-medicas')
-@UseGuards(JwtAuthGuard)
+
 export class CitasMedicasController {
-  constructor(private readonly citasMedicasService: CitasMedicasService) {}
+  constructor(private readonly citasMedicasService: CitasMedicasService) { }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Crear nueva cita médica',
     description:
@@ -116,6 +117,7 @@ export class CitasMedicasController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Obtener todas las citas médicas',
     description:
@@ -216,6 +218,7 @@ export class CitasMedicasController {
   }
 
   @Get('mis-citas')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Obtener citas del doctor autenticado',
     description: 'Retorna las citas médicas del doctor actualmente autenticado',
@@ -269,6 +272,7 @@ export class CitasMedicasController {
   }
 
   @Get('estados')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Obtener estados de cita disponibles',
     description:
@@ -311,6 +315,7 @@ export class CitasMedicasController {
   }
 
   @Get('tipos-consulta')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Obtener tipos de consulta disponibles',
     description:
@@ -347,6 +352,7 @@ export class CitasMedicasController {
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Obtener cita médica por ID',
     description:
@@ -414,6 +420,7 @@ export class CitasMedicasController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Actualizar cita médica',
     description: 'Actualiza la información de una cita médica existente',
@@ -472,6 +479,7 @@ export class CitasMedicasController {
   }
 
   @Patch(':id/estado/:estadoCitaId')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Cambiar estado de cita',
     description: 'Cambia el estado de una cita médica específica',
@@ -508,6 +516,7 @@ export class CitasMedicasController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Eliminar cita médica',
     description:

@@ -43,7 +43,8 @@ async function bootstrap() {
     },
   });
 
-  await app.listen(3009);
+  const port = process.env.PORT || 3009;
+  await app.listen(port, '0.0.0.0');
   console.log('Alertas Service running on port 3009 (HTTP) and 3109 (TCP)');
 }
 bootstrap();

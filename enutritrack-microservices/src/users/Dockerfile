@@ -1,21 +1,16 @@
-# --- ETAPA 1: Compilación ---
+# --- BUILD STAGE ---
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Copiamos el package.json global desde la raíz
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
 
-# Copiamos todo el monorrepo para compilar con contexto completo
 COPY . .
 
-# Compilamos específicamente el microservicio de Users
-RUN npm run build -- users
+# Compilar todo (esto genera dist/ con todos los microservicios)
+RUN npm run build
 
-# Limpiamos dependencias de desarrollo
-RUN npm prune --production
-
-# --- ETAPA 2: Ejecución ---
+# --- RUN STAGE ---
 FROM node:20-alpine AS runner
 WORKDIR /app
 
@@ -25,7 +20,6 @@ COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 
-# Puerto interno del microservicio de Users (Por estándar suele ser el 3002)
-EXPOSE 3002
+EXPOSE 3001
 
-CMD ["node", "dist/src/users/main.js"]
+CMD ["node", "dist/users/main.js"]
