@@ -164,6 +164,9 @@ locals {
     { name = "COUCHBASE_PASSWORD", value = "admin123" },
     { name = "COUCHBASE_BUCKET", value = "enutritrack" },
 
+    # ✅ AGREGAR GEMINI API KEY
+    { name = "GEMINI_API_KEY", value = var.gemini_api_key }, # ← Nueva línea
+
     # URLs de microservicios
     { name = "MICROSERVICES_BASE_URL", value = "http://${module.alb_microservices.alb_dns_name}" },
     { name = "USERS_SERVICE_URL", value = "http://${module.alb_microservices.alb_dns_name}/users" },

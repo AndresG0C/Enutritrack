@@ -123,3 +123,9 @@ variable "repositories" {
     "enutritrack-microservices-citas"
   ]
 }
+
+variable "gemini_api_key" {
+  description = "Gemini API Key for AI recommendations"
+  type        = string
+  sensitive   = true
+}

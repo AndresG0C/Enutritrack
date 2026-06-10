@@ -14,6 +14,10 @@ output "alb_cms_dns" {
   value = module.alb_cms.alb_dns_name
 }
 
+output "alb_microservices_dns" {
+  value = module.alb_microservices.alb_dns_name
+}
+
 output "redis_endpoint" {
   value = module.redis.redis_endpoint
 }

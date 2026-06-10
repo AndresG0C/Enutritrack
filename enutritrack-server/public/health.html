@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Health Dashboard - Microservicios</title>
     <style>
         * {
@@ -13,7 +13,8 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family:
+                -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f8fafc;
             padding: 20px;
         }
@@ -58,9 +59,17 @@
         }
 
         @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
         }
 
         .btn {
@@ -406,7 +415,8 @@
             color: #6b7280;
         }
 
-        .loading, .empty-state {
+        .loading,
+        .empty-state {
             text-align: center;
             padding: 3rem;
             color: #6b7280;
@@ -471,7 +481,9 @@
                     Estado de los Microservicios
                     <div class="refresh-controls">
                         <span>Actualización automática cada minuto</span>
-                        <button class="btn btn-secondary" id="refresh-now">Actualizar ahora</button>
+                        <button class="btn btn-secondary" id="refresh-now">
+                            Actualizar ahora
+                        </button>
                     </div>
                 </h2>
 
@@ -501,62 +513,128 @@
                 </div>
 
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" id="reset-btn">Restablecer</button>
-                    <button type="button" class="btn btn-primary" id="save-btn">Guardar Configuración</button>
+                    <button type="button" class="btn btn-secondary" id="reset-btn">
+                        Restablecer
+                    </button>
+                    <button type="button" class="btn btn-primary" id="save-btn">
+                        Guardar Configuración
+                    </button>
                 </div>
             </section>
         </div>
     </div>
 
     <script>
-        // Datos iniciales de los microservicios
+        // Datos iniciales de los microservicios con paths CORREGIDOS
         const initialServices = [
-            { id: 1, name: "Servicio de Usuarios", ip: "192.168.1.101", port: "3001", status: "unknown" },
-            { id: 2, name: "Servicio de Historial Medico", ip: "192.168.1.102", port: "3002", status: "unknown" },
-            { id: 3, name: "Servicio de Nutrición", ip: "192.168.1.103", port: "3003", status: "unknown" },
-            { id: 4, name: "Servicio de Autenticación", ip: "192.168.1.104", port: "3004", status: "unknown" },
-            { id: 5, name: "Servicio de Actividad Fisica", ip: "192.168.1.105", port: "3005", status: "unknown" },
-            { id: 6, name: "Servicio de Recomendaciones", ip: "192.168.1.106", port: "3006", status: "unknown" },
-            { id: 7, name: "Servicio de Doctor", ip: "192.168.1.107", port: "3007", status: "unknown" },
-            { id: 8, name: "Servicio de Citas Medicas", ip: "192.168.1.108", port: "3008", status: "unknown" },
-            { id: 9, name: "Servicio de Alertas", ip: "192.168.1.109", port: "3009", status: "unknown" }
+            {
+                id: 1,
+                name: 'Servicio de Usuarios',
+                url: '',
+                path: 'users',
+                status: 'unknown',
+            },
+            {
+                id: 2,
+                name: 'Servicio de Historial Medico',
+                url: '',
+                path: 'medical-history',
+                status: 'unknown',
+            },
+            {
+                id: 3,
+                name: 'Servicio de Nutrición',
+                url: '',
+                path: 'nutrition',
+                status: 'unknown',
+            },
+            {
+                id: 4,
+                name: 'Servicio de Autenticación',
+                url: '',
+                path: 'auth',
+                status: 'unknown',
+            },
+            {
+                id: 5,
+                name: 'Servicio de Actividad Fisica',
+                url: '',
+                path: 'physical-activity',
+                status: 'unknown',
+            },
+            {
+                id: 6,
+                name: 'Servicio de Recomendaciones',
+                url: '',
+                path: 'recommendations',
+                status: 'unknown',
+            },
+            {
+                id: 7,
+                name: 'Servicio de Doctor',
+                url: '',
+                path: 'doctors',
+                status: 'unknown',
+            },
+            {
+                id: 8,
+                name: 'Servicio de Citas Medicas',
+                url: '',
+                path: 'citas-medicas',
+                status: 'unknown',
+            },
+            {
+                id: 9,
+                name: 'Servicio de Alertas',
+                url: '',
+                path: 'alerts',
+                status: 'unknown',
+            },
         ];
 
         // Cargar servicios desde localStorage o usar los iniciales
-        let services = JSON.parse(localStorage.getItem('microservices')) || initialServices;
+        let services =
+            JSON.parse(localStorage.getItem('microservices')) || initialServices;
 
-        // Intervalo de monitoreo (10 segundos)
+        // Intervalo de monitoreo (60 segundos)
         let monitoringInterval;
         const MONITORING_INTERVAL_MS = 60000;
 
+        // Función para obtener la URL base del backend (ALB de microservicios)
+        function getBackendBaseUrl() {
+            const hostname = window.location.hostname;
+            const protocol = window.location.protocol;
+
+            if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '') {
+                return 'http://localhost';
+            }
+            return `${protocol}//${hostname}`;
+        }
+
         // Función para verificar el estado de un servicio
         async function checkServiceStatus(service) {
-            const url = `http://${service.ip}:${service.port}/health`;
+            if (!service.url) {
+                console.warn(`No hay URL configurada para ${service.name}`);
+                return 'unknown';
+            }
+
+            // Construir la URL completa para health check
+            const healthUrl = `${service.url}/${service.path}/health/check`;
 
             try {
-                const response = await fetch(url, {
+                const response = await fetch(healthUrl, {
                     method: 'GET',
-                    mode: 'no-cors', // Para evitar problemas CORS en desarrollo
-                    cache: 'no-cache'
+                    cache: 'no-cache',
                 });
 
-                // Si llegamos aquí, el servicio está activo
-                return 'healthy';
-            } catch (error) {
-                // Si hay error de CORS, intentamos con un método alternativo
-                try {
-                    // Intentamos cargar una imagen pequeña desde el servicio
-                    const img = new Image();
-                    await new Promise((resolve, reject) => {
-                        img.onload = resolve;
-                        img.onerror = reject;
-                        img.src = `http://${service.ip}:${service.port}/favicon.ico?t=${Date.now()}`;
-                    });
+                if (response.ok) {
                     return 'healthy';
-                } catch (e) {
-                    // Si ambos métodos fallan, el servicio está caído
+                } else {
                     return 'error';
                 }
+            } catch (error) {
+                console.error(`Error checking ${service.name}:`, error);
+                return 'error';
             }
         }
 
@@ -574,8 +652,10 @@
             renderServices();
 
             // Actualizar timestamp
-            document.getElementById('last-updated').textContent =
-                `Última verificación: ${new Date().toLocaleTimeString()}`;
+            const lastUpdated = document.getElementById('last-updated');
+            if (lastUpdated) {
+                lastUpdated.textContent = `Última verificación: ${new Date().toLocaleTimeString()}`;
+            }
 
             // Guardar en localStorage
             localStorage.setItem('microservices', JSON.stringify(services));
@@ -584,9 +664,10 @@
         // Función para renderizar los servicios
         function renderServices() {
             const container = document.getElementById('services-container');
+            if (!container) return;
             container.innerHTML = '';
 
-            services.forEach(service => {
+            services.forEach((service) => {
                 const serviceCard = document.createElement('div');
                 serviceCard.className = 'service-card';
 
@@ -611,19 +692,25 @@
                         statusText = 'Desconocido';
                 }
 
+                let displayUrl = 'No configurado';
+                if (service.url) {
+                    let cleanUrl = service.url.replace(/^https?:\/\//, '').replace(/:\d+$/, '');
+                    displayUrl = `${cleanUrl}/${service.path}`;
+                }
+
                 serviceCard.innerHTML = `
-                    <div class="service-header">
-                        <div class="service-name">${service.name}</div>
-                        <div class="status-indicator ${statusClass}" title="${statusText}"></div>
-                    </div>
-                    <div class="service-details">
-                        <div class="service-url">${service.ip}:${service.port}</div>
-                    </div>
-                    <div class="service-actions">
-                        <button class="btn btn-secondary" onclick="checkSingleService(${service.id})">Verificar ahora</button>
-                        <button class="btn btn-primary" onclick="editService(${service.id})">Editar</button>
-                    </div>
-                `;
+            <div class="service-header">
+                <div class="service-name">${service.name}</div>
+                <div class="status-indicator ${statusClass}" title="${statusText}"></div>
+            </div>
+            <div class="service-details">
+                <div class="service-url">${displayUrl}</div>
+            </div>
+            <div class="service-actions">
+                <button class="btn btn-secondary" onclick="checkSingleService(${service.id})">Verificar ahora</button>
+                <button class="btn btn-primary" onclick="editService(${service.id})">Editar</button>
+            </div>
+        `;
 
                 container.appendChild(serviceCard);
             });
@@ -633,38 +720,44 @@
 
         // Función para verificar un solo servicio manualmente
         async function checkSingleService(serviceId) {
-            const service = services.find(s => s.id === serviceId);
+            const service = services.find((s) => s.id === serviceId);
             if (!service) return;
 
-            // Mostrar estado de verificación
             service.status = 'unknown';
             renderServices();
 
-            // Verificar el servicio
             const status = await checkServiceStatus(service);
             service.status = status;
 
-            // Actualizar la vista
             renderServices();
-
-            // Guardar en localStorage
             localStorage.setItem('microservices', JSON.stringify(services));
         }
 
         // Función para renderizar el formulario de configuración
         function renderConfigForm() {
             const form = document.getElementById('config-form');
+            if (!form) return;
             form.innerHTML = '';
 
-            services.forEach(service => {
+            services.forEach((service) => {
                 const formGroup = document.createElement('div');
                 formGroup.className = 'form-group';
 
+                const baseUrlExample = getBackendBaseUrl();
+
                 formGroup.innerHTML = `
-                    <label for="service-${service.id}-name">${service.name}</label>
-                    <input type="text" id="service-${service.id}-ip" value="${service.ip}" placeholder="IP">
-                    <input type="text" id="service-${service.id}-port" value="${service.port}" placeholder="Puerto" readonly>
-                `;
+            <label for="service-${service.id}-name">${service.name}</label>
+            <input type="text" id="service-${service.id}-url" 
+                   value="${service.url}" 
+                   placeholder="Ej: ${baseUrlExample}"
+                   style="width: 100%; padding: 0.75rem; margin-bottom: 0.5rem; border: 2px solid #e5e7eb; border-radius: 12px;">
+            <small style="display: block; color: #6b7280; font-size: 0.75rem;">
+              URL base del ALB (sin puerto, sin path). Ejemplo: ${baseUrlExample}
+            </small>
+            <div style="font-size: 0.75rem; color: #10b981; margin-top: 0.25rem;">
+              Health check será: ${service.url || 'URL'}/${service.path}/health/check
+            </div>
+          `;
 
                 form.appendChild(formGroup);
             });
@@ -677,19 +770,12 @@
             const greenLight = document.getElementById('green-light');
             const statusSummary = document.getElementById('status-summary');
 
-            // Contar estados
-            const statusCounts = {
-                error: 0,
-                warning: 0,
-                healthy: 0,
-                unknown: 0
-            };
+            const statusCounts = { error: 0, warning: 0, healthy: 0, unknown: 0 };
 
-            services.forEach(service => {
+            services.forEach((service) => {
                 statusCounts[service.status]++;
             });
 
-            // Determinar estado general
             let overallStatus = 'unknown';
             let statusText = '';
 
@@ -699,67 +785,74 @@
             } else if (statusCounts.warning > 0) {
                 overallStatus = 'warning';
                 statusText = `Advertencia - ${statusCounts.warning} servicio(s) tienen problemas`;
-            } else if (statusCounts.healthy === services.length) {
+            } else if (statusCounts.healthy === services.length && services.length > 0) {
                 overallStatus = 'healthy';
                 statusText = 'Óptimo - Todos los servicios funcionan correctamente';
+            } else if (statusCounts.unknown === services.length) {
+                statusText = 'No configurado - Configure las URLs de los servicios';
             } else {
                 overallStatus = 'unknown';
                 statusText = 'Desconocido - No se ha verificado el estado';
             }
 
-            // Actualizar semáforo
-            redLight.classList.toggle('active', overallStatus === 'error');
-            yellowLight.classList.toggle('active', overallStatus === 'warning');
-            greenLight.classList.toggle('active', overallStatus === 'healthy');
-
-            statusSummary.textContent = `Estado general: ${statusText}`;
+            if (redLight) redLight.classList.toggle('active', overallStatus === 'error');
+            if (yellowLight) yellowLight.classList.toggle('active', overallStatus === 'warning');
+            if (greenLight) greenLight.classList.toggle('active', overallStatus === 'healthy');
+            if (statusSummary) statusSummary.textContent = `Estado general: ${statusText}`;
         }
 
         // Función para editar un servicio
         function editService(serviceId) {
-            const service = services.find(s => s.id === serviceId);
+            const service = services.find((s) => s.id === serviceId);
             if (!service) return;
 
-            // Desplazamos a la sección de configuración
             document.querySelector('.config-section').scrollIntoView({ behavior: 'smooth' });
 
-            // Y resaltamos el servicio correspondiente
-            const ipInput = document.getElementById(`service-${serviceId}-ip`);
+            const urlInput = document.getElementById(`service-${serviceId}-url`);
 
-            if (ipInput) {
-                ipInput.focus();
-                ipInput.style.borderColor = '#3498db';
+            if (urlInput) {
+                urlInput.focus();
+                urlInput.style.borderColor = '#10b981';
+                urlInput.style.boxShadow = '0 0 0 4px rgba(16, 185, 129, 0.1)';
 
                 setTimeout(() => {
-                    ipInput.style.borderColor = '';
+                    urlInput.style.borderColor = '';
+                    urlInput.style.boxShadow = '';
                 }, 2000);
             }
         }
 
         // Función para guardar la configuración
         function saveConfiguration() {
-            services.forEach(service => {
-                const ipInput = document.getElementById(`service-${service.id}-ip`);
+            services.forEach((service) => {
+                const urlInput = document.getElementById(`service-${service.id}-url`);
 
-                if (ipInput) {
-                    service.ip = ipInput.value;
-                    // Al cambiar la configuración, el estado vuelve a desconocido
+                if (urlInput) {
+                    let url = urlInput.value.trim();
+
+                    // Eliminar barra final
+                    if (url.endsWith('/')) {
+                        url = url.slice(0, -1);
+                    }
+
+                    // ✅ Eliminar puerto si existe
+                    url = url.replace(/:\d+$/, '');
+
+                    // ✅ Agregar http:// si no tiene
+                    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                        url = 'http://' + url;
+                    }
+
+                    service.url = url;
                     service.status = 'unknown';
                 }
             });
 
-            // Actualizar la vista
             renderServices();
-
-            // Guardar en localStorage
             localStorage.setItem('microservices', JSON.stringify(services));
-
             alert('Configuración guardada correctamente');
-
-            // Verificar todos los servicios después de guardar
             checkAllServices();
         }
-
         // Función para restablecer la configuración
         function resetConfiguration() {
             if (confirm('¿Estás seguro de que deseas restablecer la configuración a los valores predeterminados?')) {
@@ -768,22 +861,16 @@
                 renderServices();
                 renderConfigForm();
                 alert('Configuración restablecida');
-
-                // Verificar todos los servicios después de restablecer
                 checkAllServices();
             }
         }
 
         // Iniciar monitoreo automático
         function startMonitoring() {
-            // Verificar inmediatamente
             checkAllServices();
-
-            // Configurar intervalo periódico
             monitoringInterval = setInterval(checkAllServices, MONITORING_INTERVAL_MS);
         }
 
-        // Detener monitoreo automático
         function stopMonitoring() {
             if (monitoringInterval) {
                 clearInterval(monitoringInterval);
@@ -795,16 +882,17 @@
             renderServices();
             renderConfigForm();
 
-            // Asignar event listeners a los botones
-            document.getElementById('save-btn').addEventListener('click', saveConfiguration);
-            document.getElementById('reset-btn').addEventListener('click', resetConfiguration);
-            document.getElementById('refresh-now').addEventListener('click', checkAllServices);
+            const saveBtn = document.getElementById('save-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const refreshBtn = document.getElementById('refresh-now');
 
-            // Iniciar monitoreo automático
+            if (saveBtn) saveBtn.addEventListener('click', saveConfiguration);
+            if (resetBtn) resetBtn.addEventListener('click', resetConfiguration);
+            if (refreshBtn) refreshBtn.addEventListener('click', checkAllServices);
+
             startMonitoring();
         });
 
-        // Limpiar intervalo cuando se cierre la página
         window.addEventListener('beforeunload', stopMonitoring);
     </script>
 </body>
