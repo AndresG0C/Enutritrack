@@ -34,7 +34,7 @@ object ApiConfig {
      * Nombre típico: enutritrack-microservices
      * Ejemplo: enutritrack-microservices-1234567890.us-east-1.elb.amazonaws.com
      */
-    private const val ALB_MICROSERVICES_DNS = "enutritrack-microservices-1024331855.us-east-1.elb.amazonaws.com"
+    private const val ALB_MICROSERVICES_DNS = "enutritrack-microservices-129580438.us-east-1.elb.amazonaws.com"
 
     /**
      * DNS del ALB del CMS (Backend)
@@ -43,7 +43,7 @@ object ApiConfig {
      * Nombre típico: enutritrack-alb-cms
      * Ejemplo: enutritrack-alb-cms-1234567890.us-east-1.elb.amazonaws.com
      */
-    private const val ALB_CMS_DNS = "enutritrack-alb-cms-1814714288.us-east-1.elb.amazonaws.com"
+    private const val ALB_CMS_DNS = "enutritrack-alb-cms-2141858571.us-east-1.elb.amazonaws.com"
 
     /**
      * Puerto de los ALBs (80 para HTTP, 443 para HTTPS)
